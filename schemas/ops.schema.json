@@ -1,0 +1,1680 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://zindex.ai/schemas/ops.schema.json",
+    "title": "Diagram Scene Protocol Operations Schema",
+    "description": "Draft JSON Schema for DSP operation envelopes and operation payloads. Licensed under Apache-2.0; the spec and both schemas are at https://github.com/zindexai/diagram-scene-protocol.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["schemaVersion", "sceneId", "baseRevision", "ops"],
+    "properties": {
+      "schemaVersion": {
+        "type": "string",
+        "const": "0.1"
+      },
+      "sceneId": {
+        "$ref": "#/$defs/id"
+      },
+      "baseRevision": {
+        "type": "integer",
+        "minimum": 1,
+        "description": "The revision this edit was planned against. Revisions are numbered from 1."
+      },
+      "ops": {
+        "type": "array",
+        "description": "The operations, applied in order, each to the document the ones before it left. An edit applies whole or not at all: an operation that can't apply, or a result with an error the base revision didn't have, saves nothing (VALIDATION_FAILED). The element an operation changes must exist when it runs; what an operation only names (an edge's ends, children, a style, a relative layout's target, a constraint's elements) may be created by a later operation of the same edit.",
+        "items": {
+          "$ref": "#/$defs/op"
+        }
+      },
+      "extensions": {
+        "type": "object",
+        "additionalProperties": true,
+        "default": {}
+      },
+      "message": {
+        "type": "string",
+        "description": "Optional revision message describing what this operation batch does (like a git commit message)"
+      },
+      "requestId": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 255,
+        "pattern": "^[!-~]+$",
+        "description": "Optional client-chosen ID for this edit, unique per scene (a UUID works). A retry with the same requestId returns the revision the first attempt made instead of making another. Reusing a requestId for a different edit is rejected."
+      }
+    },
+    "$defs": {
+      "id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      },
+      "nonNegativeNumber": {
+        "type": "number",
+        "minimum": 0
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": true,
+        "default": {}
+      },
+      "erColumn": {
+        "type": "object",
+        "description": "One column of an ER table (er.entity, er.weakEntity): drawn as a row with its PK/FK badges and type.",
+        "required": ["name"],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Column name, drawn on its row. endpoint.column, and an edge label that names a foreign key, match it."
+          },
+          "type": {
+            "type": "string",
+            "description": "Column type, drawn right-aligned on the row."
+          },
+          "pk": {
+            "type": "boolean",
+            "description": "Part of the primary key. An edge end at the only PK column infers one; at one of several, many."
+          },
+          "fk": {
+            "type": "boolean",
+            "description": "A foreign key. An edge end here infers many: one when unique (or the entity's only PK column), zero-or-many when nullable, zero-or-one when both."
+          },
+          "unique": {
+            "type": "boolean",
+            "description": "Unique on its own: a unique foreign key infers one."
+          },
+          "nullable": {
+            "type": "boolean",
+            "description": "Nullable: a nullable foreign key infers zero-or-many, or zero-or-one when unique."
+          },
+          "key": {
+            "type": "string",
+            "enum": ["PK", "FK"],
+            "description": "Alias for pk: true or fk: true. A column that is both needs pk and fk."
+          },
+          "comment": {
+            "type": "string",
+            "description": "Kept with the column (a Mermaid attribute comment), not drawn."
+          }
+        }
+      },
+      "extensions": {
+        "type": "object",
+        "additionalProperties": true,
+        "default": {},
+        "properties": {
+          "columns": {
+            "type": "array",
+            "description": "ER table columns, read by er.entity and er.weakEntity nodes. Each column draws as a row; an edge anchors at a row with endpoint.column, and an edge end left without cardinality is inferred from the column's flags. updateNode replaces the whole array.",
+            "items": {
+              "$ref": "#/$defs/erColumn"
+            }
+          }
+        }
+      },
+      "size": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["width", "height"],
+        "properties": {
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          }
+        }
+      },
+      "point": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          }
+        }
+      },
+      "rotation": {
+        "type": "number"
+      },
+      "router": {
+        "type": "string",
+        "enum": ["straight", "orthogonal", "curved", "polyline"]
+      },
+      "side": {
+        "type": "string",
+        "enum": ["top", "right", "bottom", "left"]
+      },
+      "arrowhead": {
+        "type": "string",
+        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle"]
+      },
+      "fitMode": {
+        "type": "string",
+        "enum": ["contain", "cover", "stretch", "original"]
+      },
+      "nodeType": {
+        "type": "string",
+        "enum": [
+          "generic",
+          "service",
+          "database",
+          "queue",
+          "actor",
+          "note",
+          "decision",
+          "document",
+          "process",
+          "container",
+          "externalSystem",
+          "storage",
+          "objectStorage",
+          "event",
+          "iconNode",
+          "workflow.start",
+          "workflow.end",
+          "workflow.task",
+          "workflow.decision",
+          "workflow.gateway",
+          "workflow.gatewayParallel",
+          "workflow.gatewayInclusive",
+          "workflow.subprocess",
+          "workflow.timer",
+          "workflow.error",
+          "er.entity",
+          "er.weakEntity",
+          "er.attribute",
+          "er.relationship",
+          "sequence.lifeline",
+          "sequence.activation",
+          "sequence.actor",
+          "sequence.note",
+          "network.server",
+          "network.router",
+          "network.switch",
+          "network.firewall",
+          "network.cloud",
+          "network.client",
+          "org.person",
+          "org.role",
+          "org.department",
+          "workflow.intermediateTimer",
+          "workflow.intermediateMessage",
+          "workflow.intermediateError",
+          "workflow.intermediateThrowMessage",
+          "workflow.terminate",
+          "workflow.messageStart",
+          "workflow.messageEnd",
+          "workflow.gatewayEvent",
+          "uiflow.screen",
+          "uiflow.modal",
+          "uiflow.entry",
+          "uiflow.exit"
+        ]
+      },
+      "shape": {
+        "type": "string",
+        "enum": [
+          "rect",
+          "roundedRect",
+          "ellipse",
+          "diamond",
+          "cylinder",
+          "bucket",
+          "pill",
+          "hexagon",
+          "parallelogram",
+          "cloud",
+          "box3d",
+          "textBox",
+          "iconBox"
+        ]
+      },
+      "axis": {
+        "type": "string",
+        "enum": ["x", "y"]
+      },
+      "alignX": {
+        "type": "string",
+        "enum": ["left", "center", "right"]
+      },
+      "alignY": {
+        "type": "string",
+        "enum": ["top", "center", "bottom"]
+      },
+      "textWrap": {
+        "type": "string",
+        "enum": ["none", "word", "character"],
+        "description": "'none' breaks lines only at \\n. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
+      },
+      "textAlign": {
+        "type": "string",
+        "enum": ["left", "center", "right"],
+        "description": "Horizontal alignment. Left out, the element keeps the alignment it has."
+      },
+      "verticalAlign": {
+        "type": "string",
+        "enum": ["top", "middle", "bottom"],
+        "description": "Vertical alignment. Left out, the element keeps the alignment it has."
+      },
+      "sameSizeDimension": {
+        "type": "string",
+        "enum": ["width", "height", "both"]
+      },
+      "port": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "side"],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "side": {
+            "$ref": "#/$defs/side"
+          },
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "label": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          }
+        }
+      },
+      "absoluteLayout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mode", "x", "y", "width", "height"],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "absolute"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "rotation": {
+            "$ref": "#/$defs/rotation"
+          },
+          "autoSize": {
+            "type": "string",
+            "enum": ["content", "none"],
+            "default": "none",
+            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label that doesn't wrap (the engine already grows that node to fit it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points. The same fields as scene.schema.json#/$defs/absoluteLayout."
+          }
+        }
+      },
+      "placeClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "above": {
+            "$ref": "#/$defs/id"
+          },
+          "below": {
+            "$ref": "#/$defs/id"
+          },
+          "leftOf": {
+            "$ref": "#/$defs/id"
+          },
+          "rightOf": {
+            "$ref": "#/$defs/id"
+          },
+          "inside": {
+            "$ref": "#/$defs/id"
+          },
+          "gap": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "alignX": {
+            "$ref": "#/$defs/alignX"
+          },
+          "alignY": {
+            "$ref": "#/$defs/alignY"
+          }
+        },
+        "allOf": [
+          {
+            "oneOf": [
+              { "required": ["above"] },
+              { "required": ["below"] },
+              { "required": ["leftOf"] },
+              { "required": ["rightOf"] },
+              { "required": ["inside"] }
+            ]
+          }
+        ]
+      },
+      "relativeLayout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mode", "place"],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "relative"
+          },
+          "place": {
+            "$ref": "#/$defs/placeClause"
+          },
+          "preferredSize": {
+            "$ref": "#/$defs/size"
+          },
+          "rotation": {
+            "$ref": "#/$defs/rotation"
+          }
+        }
+      },
+      "layout": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/absoluteLayout"
+          },
+          {
+            "$ref": "#/$defs/relativeLayout"
+          }
+        ]
+      },
+      "anchor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["side", "offset"],
+        "properties": {
+          "side": {
+            "$ref": "#/$defs/side"
+          },
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "endpoint": {
+        "type": "object",
+        "description": "Edge endpoint: the same fields as an endpoint in a scene (scene.schema.json#/$defs/endpoint).",
+        "additionalProperties": false,
+        "required": ["elementId"],
+        "properties": {
+          "elementId": {
+            "$ref": "#/$defs/id"
+          },
+          "portId": {
+            "$ref": "#/$defs/id"
+          },
+          "anchor": {
+            "$ref": "#/$defs/anchor"
+          },
+          "column": {
+            "type": "string",
+            "description": "Optional column-row anchor for ER entities. When set, must match the `name` of a column declared in the endpoint entity's `extensions.columns` array. The edge's segment touching this endpoint anchors at the column row inside the entity instead of the entity's outer face. Mismatched names emit an EDGE_COLUMN_NOT_FOUND warning."
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": ["one", "many", "zero-or-one", "zero-or-many", "one-or-many"],
+            "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end anchors at each time the diagram is drawn, and isn't stored, so it follows the column."
+          }
+        },
+        "allOf": [
+          {
+            "not": {
+              "required": ["portId", "anchor"]
+            }
+          }
+        ]
+      },
+      "edgeEndpoints": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Arrowheads at each end. An arrowhead left out comes from the edge's edgeType, as in a scene: workflow.messageFlow has an open circle at the source and an open triangle at the target, sequence.async and sequence.reply an open triangle at the target, and every other type, default included, a filled triangle at the target and none at the source.",
+        "properties": {
+          "startArrow": {
+            "$ref": "#/$defs/arrowhead"
+          },
+          "endArrow": {
+            "$ref": "#/$defs/arrowhead"
+          }
+        }
+      },
+      "textStyle": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "wrap": {
+            "$ref": "#/$defs/textWrap"
+          },
+          "align": {
+            "$ref": "#/$defs/textAlign"
+          },
+          "verticalAlign": {
+            "$ref": "#/$defs/verticalAlign"
+          }
+        }
+      },
+      "styleValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fill": {
+            "type": "string",
+            "minLength": 1
+          },
+          "accentColor": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Accent color: the header and PK badges of an ER table, the stripe of an org chart card, the title bar of a UI flow screen or modal"
+          },
+          "forceLabel": {
+            "type": "boolean",
+            "description": "Edge-only: draw the label where the engine would leave it out. An ER edge whose label names a column still anchors at that column."
+          },
+          "stroke": {
+            "type": "string",
+            "minLength": 1
+          },
+          "strokeWidth": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "cornerRadius": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "fontFamily": {
+            "type": "string"
+          },
+          "fontSize": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "fontWeight": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 100,
+                "maximum": 900,
+                "multipleOf": 100
+              },
+              {
+                "type": "string",
+                "enum": ["normal", "bold", "lighter", "bolder"]
+              }
+            ]
+          },
+          "textColor": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dash": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/nonNegativeNumber"
+            }
+          },
+          "labelBackground": {
+            "type": "string",
+            "minLength": 1
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "color": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Alias for textColor (normalized to textColor at runtime)"
+          }
+        }
+      },
+      "constraint": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/alignConstraint"
+          },
+          {
+            "$ref": "#/$defs/distributeConstraint"
+          },
+          {
+            "$ref": "#/$defs/containConstraint"
+          },
+          {
+            "$ref": "#/$defs/stackConstraint"
+          },
+          {
+            "$ref": "#/$defs/gridConstraint"
+          },
+          {
+            "$ref": "#/$defs/sameSizeConstraint"
+          },
+          {
+            "$ref": "#/$defs/minGapConstraint"
+          },
+          {
+            "$ref": "#/$defs/noOverlapConstraint"
+          },
+          {
+            "$ref": "#/$defs/centerInConstraint"
+          },
+          {
+            "$ref": "#/$defs/orderConstraint"
+          }
+        ]
+      },
+      "constraintBase": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/$defs/id",
+            "description": "Optional. Unique among the document's constraints when given: removeConstraint removes a constraint by its id."
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          }
+        }
+      },
+      "elementIdList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/id"
+        },
+        "minItems": 1
+      },
+      "alignConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "const": "align"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              }
+            }
+          }
+        ]
+      },
+      "distributeConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "const": "distribute"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "containConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "containerId", "elements"],
+            "properties": {
+              "type": {
+                "const": "contain"
+              },
+              "containerId": {
+                "$ref": "#/$defs/id"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "padding": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "stackConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "const": "stack"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "gridConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "const": "grid"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "columns": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 2,
+                "description": "Elements per row; the elements fill as many rows as they need."
+              },
+              "columnGap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              },
+              "rowGap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "sameSizeConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "const": "sameSize"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "dimension": {
+                "$ref": "#/$defs/sameSizeDimension"
+              }
+            }
+          }
+        ]
+      },
+      "minGapConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements", "gap"],
+            "properties": {
+              "type": {
+                "const": "minGap"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "noOverlapConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "const": "noOverlap"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              }
+            }
+          }
+        ]
+      },
+      "centerInConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "containerId", "elements"],
+            "properties": {
+              "type": {
+                "const": "centerIn"
+              },
+              "containerId": {
+                "$ref": "#/$defs/id"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList",
+                "description": "Each element is centred in the container on both axes."
+              }
+            }
+          }
+        ]
+      },
+      "orderRelation": {
+        "type": "string",
+        "enum": ["leftOf", "rightOf", "above", "below", "sameRank"]
+      },
+      "orderConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "source", "target", "relation"],
+            "properties": {
+              "type": {
+                "const": "order"
+              },
+              "source": {
+                "$ref": "#/$defs/id"
+              },
+              "target": {
+                "$ref": "#/$defs/id"
+              },
+              "relation": {
+                "$ref": "#/$defs/orderRelation"
+              }
+            }
+          }
+        ]
+      },
+      "opBase": {
+        "type": "object",
+        "required": ["op"],
+        "properties": {
+          "op": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          },
+          "extensions": {
+            "$ref": "#/$defs/extensions"
+          }
+        }
+      },
+      "op": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/createNodeOp"
+          },
+          {
+            "$ref": "#/$defs/updateNodeOp"
+          },
+          {
+            "$ref": "#/$defs/deleteElementOp"
+          },
+          {
+            "$ref": "#/$defs/createEdgeOp"
+          },
+          {
+            "$ref": "#/$defs/updateEdgeOp"
+          },
+          {
+            "$ref": "#/$defs/groupElementsOp"
+          },
+          {
+            "$ref": "#/$defs/ungroupElementsOp"
+          },
+          {
+            "$ref": "#/$defs/createFrameOp"
+          },
+          {
+            "$ref": "#/$defs/moveElementOp"
+          },
+          {
+            "$ref": "#/$defs/resizeElementOp"
+          },
+          {
+            "$ref": "#/$defs/setStyleOp"
+          },
+          {
+            "$ref": "#/$defs/setTextOp"
+          },
+          {
+            "$ref": "#/$defs/addConstraintOp"
+          },
+          {
+            "$ref": "#/$defs/removeConstraintOp"
+          },
+          {
+            "$ref": "#/$defs/autoLayoutOp"
+          },
+          {
+            "$ref": "#/$defs/updateSceneOp"
+          },
+          {
+            "$ref": "#/$defs/restoreRevisionOp"
+          }
+        ]
+      },
+      "createNodeOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "nodeType"],
+            "properties": {
+              "op": {
+                "const": "createNode"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides the node: it keeps its space but isn't drawn, nor any edge with an end at it."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "nodeType": {
+                "$ref": "#/$defs/nodeType"
+              },
+              "shape": {
+                "$ref": "#/$defs/shape"
+              },
+              "label": {
+                "type": "string"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/port"
+                }
+              },
+              "icon": {
+                "type": "string"
+              },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle",
+                "description": "How the label wraps and aligns. Leave a field out for its default: wrap 'none', align 'center', verticalAlign 'middle'."
+              },
+              "x": {
+                "type": "number",
+                "description": "Position shorthand: x-coordinate (equivalent to layout.x)"
+              },
+              "y": {
+                "type": "number",
+                "description": "Position shorthand: y-coordinate (equivalent to layout.y)"
+              },
+              "width": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Position shorthand: width (equivalent to layout.width)"
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "description": "Position shorthand: height (equivalent to layout.height)"
+              }
+            }
+          }
+        ]
+      },
+      "updateNodeOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "updateNode"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides the node: it keeps its space but isn't drawn, nor any edge with an end at it."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "nodeType": {
+                "$ref": "#/$defs/nodeType"
+              },
+              "shape": {
+                "$ref": "#/$defs/shape"
+              },
+              "label": {
+                "type": "string"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/port"
+                }
+              },
+              "icon": {
+                "type": ["string", "null"],
+                "description": "The node's icon: a family:id key such as lucide:database or aws:lambda, or an image URL. null removes it."
+              },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle",
+                "description": "How the label wraps and aligns. Only the fields given change."
+              }
+            },
+            "anyOf": [
+              { "required": ["name"] },
+              { "required": ["zIndex"] },
+              { "required": ["locked"] },
+              { "required": ["visible"] },
+              { "required": ["style"] },
+              { "required": ["nodeType"] },
+              { "required": ["shape"] },
+              { "required": ["label"] },
+              { "required": ["layout"] },
+              { "required": ["ports"] },
+              { "required": ["icon"] },
+              { "required": ["textStyle"] },
+              { "required": ["metadata"] },
+              { "required": ["extensions"] }
+            ]
+          }
+        ]
+      },
+      "deleteElementOp": {
+        "description": "Remove an element, and every edge with an end at it. Its ID leaves every group's and frame's children; the members of a deleted group or frame stay. A constraint that names it as containerId, source or target is removed, as is one left with fewer elements than it needs, and any other loses it (a CONSTRAINT_REMOVED note). An element placed relative to it gets an absolute layout where it was drawn (a RELATIVE_LAYOUT_FIXED note).",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "deleteElement"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        ]
+      },
+      "createEdgeOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "from", "to"],
+            "properties": {
+              "op": {
+                "const": "createEdge"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides the edge."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "from": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "to": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "router": {
+                "$ref": "#/$defs/router"
+              },
+              "label": {
+                "type": "string"
+              },
+              "endpoints": {
+                "$ref": "#/$defs/edgeEndpoints"
+              },
+              "waypoints": {
+                "description": "Kept with the edge, but not drawn: the engine routes every edge itself and doesn't pass through these points.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/point"
+                }
+              },
+              "edgeType": {
+                "type": "string",
+                "enum": ["default", "workflow.sequenceFlow", "workflow.messageFlow", "er.relationship", "er.identifying", "sequence.message", "sequence.reply", "sequence.create", "sequence.async", "sequence.destroy", "network.dataFlow", "network.controlFlow", "org.directReport", "org.dottedLine", "uiflow.navigate", "uiflow.back", "uiflow.action"]
+              }
+            }
+          }
+        ]
+      },
+      "updateEdgeOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "updateEdge"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides the edge."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "from": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "to": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "router": {
+                "$ref": "#/$defs/router"
+              },
+              "label": {
+                "type": "string"
+              },
+              "endpoints": {
+                "$ref": "#/$defs/edgeEndpoints"
+              },
+              "waypoints": {
+                "description": "Kept with the edge, but not drawn: the engine routes every edge itself and doesn't pass through these points.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/point"
+                }
+              },
+              "edgeType": {
+                "type": "string",
+                "enum": ["default", "workflow.sequenceFlow", "workflow.messageFlow", "er.relationship", "er.identifying", "sequence.message", "sequence.reply", "sequence.create", "sequence.async", "sequence.destroy", "network.dataFlow", "network.controlFlow", "org.directReport", "org.dottedLine", "uiflow.navigate", "uiflow.back", "uiflow.action"]
+              }
+            },
+            "anyOf": [
+              { "required": ["name"] },
+              { "required": ["zIndex"] },
+              { "required": ["locked"] },
+              { "required": ["visible"] },
+              { "required": ["style"] },
+              { "required": ["from"] },
+              { "required": ["to"] },
+              { "required": ["router"] },
+              { "required": ["label"] },
+              { "required": ["endpoints"] },
+              { "required": ["waypoints"] },
+              { "required": ["edgeType"] },
+              { "required": ["metadata"] },
+              { "required": ["extensions"] }
+            ]
+          }
+        ]
+      },
+      "groupElementsOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "children"],
+            "properties": {
+              "op": {
+                "const": "groupElements"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides only the group's title, not its members."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "title": {
+                "type": "string"
+              },
+              "children": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "layout": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "padding": {
+                    "$ref": "#/$defs/nonNegativeNumber"
+                  },
+                  "titleBar": {
+                    "$ref": "#/$defs/nonNegativeNumber"
+                  },
+                  "autoResize": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ungroupElementsOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "ungroupElements"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        ]
+      },
+      "createFrameOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "children"],
+            "properties": {
+              "op": {
+                "const": "createFrame"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "name": {
+                "type": "string"
+              },
+              "zIndex": {
+                "type": "integer"
+              },
+              "locked": {
+                "type": "boolean"
+              },
+              "visible": {
+                "type": "boolean",
+                "description": "false hides only the frame's box and title, not its members."
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "title": {
+                "type": "string"
+              },
+              "children": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "containerType": {
+                "type": "string",
+                "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment"]
+              },
+              "laneDirection": {
+                "type": "string",
+                "enum": ["horizontal", "vertical"]
+              }
+            }
+          }
+        ]
+      },
+      "moveElementOp": {
+        "description": "Move an element by delta. Works on elements with an absolute layout, on frames and groups, whose members (nested ones included) move by the same delta, and on guides. A member the engine hasn't placed stays unplaced, and a frame without a layout fits its members where they now are. Refused for an edge and for a sequence diagram's nodes and frames (MOVE_NOT_SUPPORTED), and for an element with a relative layout (MOVE_NOT_ALLOWED_FOR_RELATIVE_LAYOUT: change its layout with updateNode).",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "delta"],
+            "properties": {
+              "op": {
+                "const": "moveElement"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "delta": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["dx", "dy"],
+                "properties": {
+                  "dx": {
+                    "type": "number"
+                  },
+                  "dy": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "resizeElementOp": {
+        "description": "Give a node, frame, image or text element a new size. A placed node made bigger pushes the nodes in its way. A frame without a layout gets one: the box it was last drawn with, at the new size. An element with a relative layout takes the size as its preferredSize. Refused for a node the engine hasn't placed yet and for a frame without a layout that hasn't been drawn (RESIZE_NOT_PLACED: resize it in a later edit), and for a sequence diagram's nodes and frames (RESIZE_NOT_SUPPORTED).",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "size"],
+            "properties": {
+              "op": {
+                "const": "resizeElement"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "size": {
+                "$ref": "#/$defs/size"
+              },
+              "anchor": {
+                "$ref": "#/$defs/side",
+                "description": "The side that stays put: the element grows or shrinks away from it and stays centred along it. Without it, the top-left corner stays put. Leave it out for an element placed relative to another, whose placement sets where it is. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing; a smaller one pulls nothing back."
+              }
+            }
+          }
+        ]
+      },
+      "setStyleOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "setStyle"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              },
+              "styleOverride": {
+                "$ref": "#/$defs/styleValue"
+              }
+            },
+            "oneOf": [
+              { "required": ["style"] },
+              { "required": ["styleOverride"] }
+            ]
+          }
+        ]
+      },
+      "setTextOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id", "text"],
+            "properties": {
+              "op": {
+                "const": "setText"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              },
+              "text": {
+                "type": "string"
+              },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle"
+              }
+            }
+          }
+        ]
+      },
+      "addConstraintOp": {
+        "description": "Add a constraint at the end of constraints. An order constraint whose two nodes are placed and don't already stand that way round has the engine place both again, in order, around the other nodes (not in sequence diagrams).",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "constraint"],
+            "properties": {
+              "op": {
+                "const": "addConstraint"
+              },
+              "constraint": {
+                "$ref": "#/$defs/constraint"
+              }
+            }
+          }
+        ]
+      },
+      "removeConstraintOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op", "id"],
+            "properties": {
+              "op": {
+                "const": "removeConstraint"
+              },
+              "id": {
+                "$ref": "#/$defs/id"
+              }
+            }
+          }
+        ]
+      },
+      "autoLayoutOp": {
+        "description": "Have the engine place nodes again and keep the new positions. Nodes keep their positions after the first save. They move only when a node that grows needs the room; when an edit adds or deletes a frame round them and keeping them would leave frames overlapping or a frame holding a node that isn't its member; when an added order constraint finds its two nodes the wrong way round; or when updateScene changes or removes layoutStrategy or diagramFamily. So this op is how to get a fresh arrangement. Nodes with a relative layout follow the node they are placed against, and sequence diagrams are laid out from their messages, so autoLayout moves neither.",
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op"],
+            "properties": {
+              "op": {
+                "const": "autoLayout"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList",
+                "description": "Node IDs to place again, next to their neighbours and clear of the other nodes, which stay where they are. Leave it out to lay out every node, as on a new diagram, and size the canvas to fit: in architecture, workflow, entityRelationship and uiflow diagrams and diagrams without a family, every frame but a pool, lane or fragment then drops its own layout and is laid out with its members, and the members of a frame that keeps its layout keep their positions. Name them here to place them again inside their frame."
+              }
+            }
+          }
+        ]
+      },
+      "updateSceneOp": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/opBase"
+          },
+          {
+            "type": "object",
+            "required": ["op"],
+            "properties": {
+              "op": {
+                "const": "updateScene"
+              },
+              "title": {
+                "type": "string",
+                "description": "Update the scene title"
+              },
+              "brief": {
+                "type": ["string", "null"],
+                "maxLength": 1000,
+                "description": "Replace the diagram's brief (context for the next agent). Pass null to remove it."
+              },
+              "palette": {
+                "type": ["object", "null"],
+                "description": "Scene-level color palette overrides. Pass null to remove.",
+                "properties": {
+                  "background": { "type": "string" },
+                  "foreground": { "type": "string" },
+                  "nodeFill": { "type": "string" },
+                  "nodeStroke": { "type": "string" },
+                  "edgeStroke": { "type": "string" },
+                  "accentPrimary": { "type": "string" },
+                  "accentSecondary": { "type": "string" },
+                  "mutedForeground": { "type": "string" },
+                  "containerFill": { "type": "string" },
+                  "containerStroke": { "type": "string" }
+                }
+              },
+              "styles": {
+                "type": "object",
+                "description": "Merge entries into the named styles registry (additive, not replacement)",
+                "additionalProperties": {
+                  "$ref": "#/$defs/styleValue"
+                }
+              },
+              "layoutStrategy": {
+                "type": ["object", "null"],
+                "description": "Replace the layout strategy (scene.schema.json's layoutStrategy), or pass null to remove it. A new or removed strategy places every node again, as autoLayout without elements does.",
+                "properties": {
+                  "direction": {
+                    "type": "string",
+                    "enum": ["TB", "BT", "LR", "RL"]
+                  },
+                  "nodeSpacing": { "type": "number" },
+                  "rankSpacing": { "type": "number" }
+                }
+              },
+              "diagramFamily": {
+                "type": ["string", "null"],
+                "enum": ["architecture", "workflow", "entityRelationship", "sequence", "network", "orgchart", "uiflow", null],
+                "description": "Update the diagram family declaration, or pass null to remove it. A new or removed family places every node again, as autoLayout without elements does."
+              },
+              "canvas": {
+                "type": "object",
+                "description": "Partial merge into canvas dimensions and background",
+                "properties": {
+                  "width": { "type": "number", "minimum": 0 },
+                  "height": { "type": "number", "minimum": 0 },
+                  "background": { "type": "string" }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "restoreRevisionOp": {
+        "description": "Make the next revision equal to an earlier one. History is never rewritten: the old content becomes a new revision. Must be the only operation in its envelope.",
+        "unevaluatedProperties": false,
+        "allOf": [
+          { "$ref": "#/$defs/opBase" },
+          {
+            "type": "object",
+            "required": ["op"],
+            "properties": {
+              "op": { "const": "restoreRevision" },
+              "revision": { "type": "integer", "minimum": 1, "description": "The revision whose content to restore" },
+              "asOf": { "type": "string", "description": "Restore the revision that was current at this instant: a date (2026-06-30, the end of that day in UTC) or an ISO 8601 timestamp with an offset" }
+            },
+            "oneOf": [{ "required": ["revision"] }, { "required": ["asOf"] }]
+          }
+        ]
+      }
+    }
+  }
+  

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "0.1",
+  "diagramFamily": "architecture",
+  "scene": {
+    "id": "checkout",
+    "title": "Checkout",
+    "brief": "Request path for an order. Keep the database on the right."
+  },
+  "elements": [
+    { "id": "web", "kind": "node", "nodeType": "service", "label": "Web app" },
+    { "id": "api", "kind": "node", "nodeType": "service", "label": "Orders API" },
+    { "id": "db", "kind": "node", "nodeType": "database", "label": "Orders DB" },
+    { "id": "web-api", "kind": "edge", "from": { "elementId": "web" }, "to": { "elementId": "api" }, "label": "HTTPS" },
+    { "id": "api-db", "kind": "edge", "from": { "elementId": "api" }, "to": { "elementId": "db" } }
+  ],
+  "constraints": [
+    { "id": "db-right", "type": "order", "source": "db", "target": "api", "relation": "rightOf" }
+  ]
+}

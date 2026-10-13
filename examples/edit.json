@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "0.1",
+  "sceneId": "checkout",
+  "baseRevision": 1,
+  "message": "Add a cache in front of the database",
+  "requestId": "0f6c2e7a-4b0d-4c55-9a51-2f1f8f7c9d10",
+  "ops": [
+    { "op": "createNode", "id": "cache", "nodeType": "database", "label": "Cache" },
+    { "op": "createEdge", "id": "api-cache", "from": { "elementId": "api" }, "to": { "elementId": "cache" } },
+    { "op": "updateEdge", "id": "api-db", "label": "on a cache miss" }
+  ]
+}

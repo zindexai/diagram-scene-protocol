@@ -1,0 +1,1579 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://zindex.ai/schemas/scene.schema.json",
+    "title": "Diagram Scene Protocol Scene Schema",
+    "description": "Draft JSON Schema for the canonical DSP scene document. Licensed under Apache-2.0; the spec and both schemas are at https://github.com/zindexai/diagram-scene-protocol.",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["schemaVersion", "scene", "elements"],
+    "properties": {
+      "schemaVersion": {
+        "type": "string",
+        "const": "0.1"
+      },
+      "scene": {
+        "$ref": "#/$defs/scene"
+      },
+      "elements": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/element"
+        },
+        "default": []
+      },
+      "styles": {
+        "$ref": "#/$defs/styleRegistry"
+      },
+      "assets": {
+        "$ref": "#/$defs/assetRegistry"
+      },
+      "constraints": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/constraint"
+        },
+        "default": []
+      },
+      "computed": {
+        "$ref": "#/$defs/computed"
+      },
+      "extensions": {
+        "type": "object",
+        "description": "Reserved extension point for protocol additions. Recognised keys include `showLifelineFeet` (sequence diagrams only) and `autoGroup` (architecture diagrams only).",
+        "additionalProperties": true,
+        "default": {},
+        "properties": {
+          "showLifelineFeet": {
+            "type": "boolean",
+            "default": true,
+            "description": "Sequence-diagram only. When true (default), the renderer draws a foot bar at the bottom of each lifeline mirroring the head (UML / PlantUML / Mermaid convention). Set to false to suppress foot bars - useful when the author authors their own bottom row of shapes."
+          },
+          "autoGroup": {
+            "type": "string",
+            "enum": ["byNodeType"],
+            "description": "Architecture-family only. When set, the engine synthesises subtle background bands grouping nodes by their `nodeType` (e.g. one band for all `service` nodes, one for `database` nodes, one for `externalSystem` nodes). Each band is labelled with the pluralised type name (\"Services\", \"Databases\", \"External Systems\"). Skipped when the scene already authors frames containing the candidate nodes (no double-wrap), when all nodes share a single `nodeType` (trivial), or when the nodes of a type are scattered (a node of another type sits between two of them in a column). Opt-in only; omit the field to render with no banding (existing default)."
+          }
+        }
+      },
+      "diagramFamily": {
+        "type": "string",
+        "enum": ["architecture", "workflow", "entityRelationship", "sequence", "network", "orgchart", "uiflow"],
+        "description": "Diagram family declaration. Technically optional in the schema but effectively load-bearing: gates family-specific validation, layout, and rendering behaviour the engine and downstream tooling rely on (sequence-family fan-in exemption, ER auto-promote-fk-labels, workflow BPMN conventions, family-namespaced node types). Without it the diagram is drawn as a generic flowchart, and nothing warns you. Always declare on every scene."
+      },
+      "layoutStrategy": {
+        "type": "object",
+        "description": "How the engine places the nodes that have no position. The engine picks its placement method from diagramFamily: a layered layout for architecture, workflow, entityRelationship and uiflow diagrams and for diagrams without a family, which read these fields; a tree for orgchart (top to bottom), forces for network, and message order for sequence, which don't. A field left out takes the layered layout's default.",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "enum": ["TB", "BT", "LR", "RL"],
+            "default": "LR",
+            "description": "Layout direction: top to bottom, bottom to top, left to right, right to left."
+          },
+          "nodeSpacing": { "type": "number", "default": 30, "description": "Pixels the engine aims for between nodes in the same rank. Not a minimum: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, and it widens gaps to fill a larger canvas." },
+          "rankSpacing": { "type": "number", "default": 80, "description": "Pixels the engine aims for between adjacent ranks. Not a minimum: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, and it widens gaps to fill a larger canvas." }
+        }
+      },
+      "palette": {
+        "type": "object",
+        "description": "Scene-level color palette that overrides theme defaults for unstyled elements. All properties optional - only specify the colors you want to override. Cascade: element style > palette > theme > fallback.",
+        "properties": {
+          "background": { "type": "string", "description": "Canvas background color" },
+          "foreground": { "type": "string", "description": "Default text color for nodes" },
+          "nodeFill": { "type": "string", "description": "Default node fill color" },
+          "nodeStroke": { "type": "string", "description": "Default node border color" },
+          "edgeStroke": { "type": "string", "description": "Default edge line color" },
+          "accentPrimary": { "type": "string", "description": "Accent color of nodes whose style sets no accentColor: ER table headers and PK badges, org chart card stripes, UI flow screen and modal title bars" },
+          "accentSecondary": { "type": "string", "description": "Nothing draws a second accent yet, so this has no effect" },
+          "mutedForeground": { "type": "string", "description": "Edge label text color" },
+          "containerFill": { "type": "string", "description": "Default frame/group fill color" },
+          "containerStroke": { "type": "string", "description": "Default frame/group border color" }
+        }
+      }
+    },
+    "$defs": {
+      "id": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[A-Za-z0-9._:-]+$"
+      },
+      "nonEmptyString": {
+        "type": "string",
+        "minLength": 1
+      },
+      "nonNegativeNumber": {
+        "type": "number",
+        "minimum": 0
+      },
+      "zIndex": {
+        "type": "integer"
+      },
+      "color": {
+        "type": "string",
+        "description": "CSS-compatible color string. Implementations may choose to restrict this further.",
+        "minLength": 1
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "metadata": {
+        "type": "object",
+        "description": "Freeform metadata for provenance or custom annotations.",
+        "additionalProperties": true,
+        "default": {}
+      },
+      "point": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y"],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          }
+        }
+      },
+      "size": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["width", "height"],
+        "properties": {
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          }
+        }
+      },
+      "bounds": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["x", "y", "width", "height"],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          }
+        }
+      },
+      "rotation": {
+        "type": "number",
+        "default": 0,
+        "description": "Kept with the layout. The reference engine doesn't rotate anything."
+      },
+      "units": {
+        "type": "string",
+        "enum": ["px"],
+        "description": "The units of every position and size. Only px."
+      },
+      "scene": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id",
+            "description": "The diagram's ID. Zindex sets it when the diagram is created through /v1/diagrams or diagram_create, ignoring any value sent."
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "brief": {
+            "type": "string",
+            "maxLength": 1000,
+            "description": "Context kept with the diagram for the next agent: what it shows, conventions to keep, decisions made. Versioned with the diagram."
+          },
+          "units": {
+            "$ref": "#/$defs/units"
+          },
+          "canvas": {
+            "$ref": "#/$defs/canvas"
+          },
+          "viewport": {
+            "$ref": "#/$defs/viewport"
+          },
+          "defaults": {
+            "$ref": "#/$defs/sceneDefaults"
+          },
+          "metadata": {
+            "$ref": "#/$defs/sceneMetadata"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true,
+            "default": {},
+            "description": "Not kept: the reference engine drops it when it stores the diagram. Put data in the document's top-level extensions instead."
+          }
+        }
+      },
+      "canvas": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "background": {
+            "$ref": "#/$defs/color"
+          },
+          "grid": {
+            "$ref": "#/$defs/nonNegativeNumber",
+            "default": 0,
+            "description": "Kept with the diagram. The reference engine draws no grid."
+          },
+          "snap": {
+            "type": "boolean",
+            "default": false,
+            "description": "Kept with the diagram. The reference engine doesn't snap to a grid."
+          }
+        }
+      },
+      "viewport": {
+        "type": "object",
+        "description": "Kept with the diagram. The reference engine doesn't read it.",
+        "additionalProperties": false,
+        "properties": {
+          "originX": {
+            "type": "number",
+            "default": 0
+          },
+          "originY": {
+            "type": "number",
+            "default": 0
+          },
+          "zoom": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "default": 1
+          }
+        },
+        "default": {
+          "originX": 0,
+          "originY": 0,
+          "zoom": 1
+        }
+      },
+      "sceneDefaults": {
+        "type": "object",
+        "description": "Kept with the diagram. The reference engine doesn't read these: set fonts, strokes and routers on elements or in styles.",
+        "additionalProperties": false,
+        "properties": {
+          "fontFamily": {
+            "type": "string"
+          },
+          "fontSize": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "strokeWidth": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "router": {
+            "$ref": "#/$defs/router"
+          }
+        },
+        "default": {}
+      },
+      "sceneMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "createdBy": {
+            "type": "string"
+          },
+          "createdAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "updatedAt": {
+            "$ref": "#/$defs/timestamp"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "provenance": {
+            "$ref": "#/$defs/metadata"
+          }
+        },
+        "default": {}
+      },
+      "elementBase": {
+        "type": "object",
+        "required": ["id", "kind"],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["node", "edge", "group", "text", "image", "frame", "guide"]
+          },
+          "name": {
+            "type": "string"
+          },
+          "zIndex": {
+            "$ref": "#/$defs/zIndex",
+            "description": "Paint order: higher draws on top. When absent, the engine assigns one by kind, counting up in array order within each kind: frames from 0, groups from 100, edges from 200, nodes from 300, text from 400, images from 500 and guides from 600."
+          },
+          "locked": {
+            "type": "boolean",
+            "default": false,
+            "description": "Kept with the element. The reference engine edits and draws an element whatever its value."
+          },
+          "visible": {
+            "type": "boolean",
+            "default": true,
+            "description": "false hides the element: the engine still lays it out, so it keeps its space, but doesn't draw it or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group only its title, not their members."
+          },
+          "style": {
+            "oneOf": [
+              { "type": "string", "description": "Reference to a named style in scene.styles" },
+              { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+            ],
+            "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true,
+            "default": {},
+            "properties": {
+              "columns": {
+                "type": "array",
+                "description": "ER table columns, read by er.entity and er.weakEntity nodes. Each column draws as a row; an edge anchors at a row with endpoint.column, and an edge end left without cardinality is inferred from the column's flags. updateNode replaces the whole array.",
+                "items": {
+                  "$ref": "#/$defs/erColumn"
+                }
+              }
+            }
+          },
+          "x": {
+            "type": "number",
+            "description": "Shorthand for layout.x - sets layout.mode to 'absolute' automatically"
+          },
+          "y": {
+            "type": "number",
+            "description": "Shorthand for layout.y - sets layout.mode to 'absolute' automatically"
+          },
+          "width": {
+            "type": "number",
+            "description": "Shorthand for layout.width - sets layout.mode to 'absolute' automatically"
+          },
+          "height": {
+            "type": "number",
+            "description": "Shorthand for layout.height - sets layout.mode to 'absolute' automatically"
+          }
+        }
+      },
+      "element": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/nodeElement"
+          },
+          {
+            "$ref": "#/$defs/edgeElement"
+          },
+          {
+            "$ref": "#/$defs/groupElement"
+          },
+          {
+            "$ref": "#/$defs/frameElement"
+          },
+          {
+            "$ref": "#/$defs/textElement"
+          },
+          {
+            "$ref": "#/$defs/imageElement"
+          },
+          {
+            "$ref": "#/$defs/guideElement"
+          }
+        ]
+      },
+      "nodeType": {
+        "type": "string",
+        "enum": [
+          "generic",
+          "service",
+          "database",
+          "queue",
+          "actor",
+          "note",
+          "decision",
+          "document",
+          "process",
+          "container",
+          "externalSystem",
+          "storage",
+          "objectStorage",
+          "event",
+          "iconNode",
+          "workflow.start",
+          "workflow.end",
+          "workflow.task",
+          "workflow.decision",
+          "workflow.gateway",
+          "workflow.gatewayParallel",
+          "workflow.gatewayInclusive",
+          "workflow.subprocess",
+          "workflow.timer",
+          "workflow.error",
+          "er.entity",
+          "er.weakEntity",
+          "er.attribute",
+          "er.relationship",
+          "sequence.lifeline",
+          "sequence.activation",
+          "sequence.actor",
+          "sequence.note",
+          "network.server",
+          "network.router",
+          "network.switch",
+          "network.firewall",
+          "network.cloud",
+          "network.client",
+          "org.person",
+          "org.role",
+          "org.department",
+          "workflow.intermediateTimer",
+          "workflow.intermediateMessage",
+          "workflow.intermediateError",
+          "workflow.intermediateThrowMessage",
+          "workflow.terminate",
+          "workflow.messageStart",
+          "workflow.messageEnd",
+          "workflow.gatewayEvent",
+          "uiflow.screen",
+          "uiflow.modal",
+          "uiflow.entry",
+          "uiflow.exit"
+        ]
+      },
+      "shape": {
+        "type": "string",
+        "enum": [
+          "rect",
+          "roundedRect",
+          "ellipse",
+          "diamond",
+          "cylinder",
+          "bucket",
+          "pill",
+          "hexagon",
+          "parallelogram",
+          "cloud",
+          "box3d",
+          "textBox",
+          "iconBox"
+        ]
+      },
+      "side": {
+        "type": "string",
+        "enum": ["top", "right", "bottom", "left"]
+      },
+      "erColumn": {
+        "type": "object",
+        "description": "One column of an ER table (er.entity, er.weakEntity): drawn as a row with its PK/FK badges and type.",
+        "required": ["name"],
+        "additionalProperties": true,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Column name, drawn on its row. endpoint.column, and an edge label that names a foreign key, match it."
+          },
+          "type": {
+            "type": "string",
+            "description": "Column type, drawn right-aligned on the row."
+          },
+          "pk": {
+            "type": "boolean",
+            "description": "Part of the primary key. An edge end at the only PK column infers one; at one of several, many."
+          },
+          "fk": {
+            "type": "boolean",
+            "description": "A foreign key. An edge end here infers many: one when unique (or the entity's only PK column), zero-or-many when nullable, zero-or-one when both."
+          },
+          "unique": {
+            "type": "boolean",
+            "description": "Unique on its own: a unique foreign key infers one."
+          },
+          "nullable": {
+            "type": "boolean",
+            "description": "Nullable: a nullable foreign key infers zero-or-many, or zero-or-one when unique."
+          },
+          "key": {
+            "type": "string",
+            "enum": ["PK", "FK"],
+            "description": "Alias for pk: true or fk: true. A column that is both needs pk and fk."
+          },
+          "comment": {
+            "type": "string",
+            "description": "Kept with the column (a Mermaid attribute comment), not drawn."
+          }
+        }
+      },
+      "port": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "side"],
+        "properties": {
+          "id": {
+            "$ref": "#/$defs/id"
+          },
+          "side": {
+            "$ref": "#/$defs/side"
+          },
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0
+          },
+          "label": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          }
+        }
+      },
+      "absoluteLayout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mode", "x", "y", "width", "height"],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "absolute"
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "width": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "height": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "rotation": {
+            "$ref": "#/$defs/rotation"
+          },
+          "autoSize": {
+            "type": "string",
+            "enum": ["content", "none"],
+            "default": "none",
+            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label that doesn't wrap (the engine already grows that node to fit it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points."
+          }
+        }
+      },
+      "placeClause": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "above": {
+            "$ref": "#/$defs/id"
+          },
+          "below": {
+            "$ref": "#/$defs/id"
+          },
+          "leftOf": {
+            "$ref": "#/$defs/id"
+          },
+          "rightOf": {
+            "$ref": "#/$defs/id"
+          },
+          "inside": {
+            "$ref": "#/$defs/id"
+          },
+          "gap": {
+            "$ref": "#/$defs/nonNegativeNumber",
+            "default": 0
+          },
+          "alignX": {
+            "type": "string",
+            "enum": ["left", "center", "right"]
+          },
+          "alignY": {
+            "type": "string",
+            "enum": ["top", "center", "bottom"]
+          }
+        },
+        "allOf": [
+          {
+            "oneOf": [
+              { "required": ["above"] },
+              { "required": ["below"] },
+              { "required": ["leftOf"] },
+              { "required": ["rightOf"] },
+              { "required": ["inside"] }
+            ]
+          }
+        ]
+      },
+      "relativeLayout": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mode", "place"],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "relative"
+          },
+          "place": {
+            "$ref": "#/$defs/placeClause"
+          },
+          "preferredSize": {
+            "$ref": "#/$defs/size"
+          },
+          "rotation": {
+            "$ref": "#/$defs/rotation"
+          }
+        }
+      },
+      "layout": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/absoluteLayout"
+          },
+          {
+            "$ref": "#/$defs/relativeLayout"
+          }
+        ]
+      },
+      "nodeElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "nodeType"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "node"
+              },
+              "nodeType": {
+                "$ref": "#/$defs/nodeType"
+              },
+              "shape": {
+                "$ref": "#/$defs/shape"
+              },
+              "label": {
+                "type": "string"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout",
+                "description": "Position and size. Leave it out and the engine places the node next to its neighbours, around the nodes that have a layout, without moving them, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
+              },
+              "ports": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/port"
+                },
+                "default": []
+              },
+              "icon": {
+                "type": "string",
+                "description": "Icon key ({family}:{id}, e.g. lucide:database) or URL"
+              },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle"
+              }
+            }
+          }
+        ]
+      },
+      "router": {
+        "type": "string",
+        "enum": ["straight", "orthogonal", "curved", "polyline"]
+      },
+      "anchor": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["side", "offset"],
+        "properties": {
+          "side": {
+            "$ref": "#/$defs/side"
+          },
+          "offset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "endpoint": {
+        "type": "object",
+        "description": "Edge endpoint. elementId may reference any element kind - typically a node, but frame and group IDs are also valid targets. An edge to a frame terminates at the frame's border using cardinal anchors; useful for abstract group dependencies (e.g. an edge to a 'Regional Services' sidebar rather than to a specific service inside). On entityRelationship diagrams, set `column` to anchor the edge at a specific column row inside the entity (matching the dbdiagram.io / DBeaver convention where FK edges point at the FK column itself rather than the entity rectangle as a whole).",
+        "additionalProperties": false,
+        "required": ["elementId"],
+        "properties": {
+          "elementId": {
+            "$ref": "#/$defs/id"
+          },
+          "portId": {
+            "$ref": "#/$defs/id"
+          },
+          "anchor": {
+            "$ref": "#/$defs/anchor"
+          },
+          "column": {
+            "type": "string",
+            "description": "Optional column-row anchor for ER entities. When set, must match the `name` of a column declared in the endpoint entity's `extensions.columns` array. The edge's segment touching this endpoint anchors at the column row inside the entity instead of the entity's outer face. Mismatched names emit an EDGE_COLUMN_NOT_FOUND warning."
+          },
+          "cardinality": {
+            "type": "string",
+            "enum": ["one", "many", "zero-or-one", "zero-or-many", "one-or-many"],
+            "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end anchors at each time the diagram is drawn, and isn't stored, so it follows the column."
+          }
+        },
+        "allOf": [
+          {
+            "not": {
+              "required": ["portId", "anchor"]
+            }
+          }
+        ]
+      },
+      "arrowhead": {
+        "type": "string",
+        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle"]
+      },
+      "edgeEndpoints": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Arrowheads at each end. An arrowhead left out comes from the edge's edgeType: workflow.messageFlow has an open circle at the source and an open triangle at the target, sequence.async and sequence.reply an open triangle at the target, and every other type, default included, a filled triangle at the target and none at the source.",
+        "properties": {
+          "startArrow": {
+            "$ref": "#/$defs/arrowhead"
+          },
+          "endArrow": {
+            "$ref": "#/$defs/arrowhead"
+          }
+        }
+      },
+      "edgeElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "from", "to"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "edge"
+              },
+              "from": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "to": {
+                "$ref": "#/$defs/endpoint"
+              },
+              "router": {
+                "$ref": "#/$defs/router"
+              },
+              "label": {
+                "type": "string",
+                "description": "Edge label text. Plain strings render as a single tspan. Labels matching the state-machine / SCXML / BPMN convention 'EVENT [guard] / action' render with multi-tier typography: event 12px, guard 10px muted, action 10px muted italic. Detection is content-based (balanced [...] OR ' / ' separator) and family-agnostic. Multi-line labels (containing \\n) skip the convention parse."
+              },
+              "endpoints": {
+                "$ref": "#/$defs/edgeEndpoints"
+              },
+              "waypoints": {
+                "description": "Kept with the edge, but not drawn: the engine routes every edge itself and doesn't pass through these points.",
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/point"
+                },
+                "default": []
+              },
+              "edgeType": {
+                "type": "string",
+                "enum": ["default", "workflow.sequenceFlow", "workflow.messageFlow", "er.relationship", "er.identifying", "sequence.message", "sequence.reply", "sequence.create", "sequence.async", "sequence.destroy", "network.dataFlow", "network.controlFlow", "org.directReport", "org.dottedLine", "uiflow.navigate", "uiflow.back", "uiflow.action"],
+                "default": "default",
+                "description": "Family-specific edge type for typed connection semantics"
+              }
+            }
+          }
+        ]
+      },
+      "groupLayout": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "padding": {
+            "$ref": "#/$defs/nonNegativeNumber",
+            "default": 0
+          },
+          "titleBar": {
+            "$ref": "#/$defs/nonNegativeNumber",
+            "default": 0
+          },
+          "autoResize": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "default": {}
+      },
+      "groupElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "children"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "group"
+              },
+              "title": {
+                "type": "string"
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/id"
+                }
+              },
+              "layout": {
+                "$ref": "#/$defs/groupLayout"
+              }
+            }
+          }
+        ]
+      },
+      "frameElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "children"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "frame"
+              },
+              "title": {
+                "type": "string"
+              },
+              "children": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/id"
+                }
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "containerType": {
+                "type": "string",
+                "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment"],
+                "default": "generic",
+                "description": "Semantic container type for swimlane and process layout"
+              },
+              "laneDirection": {
+                "type": "string",
+                "enum": ["horizontal", "vertical"],
+                "description": "Direction for lane-based layout within this container"
+              }
+            }
+          }
+        ]
+      },
+      "textStyle": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "wrap": {
+            "type": "string",
+            "enum": ["none", "word", "character"],
+            "default": "none",
+            "description": "'none' breaks lines only at \\n. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
+          },
+          "align": {
+            "type": "string",
+            "enum": ["left", "center", "right"],
+            "description": "Horizontal alignment. When absent: center on a node, left on a text element."
+          },
+          "verticalAlign": {
+            "type": "string",
+            "enum": ["top", "middle", "bottom"],
+            "description": "Vertical alignment. When absent: middle on a node, top on a text element."
+          }
+        },
+        "default": {}
+      },
+      "textElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "text", "layout"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "text"
+              },
+              "text": {
+                "type": "string"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle"
+              }
+            }
+          }
+        ]
+      },
+      "fitMode": {
+        "type": "string",
+        "enum": ["contain", "cover", "stretch", "original"]
+      },
+      "imageElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "assetRef", "layout"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "image"
+              },
+              "assetRef": {
+                "$ref": "#/$defs/id"
+              },
+              "layout": {
+                "$ref": "#/$defs/layout"
+              },
+              "fit": {
+                "$ref": "#/$defs/fitMode"
+              }
+            }
+          }
+        ]
+      },
+      "guideOrientation": {
+        "type": "string",
+        "enum": ["horizontal", "vertical"]
+      },
+      "guideElement": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/elementBase"
+          },
+          {
+            "type": "object",
+            "required": ["kind", "orientation", "position"],
+            "properties": {
+              "kind": {
+                "type": "string",
+                "const": "guide"
+              },
+              "orientation": {
+                "$ref": "#/$defs/guideOrientation"
+              },
+              "position": {
+                "type": "number"
+              }
+            }
+          }
+        ]
+      },
+      "styleValue": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "fill": {
+            "$ref": "#/$defs/color"
+          },
+          "stroke": {
+            "$ref": "#/$defs/color"
+          },
+          "strokeWidth": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "cornerRadius": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "fontFamily": {
+            "type": "string"
+          },
+          "fontSize": {
+            "$ref": "#/$defs/nonNegativeNumber"
+          },
+          "fontWeight": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 100,
+                "maximum": 900,
+                "multipleOf": 100
+              },
+              {
+                "type": "string",
+                "enum": ["normal", "bold", "lighter", "bolder"]
+              }
+            ]
+          },
+          "textColor": {
+            "$ref": "#/$defs/color"
+          },
+          "dash": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/nonNegativeNumber"
+            },
+            "default": []
+          },
+          "labelBackground": {
+            "$ref": "#/$defs/color"
+          },
+          "opacity": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "accentColor": {
+            "$ref": "#/$defs/color",
+            "description": "Accent color: the header and PK badges of an ER table, the stripe of an org chart card, the title bar of a UI flow screen or modal"
+          },
+          "color": {
+            "$ref": "#/$defs/color",
+            "description": "Alias for textColor (normalized to textColor at runtime)"
+          },
+          "forceLabel": {
+            "type": "boolean",
+            "description": "Edge-only: draw the edge's label where the engine would leave it out. When an edge's label exactly matches the name of a column declared in either endpoint's extensions.columns, the edge anchors at that column's row inside the entity (the dbdiagram.io / DBeaver convention) and the label isn't drawn, because the row carries the FK identity. Set this to true to draw the label as well: the edge still anchors at the column, and its cardinality at that end is inferred from the column."
+          }
+        }
+      },
+      "styleRegistry": {
+        "type": "object",
+        "default": {},
+        "patternProperties": {
+          "^[A-Za-z0-9._:-]+$": {
+            "$ref": "#/$defs/styleValue"
+          }
+        },
+        "additionalProperties": false
+      },
+      "assetEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "mimeType", "uri"],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["image"]
+          },
+          "mimeType": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "integrity": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          }
+        }
+      },
+      "assetRegistry": {
+        "type": "object",
+        "default": {},
+        "patternProperties": {
+          "^[A-Za-z0-9._:-]+$": {
+            "$ref": "#/$defs/assetEntry"
+          }
+        },
+        "additionalProperties": false
+      },
+      "constraint": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/alignConstraint"
+          },
+          {
+            "$ref": "#/$defs/distributeConstraint"
+          },
+          {
+            "$ref": "#/$defs/containConstraint"
+          },
+          {
+            "$ref": "#/$defs/stackConstraint"
+          },
+          {
+            "$ref": "#/$defs/gridConstraint"
+          },
+          {
+            "$ref": "#/$defs/sameSizeConstraint"
+          },
+          {
+            "$ref": "#/$defs/minGapConstraint"
+          },
+          {
+            "$ref": "#/$defs/noOverlapConstraint"
+          },
+          {
+            "$ref": "#/$defs/centerInConstraint"
+          },
+          {
+            "$ref": "#/$defs/orderConstraint"
+          }
+        ]
+      },
+      "constraintBase": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "id": {
+            "$ref": "#/$defs/id",
+            "description": "Optional. Unique among the document's constraints when given: removeConstraint removes a constraint by its id."
+          },
+          "metadata": {
+            "$ref": "#/$defs/metadata"
+          }
+        }
+      },
+      "axis": {
+        "type": "string",
+        "enum": ["x", "y"]
+      },
+      "elementIdList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/id"
+        },
+        "minItems": 1
+      },
+      "alignConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "align"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              }
+            }
+          }
+        ]
+      },
+      "distributeConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "distribute"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "containConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "containerId", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "contain"
+              },
+              "containerId": {
+                "$ref": "#/$defs/id"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "padding": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "stackConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "stack"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "gridConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "grid"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "columns": {
+                "type": "integer",
+                "minimum": 1,
+                "default": 2,
+                "description": "Elements per row; the elements fill as many rows as they need."
+              },
+              "columnGap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              },
+              "rowGap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "sameSizeConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "sameSize"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "dimension": {
+                "type": "string",
+                "enum": ["width", "height", "both"],
+                "default": "both"
+              }
+            }
+          }
+        ]
+      },
+      "minGapConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "axis", "elements", "gap"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "minGap"
+              },
+              "axis": {
+                "$ref": "#/$defs/axis"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              },
+              "gap": {
+                "$ref": "#/$defs/nonNegativeNumber"
+              }
+            }
+          }
+        ]
+      },
+      "noOverlapConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "noOverlap"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList"
+              }
+            }
+          }
+        ]
+      },
+      "centerInConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "containerId", "elements"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "centerIn"
+              },
+              "containerId": {
+                "$ref": "#/$defs/id"
+              },
+              "elements": {
+                "$ref": "#/$defs/elementIdList",
+                "description": "Each element is centred in the container on both axes."
+              }
+            }
+          }
+        ]
+      },
+      "orderRelation": {
+        "type": "string",
+        "enum": ["leftOf", "rightOf", "above", "below", "sameRank"]
+      },
+      "orderConstraint": {
+        "unevaluatedProperties": false,
+        "allOf": [
+          {
+            "$ref": "#/$defs/constraintBase"
+          },
+          {
+            "type": "object",
+            "required": ["type", "source", "target", "relation"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "order"
+              },
+              "source": {
+                "$ref": "#/$defs/id"
+              },
+              "target": {
+                "$ref": "#/$defs/id"
+              },
+              "relation": {
+                "$ref": "#/$defs/orderRelation"
+              }
+            }
+          }
+        ]
+      },
+      "computedLayoutRegistry": {
+        "type": "object",
+        "default": {},
+        "patternProperties": {
+          "^[A-Za-z0-9._:-]+$": {
+            "$ref": "#/$defs/bounds"
+          }
+        },
+        "additionalProperties": false
+      },
+      "computedEdgePath": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["points"],
+        "properties": {
+          "points": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/point"
+            },
+            "minItems": 2
+          },
+          "labelPosition": {
+            "$ref": "#/$defs/point"
+          },
+          "labelWidth": {
+            "type": "number",
+            "description": "Measured label width including padding. Used by the renderer to draw a background rect behind edge labels."
+          },
+          "labelHeight": {
+            "type": "number",
+            "description": "Measured label height including padding."
+          },
+          "router": {
+            "type": "string",
+            "enum": ["polyline", "curved"],
+            "description": "How the renderer draws `points`. `\"curved\"` only for an edge whose own `router` is `curved`: the 2-point points list is drawn as a quadratic Bezier with a perpendicular-offset control point. Every other edge is drawn as a polyline; the engine never turns an orthogonal edge into a curve, and a long back-edge detour becomes an orthogonal U-hook below the diagram instead."
+          },
+          "cornerRadius": {
+            "type": "number",
+            "description": "Engine-applied corner-rounding radius for the polyline path. Set today by the sequence resolver for self-message U-shapes."
+          },
+          "isFanInFeeder": {
+            "type": "boolean",
+            "description": "True when this edge is a feeder in a fan-in trunk merge: one of N edges sharing a target+label that have been geometrically merged so they all meet at a common fan-in point near the target. The terminal point sits at the fan-in T (24 px outward from the target's face centre) instead of on the face itself. Set on BOTH collapsing and bundle-only feeders."
+          },
+          "keepFeederArrowhead": {
+            "type": "boolean",
+            "description": "Set on bundle-only fan-in feeders only. When true, the renderer keeps the terminal arrowhead even though `isFanInFeeder` is also true. Bundle-only groups have structurally distinct sources sharing only target+label; labels and arrowheads are deliberately preserved. Collapsing feeders set `isFanInFeeder` only and the renderer omits their arrowhead."
+          }
+        }
+      },
+      "computedEdgePathRegistry": {
+        "type": "object",
+        "default": {},
+        "patternProperties": {
+          "^[A-Za-z0-9._:-]+$": {
+            "$ref": "#/$defs/computedEdgePath"
+          }
+        },
+        "additionalProperties": false
+      },
+      "diagnostic": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message", "severity"],
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warning", "error", "fatal"]
+          }
+        }
+      },
+      "computed": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "layout": {
+            "$ref": "#/$defs/computedLayoutRegistry"
+          },
+          "edgePaths": {
+            "$ref": "#/$defs/computedEdgePathRegistry"
+          },
+          "diagnostics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/diagnostic"
+            },
+            "default": []
+          },
+          "normalizedHash": {
+            "type": "string"
+          }
+        },
+        "default": {}
+      }
+    }
+  }
+  
