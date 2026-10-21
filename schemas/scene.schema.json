@@ -535,31 +535,6 @@
           }
         }
       },
-      "port": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "side"],
-        "properties": {
-          "id": {
-            "$ref": "#/$defs/id"
-          },
-          "side": {
-            "$ref": "#/$defs/side"
-          },
-          "offset": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
-            "default": 0
-          },
-          "label": {
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/$defs/metadata"
-          }
-        }
-      },
       "absoluteLayout": {
         "type": "object",
         "additionalProperties": false,
@@ -693,13 +668,6 @@
                 "$ref": "#/$defs/layout",
                 "description": "Position and size. Leave it out and the engine places the node next to its neighbours, around the nodes that have a layout, without moving them, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
               },
-              "ports": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/port"
-                },
-                "default": []
-              },
               "icon": {
                 "type": "string",
                 "description": "Icon key ({family}:{id}, e.g. lucide:database) or URL"
@@ -717,29 +685,29 @@
       },
       "anchor": {
         "type": "object",
+        "description": "Where this end of the edge meets its node: `side` alone fixes the side, and the end sits where the engine spreads ends on that side; with `offset` it sits at that place, 0 to 1 from the top of a left or right side or the left of a top or bottom side, kept 8 px from the side's corners. An anchored edge joins no shared trunk. The engine doesn't move nodes for it, so an anchor on the side facing away from the other node routes round the node. Ignored, with EDGE_ANCHOR_IGNORED, on a sequence message, a self-loop, or an end that names a column.",
         "additionalProperties": false,
-        "required": ["side", "offset"],
+        "required": ["side"],
         "properties": {
           "side": {
-            "$ref": "#/$defs/side"
+            "$ref": "#/$defs/side",
+            "description": "The side of the node this end meets."
           },
           "offset": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "description": "Where on the side, 0 to 1 from its top (left and right sides) or its left (top and bottom sides). Omit it to let the engine place the end on the side."
           }
         }
       },
       "endpoint": {
         "type": "object",
-        "description": "Edge endpoint. elementId may reference any element kind - typically a node, but frame and group IDs are also valid targets. An edge to a frame terminates at the frame's border using cardinal anchors; useful for abstract group dependencies (e.g. an edge to a 'Regional Services' sidebar rather than to a specific service inside). On entityRelationship diagrams, set `column` to anchor the edge at a specific column row inside the entity (matching the dbdiagram.io / DBeaver convention where FK edges point at the FK column itself rather than the entity rectangle as a whole).",
+        "description": "Edge endpoint. elementId may reference any element kind - typically a node, but frame and group IDs are also valid targets. An edge to a frame terminates at the frame's border, on the side facing the source, straight across where the source lines up and otherwise at the side's centre; useful for abstract group dependencies (e.g. an edge to a 'Regional Services' sidebar rather than to a specific service inside). On entityRelationship diagrams, set `column` to anchor the edge at a specific column row inside the entity (matching the dbdiagram.io / DBeaver convention where FK edges point at the FK column itself rather than the entity rectangle as a whole).",
         "additionalProperties": false,
         "required": ["elementId"],
         "properties": {
           "elementId": {
-            "$ref": "#/$defs/id"
-          },
-          "portId": {
             "$ref": "#/$defs/id"
           },
           "anchor": {
@@ -754,14 +722,7 @@
             "enum": ["one", "many", "zero-or-one", "zero-or-many", "one-or-many"],
             "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end anchors at each time the diagram is drawn, and isn't stored, so it follows the column."
           }
-        },
-        "allOf": [
-          {
-            "not": {
-              "required": ["portId", "anchor"]
-            }
-          }
-        ]
+        }
       },
       "arrowhead": {
         "type": "string",

@@ -267,30 +267,6 @@
         "type": "string",
         "enum": ["width", "height", "both"]
       },
-      "port": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["id", "side"],
-        "properties": {
-          "id": {
-            "$ref": "#/$defs/id"
-          },
-          "side": {
-            "$ref": "#/$defs/side"
-          },
-          "offset": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1
-          },
-          "label": {
-            "type": "string"
-          },
-          "metadata": {
-            "$ref": "#/$defs/metadata"
-          }
-        }
-      },
       "absoluteLayout": {
         "type": "object",
         "additionalProperties": false,
@@ -396,16 +372,19 @@
       },
       "anchor": {
         "type": "object",
+        "description": "Where this end of the edge meets its node: `side` alone fixes the side, and the end sits where the engine spreads ends on that side; with `offset` it sits at that place, 0 to 1 from the top of a left or right side or the left of a top or bottom side, kept 8 px from the side's corners. An anchored edge joins no shared trunk. The engine doesn't move nodes for it, so an anchor on the side facing away from the other node routes round the node. Ignored, with EDGE_ANCHOR_IGNORED, on a sequence message, a self-loop, or an end that names a column.",
         "additionalProperties": false,
-        "required": ["side", "offset"],
+        "required": ["side"],
         "properties": {
           "side": {
-            "$ref": "#/$defs/side"
+            "$ref": "#/$defs/side",
+            "description": "The side of the node this end meets."
           },
           "offset": {
             "type": "number",
             "minimum": 0,
-            "maximum": 1
+            "maximum": 1,
+            "description": "Where on the side, 0 to 1 from its top (left and right sides) or its left (top and bottom sides). Omit it to let the engine place the end on the side."
           }
         }
       },
@@ -416,9 +395,6 @@
         "required": ["elementId"],
         "properties": {
           "elementId": {
-            "$ref": "#/$defs/id"
-          },
-          "portId": {
             "$ref": "#/$defs/id"
           },
           "anchor": {
@@ -433,14 +409,7 @@
             "enum": ["one", "many", "zero-or-one", "zero-or-many", "one-or-many"],
             "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end anchors at each time the diagram is drawn, and isn't stored, so it follows the column."
           }
-        },
-        "allOf": [
-          {
-            "not": {
-              "required": ["portId", "anchor"]
-            }
-          }
-        ]
+        }
       },
       "edgeEndpoints": {
         "type": "object",
@@ -974,12 +943,6 @@
               "layout": {
                 "$ref": "#/$defs/layout"
               },
-              "ports": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/port"
-                }
-              },
               "icon": {
                 "type": "string"
               },
@@ -1057,12 +1020,6 @@
               "layout": {
                 "$ref": "#/$defs/layout"
               },
-              "ports": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/$defs/port"
-                }
-              },
               "icon": {
                 "type": ["string", "null"],
                 "description": "The node's icon: a family:id key such as lucide:database or aws:lambda, or an image URL. null removes it."
@@ -1082,7 +1039,6 @@
               { "required": ["shape"] },
               { "required": ["label"] },
               { "required": ["layout"] },
-              { "required": ["ports"] },
               { "required": ["icon"] },
               { "required": ["textStyle"] },
               { "required": ["metadata"] },
