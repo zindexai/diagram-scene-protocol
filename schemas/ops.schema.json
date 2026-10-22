@@ -21,7 +21,7 @@
       },
       "ops": {
         "type": "array",
-        "description": "The operations, applied in order, each to the document the ones before it left. An edit applies whole or not at all: an operation that can't apply, or a result with an error the base revision didn't have, saves nothing (VALIDATION_FAILED). The element an operation changes must exist when it runs; what an operation only names (an edge's ends, children, a style, a relative layout's target, a constraint's elements) may be created by a later operation of the same edit.",
+        "description": "The operations, applied in order, each to the document the ones before it left. An edit applies whole or not at all: an operation that can't apply, or a result with an error the base revision didn't have, saves nothing (VALIDATION_FAILED). The element an operation changes must exist when it runs; what an operation only names (an edge's ends, children, a style, a relative layout's target, a constraint's elements) may be created by a later operation of the same edit, except the element after or before names, which must exist when the operation runs.",
         "items": {
           "$ref": "#/$defs/op"
         }
@@ -904,12 +904,21 @@
           {
             "type": "object",
             "required": ["op", "id", "nodeType"],
+            "not": { "required": ["after", "before"] },
             "properties": {
               "op": {
                 "const": "createNode"
               },
               "id": {
                 "$ref": "#/$defs/id"
+              },
+              "after": {
+                "$ref": "#/$defs/id",
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment), or below a fragment's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+              },
+              "before": {
+                "$ref": "#/$defs/id",
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -981,12 +990,21 @@
           {
             "type": "object",
             "required": ["op", "id"],
+            "not": { "required": ["after", "before"] },
             "properties": {
               "op": {
                 "const": "updateNode"
               },
               "id": {
                 "$ref": "#/$defs/id"
+              },
+              "after": {
+                "$ref": "#/$defs/id",
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and leaving any other), or below a fragment's last row. That element must exist when this op runs. Give after or before, not both."
+              },
+              "before": {
+                "$ref": "#/$defs/id",
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and leaving any other), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1042,7 +1060,9 @@
               { "required": ["icon"] },
               { "required": ["textStyle"] },
               { "required": ["metadata"] },
-              { "required": ["extensions"] }
+              { "required": ["extensions"] },
+              { "required": ["after"] },
+              { "required": ["before"] }
             ]
           }
         ]
@@ -1077,12 +1097,21 @@
           {
             "type": "object",
             "required": ["op", "id", "from", "to"],
+            "not": { "required": ["after", "before"] },
             "properties": {
               "op": {
                 "const": "createEdge"
               },
               "id": {
                 "$ref": "#/$defs/id"
+              },
+              "after": {
+                "$ref": "#/$defs/id",
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment), or below a fragment's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+              },
+              "before": {
+                "$ref": "#/$defs/id",
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1143,12 +1172,21 @@
           {
             "type": "object",
             "required": ["op", "id"],
+            "not": { "required": ["after", "before"] },
             "properties": {
               "op": {
                 "const": "updateEdge"
               },
               "id": {
                 "$ref": "#/$defs/id"
+              },
+              "after": {
+                "$ref": "#/$defs/id",
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and leaving any other), or below a fragment's last row. That element must exist when this op runs. Give after or before, not both."
+              },
+              "before": {
+                "$ref": "#/$defs/id",
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and leaving any other), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1211,7 +1249,9 @@
               { "required": ["waypoints"] },
               { "required": ["edgeType"] },
               { "required": ["metadata"] },
-              { "required": ["extensions"] }
+              { "required": ["extensions"] },
+              { "required": ["after"] },
+              { "required": ["before"] }
             ]
           }
         ]

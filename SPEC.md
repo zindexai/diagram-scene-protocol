@@ -224,9 +224,9 @@ An end has an `elementId` (required) and can have:
 - `column`, the name of a column of that entity (ER tables only).
 - `cardinality`: `one`, `many`, `zero-or-one`, `zero-or-many` or `one-or-many`.
 
-`elementId` MUST name an element in the document. An edge connects nodes, frames or groups. An end at a text, image or guide element is valid, and so is an edge from an element to itself; the reference engine warns about both.
+`elementId` MUST name an element in the document. An edge connects nodes, frames or groups. An end at a text, image or guide element is valid, and so is an edge from an element to itself; the reference engine warns about both, except a self-loop in a sequence or entity-relationship diagram (a self-message, a table's self-reference), which it draws as a loop on purpose.
 
-When an arrowhead is absent, it comes from `edgeType`: `workflow.messageFlow` has `openCircle` at the start and `openTriangle` at the end; `sequence.async` and `sequence.reply` have none at the start and `openTriangle` at the end; every other type has none at the start and `triangle` at the end. The reference engine stores the arrowheads it fills in.
+When an arrowhead is absent, it comes from `edgeType`: `workflow.messageFlow` has `openCircle` at the start and `openTriangle` at the end; `sequence.async` and `sequence.reply` have none at the start and `openTriangle` at the end; every other type has none at the start and `triangle` at the end. The reference engine stores only arrowheads that differ from these, and works the rest out from `edgeType` each time it draws the edge, so changing an edge's `edgeType` changes the arrowheads that weren't set. An arrowhead equal to its type's is treated as absent.
 
 The reference engine routes every edge itself. It draws `polyline` like `orthogonal` and keeps `waypoints` without drawing through them. An `anchor` places its end: with a `side` alone the end meets that side where the engine spreads ends on it, and with an `offset` it meets that place, kept 8 px from the side's corners. An anchored edge shares no trunk with other edges. The engine doesn't move nodes for an anchor. It ignores, with the warning `EDGE_ANCHOR_IGNORED`, an anchor on a sequence message, on a self-loop, or on an end that names a `column`.
 
@@ -279,7 +279,7 @@ A guide is a horizontal or vertical line across the canvas. Required fields: `id
 
 ### 5.9 The order of elements
 
-The order of `elements` matters in two places. In a sequence diagram, messages (edges) and notes appear from top to bottom in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array.
+The order of `elements` matters in two places. In a sequence diagram, lifelines and actors appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
 
 ## 6. Positions and sizes
 
@@ -444,7 +444,7 @@ A service can take `sceneId` from somewhere else, such as a URL path, and fill i
 
 ### 10.2 Applying an envelope
 
-An implementation applies the operations in order, each to the document that the operations before it left, and the edit applies whole or not at all. It MUST check each operation against the document it runs on, and reject the whole edit if any check fails. The element an operation changes MUST exist when the operation runs. An element or style an operation only names (an edge's ends, `children`, a style name, a relative layout's target, a constraint's elements) MUST exist when the operation runs or be created by a later operation of the same envelope, so the order of the operations doesn't matter for those.
+An implementation applies the operations in order, each to the document that the operations before it left, and the edit applies whole or not at all. It MUST check each operation against the document it runs on, and reject the whole edit if any check fails. The element an operation changes MUST exist when the operation runs. An element or style an operation only names (an edge's ends, `children`, a style name, a relative layout's target, a constraint's elements) MUST exist when the operation runs or be created by a later operation of the same envelope, so the order of the operations doesn't matter for those. The element `after` or `before` names is the exception: where it is decides where the operation puts its own, so it MUST exist when the operation runs.
 
 | Rule | Error code |
 |---|---|
@@ -455,6 +455,8 @@ An implementation applies the operations in order, each to the document that the
 | The `children` of `groupElements` and `createFrame` name elements that exist or that the envelope creates. | `CHILD_ELEMENT_NOT_FOUND` |
 | A style name an operation gives is in `styles`, or an `updateScene` of the envelope adds it. | `STYLE_NOT_FOUND` |
 | A relative layout an operation gives names an element that exists or that the envelope creates. | `RELATIVE_TARGET_NOT_FOUND` |
+| The element `after` or `before` names exists when the operation runs. | `ORDER_TARGET_NOT_FOUND` |
+| `after` and `before` place a sequence lifeline, actor, message or note next to another element than itself: a lifeline or actor next to a lifeline or actor, a message or note next to a message, a note or a `fragment` frame. (Giving both is a schema error.) | `ORDER_NOT_SUPPORTED` |
 | The elements an `addConstraint` constraint names exist or the envelope creates them, and its `id` isn't in use. | `CONSTRAINT_TARGET_NOT_FOUND`, `CONSTRAINT_ID_DUPLICATE` |
 | `setText` names a node, an edge or a text element. | `TEXT_OPERATION_KIND_INVALID` |
 | `resizeElement` names a node, a frame, an image or a text element. | `RESIZE_NOT_SUPPORTED` |
@@ -469,19 +471,25 @@ The document an edit produces is a document like any other, and the rules of sec
 
 ### 10.3 Creating elements
 
-`createNode` adds a node. Required: `id` and `nodeType`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `shape`, `label`, `layout`, `icon`, `textStyle`, the shorthand `x`, `y`, `width` and `height`, and `metadata` and `extensions`, which become the node's. A node created without a `layout` is unplaced, and the next layout places it (6.4).
+`createNode` adds a node. Required: `id` and `nodeType`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `shape`, `label`, `layout`, `icon`, `textStyle`, the shorthand `x`, `y`, `width` and `height`, `after` or `before`, and `metadata` and `extensions`, which become the node's. A node created without a `layout` is unplaced, and the next layout places it (6.4).
 
-`createEdge` adds an edge. Required: `id`, `from` and `to`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `label`, `edgeType`, `endpoints`, `router`, `waypoints`, `metadata` and `extensions`. Missing arrowheads come from `edgeType`, as in a document (5.3).
+`createEdge` adds an edge. Required: `id`, `from` and `to`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `label`, `edgeType`, `endpoints`, `router`, `waypoints`, `after` or `before`, `metadata` and `extensions`. Missing arrowheads come from `edgeType`, as in a document (5.3).
 
 `createFrame` adds a frame. Required: `id` and `children` (at least one). Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `layout`, `containerType`, `laneDirection`, `metadata` and `extensions`. Without a `layout`, the frame fits around its members (6.6).
 
 `groupElements` adds a group. Required: `id` and `children` (at least one). Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `layout` (`padding`, `titleBar`, `autoResize`), and `metadata` and `extensions`, which become the group's.
 
-Each of these adds its element at the end of `elements`. When `zIndex` is absent, the reference engine assigns the next value for the element's kind (5.1).
+Each of these adds its element at the end of `elements`, unless `createNode` or `createEdge` gives `after` or `before`, an element ID: then it goes right after or right before that element, which puts it in its place in a sequence diagram's order (5.9).
+
+- A lifeline or actor goes next to a lifeline or actor.
+- A message or note goes next to a message or note, and joins the `children` of the `fragment` frame that holds that one, leaving any other fragment.
+- A message or note given a `fragment` frame goes right after the last message or note the fragment holds, at any depth, or right before the first, outside it and in the fragment that holds the fragment, if any.
+
+When `zIndex` is absent, the reference engine assigns the next value for the element's kind (5.1), wherever the element goes.
 
 ### 10.4 Changing elements
 
-`updateNode` changes a node, and `updateEdge` an edge. Required: `id`, and at least one other field. They take the fields their create operation takes, except `id`, and `updateNode` doesn't take the shorthand. Each field given replaces the element's field whole: `layout`, `style`, `from`, `to`, `endpoints`, `metadata` and `extensions` aren't merged. To add an ER column, send the whole `extensions` object with the new `columns` array. On `updateNode`, `icon: null` removes the icon, and `textStyle` is merged into the node's field by field, as with `setText`.
+`updateNode` changes a node, and `updateEdge` an edge. Required: `id`, and at least one other field. They take the fields their create operation takes, except `id`, and `updateNode` doesn't take the shorthand. Each field given replaces the element's field whole: `layout`, `style`, `from`, `to`, `endpoints`, `metadata` and `extensions` aren't merged. To add an ER column, send the whole `extensions` object with the new `columns` array. On `updateNode`, `icon: null` removes the icon, and `textStyle` is merged into the node's field by field, as with `setText`. `after` or `before` moves the element as 10.3 places a new one; when the element already sits there, nothing changes, its fragment included.
 
 `setText` sets the text of a node (its `label`), an edge (its `label`) or a text element (its `text`). Required: `id` and `text`. Its optional `textStyle` is merged into the element's, field by field; edges have no `textStyle` and ignore it.
 
@@ -552,7 +560,7 @@ The reference engine stores documents with their defaults written in, and return
 - `shape` is set on every node (5.2), `textStyle` on every node and text element (5.2, 5.6), and `zIndex` on every element (5.1).
 - `locked` (false), `visible` (true), `metadata` (`{}`) and `extensions` (`{}`) are set on every element.
 - Every node has an absolute or relative `layout`. A node sent without one has `{ "mode": "absolute", "x": 0, "y": 0, "width": 150, "height": 60 }` until it is placed, and then its box (6.4). The shorthand becomes a `layout`, absolute layouts get `rotation` (0) and `autoSize` (`none`), and relative layouts get `place.gap` (0).
-- Edges get `edgeType` (`default`), both arrowheads (5.3) and `waypoints` (`[]`).
+- Edges get `edgeType` (`default`) and `waypoints` (`[]`). An arrowhead its `edgeType` gives isn't stored, whether it was sent or not (5.3).
 - Frames get `containerType` (`generic`), and groups get `layout` with `padding` (0), `titleBar` (0) and `autoResize` (false). A frame sent without a `layout` stays without one.
 - `scene` gets `units` (`px`), a `canvas` with `width`, `height`, `grid` (0) and `snap` (false), `viewport` (`originX` 0, `originY` 0, `zoom` 1), `defaults` and `metadata.tags`.
 - The document gets `styles` (`{}`), `assets` (`{}`), `constraints` (`[]`) and `extensions` (`{}`).
