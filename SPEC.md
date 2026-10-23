@@ -263,7 +263,7 @@ A frame is a container drawn with a title. Required fields: `id`, `kind` and `ch
 
 Each ID in `children` MUST name an element in the document. An element MUST NOT be in more than one frame. To nest frames, list the inner frame in the outer frame's `children`. A container MUST NOT contain itself, directly or through other containers, and a guide MUST NOT be a child of a frame.
 
-In the reference engine, lanes stack top to bottom when `laneDirection` is `vertical` or absent, and left to right when it is `horizontal`. A `fragment` frame is a sequence diagram's combined fragment: its `extensions.operator` (such as `alt`, `loop` or `opt`) is drawn in its corner, and `ref` is drawn when it is absent.
+In the reference engine, lanes stack top to bottom when `laneDirection` is `vertical` or absent, and left to right when it is `horizontal`. A `fragment` frame is a sequence diagram's combined fragment: its `extensions.operator` (such as `alt`, `loop` or `opt`) is drawn in its corner, and `ref` is drawn when it is absent. Its `children` are the messages and notes it holds, and the fragments nested in it. In a sequence diagram the reference engine lays a fragment out with its rows, from its first message or note to its last, and ignores its `layout`. Each operand after the first starts at a message or note in the fragment, after its first row (`extensions.operands`, 8), and is drawn as a dashed line above that row with its guard under it, for every operator.
 
 ### 5.6 Text
 
@@ -369,7 +369,8 @@ The reference engine reads these keys:
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
 | `sequence.note` | `anchor` | The lifeline or actor ID the note sits over, or an array of two or more IDs it spans. |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |
-| `fragment` frame | `operands` | An `alt` fragment's sections: an array of `{ "y", "guard" }`. Each draws a dashed line across the fragment at `y`, in drawing coordinates, with `[guard]` under it. |
+| `fragment` frame | `operands` | The operands after the first: an array of `{ "startsAt", "guard" }`, where `startsAt` is the ID of the message or note the operand starts at and `guard` is optional. Each draws a dashed line across the fragment above that row, with `[guard]` under it. The frame's `title` is the first operand's guard. |
+| `sequence.activation` | `startsAt`, `endsAt` | The IDs of the messages a bar runs between: it is drawn on the lifeline `startsAt` arrives at, from that message's arrow to `endsAt`'s, or one row tall without `endsAt`. |
 | Document | `layoutHints.primaryDirection` | `TB`, `BT`, `LR` or `RL`: the direction of an org chart's tree (`TB` when absent), and of the layered layout, where it wins over `layoutStrategy.direction` (3.4). |
 
 `metadata` holds provenance and annotations: who made an element, from what. Implementations keep it and don't act on it.
@@ -404,6 +405,8 @@ A valid document MUST also follow these rules, which a schema can't express. The
 | Every element a constraint names exists. | `CONSTRAINT_TARGET_NOT_FOUND` |
 | An `order` constraint names two different elements. | `ORDER_CONSTRAINT_SELF_REFERENCE` |
 | An image's `assetRef` is in `assets`. | `ASSET_NOT_FOUND` |
+| In a sequence diagram, a fragment operand's `startsAt` names a message or note in the fragment, after its first row. | `FAMILY_SEQ_OPERAND_NOT_FOUND` |
+| In a sequence diagram, an activation's `startsAt` and `endsAt` name messages. | `FAMILY_SEQ_ACTIVATION_ANCHOR_NOT_FOUND` |
 
 The reference engine also limits size, with the error `CONTENT_LIMIT_EXCEEDED`: 1,000 elements, edges included, containers nested 10 deep, 10,000 characters in one label or text, and a canvas of 20,000 by 20,000 pixels. Another implementation can set other limits.
 
@@ -484,6 +487,7 @@ Each of these adds its element at the end of `elements`, unless `createNode` or 
 - A lifeline or actor goes next to a lifeline or actor.
 - A message or note goes next to a message or note, and joins the `children` of the `fragment` frame that holds that one, leaving any other fragment.
 - A message or note given a `fragment` frame goes right after the last message or note the fragment holds, at any depth, or right before the first, outside it and in the fragment that holds the fragment, if any.
+- A message or note joins the operand of the row it goes next to, so one placed right before an operand's first row becomes the row that operand starts at (`extensions.operands[].startsAt`, 8). An operand whose first row moves away starts at its next row, and one left with no rows is removed (`FRAGMENT_OPERAND_REMOVED`).
 
 When `zIndex` is absent, the reference engine assigns the next value for the element's kind (5.1), wherever the element goes.
 
@@ -501,7 +505,7 @@ When `zIndex` is absent, the reference engine assigns the next value for the ele
 - a constraint that names a removed element as its `containerId`, `source` or `target` is removed, and so is one left with fewer elements than it needs (section 7); any other constraint loses the removed elements from its `elements`;
 - an element whose relative layout names a removed element gets an absolute layout at the box it was last drawn with, so it stays where it is. In the reference engine, one not drawn yet gets an absolute layout at `x` 0, `y` 0, so the next layout places it.
 
-The members of a deleted group or frame stay. The reference engine reports each constraint it removes (`CONSTRAINT_REMOVED`) and each layout it makes absolute (`RELATIVE_LAYOUT_FIXED`) as `info` diagnostics with the edit's result.
+The members of a deleted group or frame stay; a deleted `fragment` frame's members stay in the fragment that holds it. In a sequence diagram, an operand that starts at a removed message or note starts at the next row of its operand, and an activation's `startsAt` or `endsAt` that names a removed message moves to the next message, up to its last, that arrives at its lifeline, or to the message before, to or from its lifeline. An operand left with no rows is removed; when it is the first, the next one's guard becomes the frame's `title`. An activation left with no message to start at is removed too. The reference engine reports each constraint it removes (`CONSTRAINT_REMOVED`), each layout it makes absolute (`RELATIVE_LAYOUT_FIXED`), each operand it removes (`FRAGMENT_OPERAND_REMOVED`) and each activation it removes (`ACTIVATION_REMOVED`) as `info` diagnostics with the edit's result.
 
 `ungroupElements` removes a group and keeps its members. Required: `id`, which MUST name a group.
 

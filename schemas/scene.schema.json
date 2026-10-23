@@ -367,6 +367,25 @@
                 "items": {
                   "$ref": "#/$defs/erColumn"
                 }
+              },
+              "operator": {
+                "type": "string",
+                "description": "A sequence fragment's operator (a frame whose containerType is fragment): alt, opt, loop, par, break, critical, neg or ref, drawn in its tab as written."
+              },
+              "operands": {
+                "type": "array",
+                "description": "A sequence fragment's operands after its first, top to bottom. Each starts at one of the fragment's rows (startsAt, a message or note id, after its first row) and may carry a guard; a dashed divider is drawn above that row, for every operator, with the guard under it in brackets the renderer adds. The first operand is the fragment's own, with the frame's title, drawn as written, as its guard. An operand with a y is refused; a version stored with one still draws, each such operand at the first message or note drawn at or past its y.",
+                "items": {
+                  "$ref": "#/$defs/fragmentOperand"
+                }
+              },
+              "startsAt": {
+                "$ref": "#/$defs/id",
+                "description": "A sequence.activation's first message: the bar starts at that message's arrow, on the lifeline it arrives at."
+              },
+              "endsAt": {
+                "$ref": "#/$defs/id",
+                "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
               }
             }
           },
@@ -493,6 +512,21 @@
       "side": {
         "type": "string",
         "enum": ["top", "right", "bottom", "left"]
+      },
+      "fragmentOperand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["startsAt"],
+        "properties": {
+          "startsAt": {
+            "$ref": "#/$defs/id",
+            "description": "The row the operand starts at: a message or note inside the fragment, after its first row."
+          },
+          "guard": {
+            "type": "string",
+            "description": "The operand's guard, drawn in brackets after its divider."
+          }
+        }
       },
       "erColumn": {
         "type": "object",
@@ -862,7 +896,8 @@
                 }
               },
               "layout": {
-                "$ref": "#/$defs/layout"
+                "$ref": "#/$defs/layout",
+                "description": "A frame's box. A sequence fragment's is ignored: a fragment is laid out with its rows."
               },
               "containerType": {
                 "type": "string",
