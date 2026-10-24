@@ -32,7 +32,7 @@ It doesn't define how to place nodes, route edges, place labels or draw a diagra
 
 The words MUST and MUST NOT are used as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) and [RFC 8174](https://www.rfc-editor.org/rfc/rfc8174) when they appear in capitals. This spec uses them only for rules that the schemas enforce or that the reference engine enforces. Text without them describes what fields mean, or what the reference engine does.
 
-The reference engine is Zindex's implementation of DSP, and the reference service is the hosted API around it (section 14). Where this spec describes their behaviour, the sentence names them. Another implementation can behave differently in those places and still read and write the same documents.
+The reference engine is Zindex's implementation of DSP, and the reference service is the hosted API around it (section 14). Where this spec describes their behavior, the sentence names them. Another implementation can behave differently in those places and still read and write the same documents.
 
 Paths such as `/elements/0/layout` are JSON Pointers into a document. "Absent" means the property isn't in the object.
 
@@ -47,7 +47,7 @@ Paths such as `/elements/0/layout` are JSON Pointers into a document. "Absent" m
 | `elements` | Yes | The diagram's elements, in order (section 5). |
 | `diagramFamily` | No | The kind of diagram (3.3). |
 | `layoutStrategy` | No | How to place nodes that have no position (3.4). |
-| `palette` | No | Colours for elements without their own (3.5). |
+| `palette` | No | Colors for elements without their own (3.5). |
 | `styles` | No | Named styles (3.5). |
 | `assets` | No | Images that `image` elements use (3.6). |
 | `constraints` | No | Spatial rules between elements (section 7). |
@@ -65,7 +65,7 @@ Most objects in the schemas reject properties they don't list. `metadata` and `e
 | `description` | A longer description. |
 | `brief` | Up to 1,000 characters for the next editor: what the diagram shows, conventions to keep, decisions made. It belongs to the document, so each revision has its own. |
 | `units` | `"px"`, the only unit. |
-| `canvas` | `width`, `height`, `background` (a CSS colour), `grid` and `snap`. |
+| `canvas` | `width`, `height`, `background` (a CSS color), `grid` and `snap`. |
 | `viewport` | `originX`, `originY` and `zoom` (above 0). |
 | `defaults` | `fontFamily`, `fontSize`, `strokeWidth` and `router`. |
 | `metadata` | `createdBy`, `createdAt` and `updatedAt` (RFC 3339 date-times), `tags` and `provenance` (any object). |
@@ -107,7 +107,7 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 
 | Property | Value |
 |---|---|
-| `fill`, `stroke`, `textColor`, `labelBackground`, `accentColor` | CSS colours |
+| `fill`, `stroke`, `textColor`, `labelBackground`, `accentColor` | CSS colors |
 | `strokeWidth`, `cornerRadius`, `fontSize` | Numbers, 0 or more |
 | `fontFamily` | A font family name |
 | `fontWeight` | 100 to 900 in steps of 100, or `normal`, `bold`, `lighter`, `bolder` |
@@ -116,11 +116,11 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 | `color` | Another name for `textColor` |
 | `forceLabel` | Edges only (5.3) |
 
-`accentColor` colours the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
+`accentColor` colors the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
 
 `styles` maps names (the characters an element ID allows) to style objects. A style name that an element uses MUST be in `styles`.
 
-`palette` sets colours for elements that don't set their own: `background`, `foreground` (the text of nodes and frames), `nodeFill`, `nodeStroke`, `edgeStroke`, `accentPrimary` (the `accentColor` of nodes that set none), `accentSecondary` (no effect: nothing draws a second accent yet), `mutedForeground` (edge label text), `containerFill` and `containerStroke` (frames and groups). In the reference engine an element's style wins over the palette, and the palette wins over the drawing theme. The schema accepts other keys in `palette`, and implementations ignore them.
+`palette` sets colors for elements that don't set their own: `background`, `foreground` (the text of nodes and frames), `nodeFill`, `nodeStroke`, `edgeStroke`, `accentPrimary` (the `accentColor` of nodes that set none), `accentSecondary` (no effect: nothing draws a second accent yet), `mutedForeground` (edge label text), `containerFill` and `containerStroke` (frames and groups). In the reference engine an element's style wins over the palette, and the palette wins over the drawing theme. The schema accepts other keys in `palette`, and implementations ignore them.
 
 ### 3.6 Assets
 
@@ -335,13 +335,13 @@ The canvas size is a minimum (3.2).
 
 | Type | Fields | Meaning in the reference engine |
 |---|---|---|
-| `align` | `axis`, `elements` | Moves the elements so their centres line up on `axis` (`x` or `y`), at the average centre. |
+| `align` | `axis`, `elements` | Moves the elements so their centers line up on `axis` (`x` or `y`), at the average center. |
 | `distribute` | `axis`, `elements`, `gap` | Sorts the elements by position along `axis` and puts each `gap` pixels after the one before, starting from the first. |
 | `stack` | `axis`, `elements`, `gap` | Puts the elements one after another along `axis`, in the order listed, `gap` pixels apart, starting from the first. |
 | `grid` | `elements`, `columns`, `columnGap`, `rowGap` | Lays the elements out left to right and top to bottom, `columns` per row (2 when absent), from the first element's position. |
 | `sameSize` | `elements`, `dimension` | Gives every element the first element's `width`, `height` or `both` (the default). |
 | `contain` | `containerId`, `elements`, `padding` | Sets the container's box to the elements' bounding box plus `padding`. |
-| `centerIn` | `containerId`, `elements` | Centres each element in the container, on both axes. |
+| `centerIn` | `containerId`, `elements` | Centers each element in the container, on both axes. |
 | `minGap` | `axis`, `elements`, `gap` | Sorts the elements along `axis` and pushes each one at least `gap` pixels past the one before. |
 | `noOverlap` | `elements` | Sorts the elements by `x` and pushes each one that overlaps the one before to the right. |
 | `order` | `source`, `target`, `relation` | Places `source` relative to `target` when the engine places nodes (below). |
@@ -513,7 +513,7 @@ The members of a deleted group or frame stay; a deleted `fragment` frame's membe
 
 `moveElement` moves an element by `delta` (`dx`, `dy`). Required: `id` and `delta`. It works on elements with an absolute layout, on frames and groups, and on guides, which move along the axis they mark. Moving a frame or a group moves its members by the same delta, and the members of frames and groups inside it. A member that is unplaced (6.4) stays unplaced, and a frame without a `layout` fits around its members where they are now. An edge MUST NOT be moved, nor an element with a relative layout. The reference engine also refuses a sequence diagram's nodes and frames, which it lays out from the messages (`MOVE_NOT_SUPPORTED`).
 
-`resizeElement` gives a node, frame, image or text element a new `size` (`width`, `height`). Required: `id` and `size`. Optional: `anchor`, a side (`top`, `right`, `bottom` or `left`) that stays put: the element grows or shrinks away from that side and stays centred along it. Without `anchor`, the top-left corner stays put. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing (6.5); a smaller one pulls nothing back. Resizing a frame without a `layout` gives it one: the box it was last drawn with, at the new size. Resizing an element with a relative layout sets its `preferredSize` and keeps its placement, and takes no `anchor`.
+`resizeElement` gives a node, frame, image or text element a new `size` (`width`, `height`). Required: `id` and `size`. Optional: `anchor`, a side (`top`, `right`, `bottom` or `left`) that stays put: the element grows or shrinks away from that side and stays centered along it. Without `anchor`, the top-left corner stays put. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing (6.5); a smaller one pulls nothing back. Resizing a frame without a `layout` gives it one: the box it was last drawn with, at the new size. Resizing an element with a relative layout sets its `preferredSize` and keeps its placement, and takes no `anchor`.
 
 The reference engine refuses a resize it would undo. An unplaced node (6.4) gets the size its content needs when it is placed, and a frame without a `layout` created in the same edit hasn't been drawn, so resize either in a later edit (`RESIZE_NOT_PLACED`). It sizes a sequence diagram's nodes and frames from the messages (`RESIZE_NOT_SUPPORTED`).
 
@@ -521,7 +521,7 @@ The reference engine refuses a resize it would undo. An unplaced node (6.4) gets
 
 `autoLayout` has the implementation place nodes again, and stores where it puts them. Optional: `elements`, a list of node IDs.
 
-- With `elements`, the reference engine unplaces the listed nodes, by setting their positions to `x` 0, `y` 0 and keeping their sizes. The next layout places them next to their neighbours, around the other nodes, which stay where they are.
+- With `elements`, the reference engine unplaces the listed nodes, by setting their positions to `x` 0, `y` 0 and keeping their sizes. The next layout places them next to their neighbors, around the other nodes, which stay where they are.
 - Without `elements`, in the diagrams it lays out with its layered layout (3.4), the reference engine first drops the `layout` of every frame except pools, lanes and fragments, so that each fits around its members and is laid out with them. Then it unplaces every node except the members of frames that still have their own `layout`, at any depth, which keep their positions: pools, lanes and fragments, and in org charts and network diagrams, whose layouts place nodes without regard to frames, every frame. When no node keeps a position, the result is a fresh layout, and the canvas size is set to fit.
 
 `autoLayout` doesn't move nodes with a relative layout, and does nothing in a sequence diagram. When every node lands where it already was, the edit changes nothing (12.4).
@@ -541,7 +541,7 @@ The reference engine refuses a resize it would undo. An unplaced node (6.4) gets
 | `title` | Replaces `scene.title`. |
 | `brief` | Replaces `scene.brief` (up to 1,000 characters); `null` removes it. |
 | `canvas` | Merged into `scene.canvas`: `width`, `height` and `background`. |
-| `palette` | Merged into `palette`, colour by colour; `null` removes the palette. |
+| `palette` | Merged into `palette`, color by color; `null` removes the palette. |
 | `styles` | Merged into `styles`: each named style given replaces the one with that name. |
 | `layoutStrategy` | Replaces `layoutStrategy`; `null` removes it. |
 | `diagramFamily` | Replaces `diagramFamily`; `null` removes it. |

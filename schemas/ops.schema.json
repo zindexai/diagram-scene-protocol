@@ -823,7 +823,7 @@
               },
               "elements": {
                 "$ref": "#/$defs/elementIdList",
-                "description": "Each element is centred in the container on both axes."
+                "description": "Each element is centered in the container on both axes."
               }
             }
           }
@@ -1485,7 +1485,7 @@
               },
               "anchor": {
                 "$ref": "#/$defs/side",
-                "description": "The side that stays put: the element grows or shrinks away from it and stays centred along it. Without it, the top-left corner stays put. Leave it out for an element placed relative to another, whose placement sets where it is. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing; a smaller one pulls nothing back."
+                "description": "The side that stays put: the element grows or shrinks away from it and stays centered along it. Without it, the top-left corner stays put. Leave it out for an element placed relative to another, whose placement sets where it is. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing; a smaller one pulls nothing back."
               }
             }
           }
@@ -1608,7 +1608,7 @@
               },
               "elements": {
                 "$ref": "#/$defs/elementIdList",
-                "description": "Node IDs to place again, next to their neighbours and clear of the other nodes, which stay where they are. Leave it out to lay out every node, as on a new diagram, and size the canvas to fit: in architecture, workflow, entityRelationship and uiflow diagrams and diagrams without a family, every frame but a pool, lane or fragment then drops its own layout and is laid out with its members, and the members of a frame that keeps its layout keep their positions. Name them here to place them again inside their frame."
+                "description": "Node IDs to place again, next to their neighbors and clear of the other nodes, which stay where they are. Leave it out to lay out every node, as on a new diagram, and size the canvas to fit: in architecture, workflow, entityRelationship and uiflow diagrams and diagrams without a family, every frame but a pool, lane or fragment then drops its own layout and is laid out with its members, and the members of a frame that keeps its layout keep their positions. Name them here to place them again inside their frame."
               }
             }
           }

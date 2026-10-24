@@ -39,7 +39,7 @@
       },
       "extensions": {
         "type": "object",
-        "description": "Reserved extension point for protocol additions. Recognised keys include `showLifelineFeet` (sequence diagrams only) and `autoGroup` (architecture diagrams only).",
+        "description": "Reserved extension point for protocol additions. Recognized keys include `showLifelineFeet` (sequence diagrams only) and `autoGroup` (architecture diagrams only).",
         "additionalProperties": true,
         "default": {},
         "properties": {
@@ -51,14 +51,14 @@
           "autoGroup": {
             "type": "string",
             "enum": ["byNodeType"],
-            "description": "Architecture-family only. When set, the engine synthesises subtle background bands grouping nodes by their `nodeType` (e.g. one band for all `service` nodes, one for `database` nodes, one for `externalSystem` nodes). Each band is labelled with the pluralised type name (\"Services\", \"Databases\", \"External Systems\"). Skipped when the scene already authors frames containing the candidate nodes (no double-wrap), when all nodes share a single `nodeType` (trivial), or when the nodes of a type are scattered (a node of another type sits between two of them in a column). Opt-in only; omit the field to render with no banding (existing default)."
+            "description": "Architecture-family only. When set, the engine synthesizes subtle background bands grouping nodes by their `nodeType` (e.g. one band for all `service` nodes, one for `database` nodes, one for `externalSystem` nodes). Each band is labeled with the pluralized type name (\"Services\", \"Databases\", \"External Systems\"). Skipped when the scene already authors frames containing the candidate nodes (no double-wrap), when all nodes share a single `nodeType` (trivial), or when the nodes of a type are scattered (a node of another type sits between two of them in a column). Opt-in only; omit the field to render with no banding (existing default)."
           }
         }
       },
       "diagramFamily": {
         "type": "string",
         "enum": ["architecture", "workflow", "entityRelationship", "sequence", "network", "orgchart", "uiflow"],
-        "description": "Diagram family declaration. Technically optional in the schema but effectively load-bearing: gates family-specific validation, layout, and rendering behaviour the engine and downstream tooling rely on (sequence-family fan-in exemption, ER auto-promote-fk-labels, workflow BPMN conventions, family-namespaced node types). Without it the diagram is drawn as a generic flowchart, and nothing warns you. Always declare on every scene."
+        "description": "Diagram family declaration. Technically optional in the schema but effectively load-bearing: gates family-specific validation, layout, and rendering behavior the engine and downstream tooling rely on (sequence-family fan-in exemption, ER auto-promote-fk-labels, workflow BPMN conventions, family-namespaced node types). Without it the diagram is drawn as a generic flowchart, and nothing warns you. Always declare on every scene."
       },
       "layoutStrategy": {
         "type": "object",
@@ -700,7 +700,7 @@
               },
               "layout": {
                 "$ref": "#/$defs/layout",
-                "description": "Position and size. Leave it out and the engine places the node next to its neighbours, around the nodes that have a layout, without moving them, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
+                "description": "Position and size. Leave it out and the engine places the node next to its neighbors, around the nodes that have a layout, without moving them, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
               },
               "icon": {
                 "type": "string",
@@ -737,7 +737,7 @@
       },
       "endpoint": {
         "type": "object",
-        "description": "Edge endpoint. elementId may reference any element kind - typically a node, but frame and group IDs are also valid targets. An edge to a frame terminates at the frame's border, on the side facing the source, straight across where the source lines up and otherwise at the side's centre; useful for abstract group dependencies (e.g. an edge to a 'Regional Services' sidebar rather than to a specific service inside). On entityRelationship diagrams, set `column` to anchor the edge at a specific column row inside the entity (matching the dbdiagram.io / DBeaver convention where FK edges point at the FK column itself rather than the entity rectangle as a whole).",
+        "description": "Edge endpoint. elementId may reference any element kind - typically a node, but frame and group IDs are also valid targets. An edge to a frame terminates at the frame's border, on the side facing the source, straight across where the source lines up and otherwise at the side's center; useful for abstract group dependencies (e.g. an edge to a 'Regional Services' sidebar rather than to a specific service inside). On entityRelationship diagrams, set `column` to anchor the edge at a specific column row inside the entity (matching the dbdiagram.io / DBeaver convention where FK edges point at the FK column itself rather than the entity rectangle as a whole).",
         "additionalProperties": false,
         "required": ["elementId"],
         "properties": {
@@ -1428,7 +1428,7 @@
               },
               "elements": {
                 "$ref": "#/$defs/elementIdList",
-                "description": "Each element is centred in the container on both axes."
+                "description": "Each element is centered in the container on both axes."
               }
             }
           }
@@ -1509,7 +1509,7 @@
           },
           "isFanInFeeder": {
             "type": "boolean",
-            "description": "True when this edge is a feeder in a fan-in trunk merge: one of N edges sharing a target+label that have been geometrically merged so they all meet at a common fan-in point near the target. The terminal point sits at the fan-in T (24 px outward from the target's face centre) instead of on the face itself. Set on BOTH collapsing and bundle-only feeders."
+            "description": "True when this edge is a feeder in a fan-in trunk merge: one of N edges sharing a target+label that have been geometrically merged so they all meet at a common fan-in point near the target. The terminal point sits at the fan-in T (24 px outward from the target's face center) instead of on the face itself. Set on BOTH collapsing and bundle-only feeders."
           },
           "keepFeederArrowhead": {
             "type": "boolean",

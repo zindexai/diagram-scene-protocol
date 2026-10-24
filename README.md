@@ -86,7 +86,7 @@ Each tag in this repository, such as `v6.0.0`, names the Zindex release that fir
 
 ## Zindex and other implementations
 
-Zindex's hosted engine is the reference implementation of DSP. It validates documents, lays them out, draws them, applies edits and keeps every revision. SPEC.md says where its behaviour goes beyond the spec, and where it doesn't yet do what the spec says. The engine and the hosted service are closed source; their documentation is at <https://zindex.ai/docs/>.
+Zindex's hosted engine is the reference implementation of DSP. It validates documents, lays them out, draws them, applies edits and keeps every revision. SPEC.md says where its behavior goes beyond the spec, and where it doesn't yet do what the spec says. The engine and the hosted service are closed source; their documentation is at <https://zindex.ai/docs/>.
 
 Other implementations are welcome: readers, writers, validators, converters or whole engines. They don't need permission from Zindex.
 
