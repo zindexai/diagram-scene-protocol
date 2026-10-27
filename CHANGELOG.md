@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.8.0
+
+Added: the operations `createText` and `createImage`, which add a text element and an image element to a saved document, and `assets` on `updateScene`, merged entry by entry, `null` removing one (10.3, 10.8).
+
+Changed: the reference engine draws a node's label at its `textStyle.align` and `verticalAlign` whether or not the label wraps, and a text element's text at its `verticalAlign`, as 5.2 and 5.6 describe. It drew a label that didn't wrap centered, and a text element's line in the middle of its box, whatever they said.
+
 ## v8.5.0
 
 Changed: the reference engine draws a `straight` edge as the line between its two nodes' centers, ending where it crosses each node's outline, and a `curved` edge as one quadratic Bezier between them, ending on each outline (5.3). No input field, value or rule changed.

@@ -358,7 +358,7 @@ An `order` constraint's `relation` says where `source` goes relative to `target`
 
 ## 8. Extensions and metadata
 
-`extensions` holds data the schemas don't define. The document, each element and each operation can carry an `extensions` object, and the operations envelope has one too. The reference engine keeps every key of a document's and its elements' `extensions`, including keys it doesn't know. An operation's `extensions` become the element's on `createNode`, `createEdge`, `createFrame`, `groupElements`, `updateNode` and `updateEdge` (10.3, 10.4), and are ignored on the others.
+`extensions` holds data the schemas don't define. The document, each element and each operation can carry an `extensions` object, and the operations envelope has one too. The reference engine keeps every key of a document's and its elements' `extensions`, including keys it doesn't know. An operation's `extensions` become the element's on `createNode`, `createEdge`, `createFrame`, `createText`, `createImage`, `groupElements`, `updateNode` and `updateEdge` (10.3, 10.4), and are ignored on the others.
 
 The reference engine reads these keys:
 
@@ -480,6 +480,10 @@ The document an edit produces is a document like any other, and the rules of sec
 
 `createFrame` adds a frame. Required: `id` and `children` (at least one). Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `layout`, `containerType`, `laneDirection`, `metadata` and `extensions`. Without a `layout`, the frame fits around its members (6.6).
 
+`createText` adds a text element (5.6). Required: `id`, `text` and `layout`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `textStyle`, and `metadata` and `extensions`, which become the element's.
+
+`createImage` adds an image element (5.7). Required: `id`, `assetRef` and `layout`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `fit`, and `metadata` and `extensions`, which become the element's. Its `assetRef` names an entry of `assets`, which `updateScene` adds (10.8); the document's rules apply after the edit, so an image whose asset is missing is refused.
+
 `groupElements` adds a group. Required: `id` and `children` (at least one). Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `layout` (`padding`, `titleBar`, `autoResize`), and `metadata` and `extensions`, which become the group's.
 
 Each of these adds its element at the end of `elements`, unless `createNode` or `createEdge` gives `after` or `before`, an element ID: then it goes right after or right before that element, which puts it in its place in a sequence diagram's order (5.9).
@@ -543,6 +547,7 @@ The reference engine refuses a resize it would undo. An unplaced node (6.4) gets
 | `canvas` | Merged into `scene.canvas`: `width`, `height` and `background`. |
 | `palette` | Merged into `palette`, color by color; `null` removes the palette. |
 | `styles` | Merged into `styles`: each named style given replaces the one with that name. |
+| `assets` | Merged into `assets`: each entry given replaces the one with that ID; `null` removes it. |
 | `layoutStrategy` | Replaces `layoutStrategy`; `null` removes it. |
 | `diagramFamily` | Replaces `diagramFamily`; `null` removes it. |
 

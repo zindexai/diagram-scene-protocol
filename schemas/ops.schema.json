@@ -194,6 +194,18 @@
         "type": "string",
         "enum": ["contain", "cover", "stretch", "original"]
       },
+      "assetEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "mimeType", "uri"],
+        "properties": {
+          "kind": { "type": "string", "enum": ["image"] },
+          "mimeType": { "type": "string", "minLength": 1 },
+          "uri": { "type": "string", "format": "uri" },
+          "integrity": { "type": "string" },
+          "metadata": { "$ref": "#/$defs/metadata" }
+        }
+      },
       "nodeType": {
         "type": "string",
         "enum": [
@@ -902,6 +914,12 @@
             "$ref": "#/$defs/createFrameOp"
           },
           {
+            "$ref": "#/$defs/createTextOp"
+          },
+          {
+            "$ref": "#/$defs/createImageOp"
+          },
+          {
             "$ref": "#/$defs/moveElementOp"
           },
           {
@@ -1430,6 +1448,67 @@
           }
         ]
       },
+      "createTextOp": {
+        "description": "Create a standalone text element: a caption, legend, title or note, placed by its layout. The scene's text element: change it afterwards with setText (words and textStyle), setStyle, moveElement and resizeElement.",
+        "unevaluatedProperties": false,
+        "allOf": [
+          { "$ref": "#/$defs/opBase" },
+          {
+            "type": "object",
+            "required": ["op", "id", "text", "layout"],
+            "properties": {
+              "op": { "const": "createText" },
+              "id": { "$ref": "#/$defs/id" },
+              "text": { "type": "string" },
+              "layout": { "$ref": "#/$defs/layout" },
+              "textStyle": {
+                "$ref": "#/$defs/textStyle",
+                "description": "How the text wraps and aligns in its box. Leave a field out for its default: wrap 'none', align 'left', verticalAlign 'top'."
+              },
+              "name": { "type": "string" },
+              "zIndex": { "type": "integer" },
+              "locked": { "type": "boolean" },
+              "visible": { "type": "boolean" },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              }
+            }
+          }
+        ]
+      },
+      "createImageOp": {
+        "description": "Create an image element showing an asset of the scene's assets, placed by its layout. Add the asset first with updateScene's assets, in the same edit or an earlier one.",
+        "unevaluatedProperties": false,
+        "allOf": [
+          { "$ref": "#/$defs/opBase" },
+          {
+            "type": "object",
+            "required": ["op", "id", "assetRef", "layout"],
+            "properties": {
+              "op": { "const": "createImage" },
+              "id": { "$ref": "#/$defs/id" },
+              "assetRef": { "$ref": "#/$defs/id", "description": "The ID of an asset in the scene's assets" },
+              "layout": { "$ref": "#/$defs/layout" },
+              "fit": { "$ref": "#/$defs/fitMode" },
+              "name": { "type": "string" },
+              "zIndex": { "type": "integer" },
+              "locked": { "type": "boolean" },
+              "visible": { "type": "boolean" },
+              "style": {
+                "oneOf": [
+                  { "type": "string", "description": "Reference to a named style in scene.styles" },
+                  { "$ref": "#/$defs/styleValue", "description": "Inline style object" }
+                ],
+                "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
+              }
+            }
+          }
+        ]
+      },
       "moveElementOp": {
         "description": "Move an element by delta. Works on elements with an absolute layout, on frames and groups, whose members (nested ones included) move by the same delta, and on guides. A member the engine hasn't placed stays unplaced, and a frame without a layout fits its members where they now are. Refused for an edge and for a sequence diagram's nodes and frames (MOVE_NOT_SUPPORTED), and for an element with a relative layout (MOVE_NOT_ALLOWED_FOR_RELATIVE_LAYOUT: change its layout with updateNode).",
         "unevaluatedProperties": false,
@@ -1685,6 +1764,16 @@
                   "height": { "type": "number", "minimum": 0 },
                   "background": { "type": "string" }
                 }
+              },
+              "assets": {
+                "type": "object",
+                "description": "Add or replace entries of the scene's assets registry by ID, for createImage to show; null removes an entry. Other entries are kept. The scene's rules still apply: an image's asset must exist, and a remote http or https URI is a warning (use a data: URI).",
+                "patternProperties": {
+                  "^[A-Za-z0-9._:-]+$": {
+                    "oneOf": [{ "$ref": "#/$defs/assetEntry" }, { "type": "null" }]
+                  }
+                },
+                "additionalProperties": false
               }
             }
           }
