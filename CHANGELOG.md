@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.5.0
+
+Changed: the reference engine draws a `straight` edge as the line between its two nodes' centers, ending where it crosses each node's outline, and a `curved` edge as one quadratic Bezier between them, ending on each outline (5.3). No input field, value or rule changed.
+
+Added: `control` on a computed edge path (`computedEdgePath`), a curved edge's control point: the curve is `M points[0] Q control points[1]` (13). A curved path without it, from an earlier engine, is drawn with its control point 30% of the chord off the chord's middle, left of travel.
+
+Added: the reference engine's warning `EDGE_CROSSES_NODE`, for a `straight` or `curved` edge that runs through a node it doesn't join (5.3).
+
 ## v8.2.2
 
 Changed: the spec and the schemas' descriptions use American English ("center", "neighbor", "behavior"), as the fields always have (`color`, `centerIn`). No field, value or rule changed.

@@ -700,7 +700,7 @@
               },
               "layout": {
                 "$ref": "#/$defs/layout",
-                "description": "Position and size. Leave it out and the engine places the node next to its neighbors, around the nodes that have a layout, without moving them, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
+                "description": "Position and size. Leave it out and the engine places the node next to its neighbors, around the nodes that have a layout, and sizes it to its content. After the first save the engine records the position here and keeps it, unless a node that grows needs the room and pushes this one, a node an edit adds needs more room for its edge label than the column it joins and this node is in that column or beyond it, an edit adds or deletes a frame round it and keeping it would leave frames overlapping or a frame holding a node that isn't its member, or an added order constraint finds its two nodes the wrong way round; the autoLayout op, and a new or removed layoutStrategy or diagramFamily, place nodes again. Sequence diagrams are laid out from their messages, so their nodes stay at x 0, y 0. A layout at exactly x 0, y 0 counts as not placed."
               },
               "icon": {
                 "type": "string",
@@ -715,7 +715,8 @@
       },
       "router": {
         "type": "string",
-        "enum": ["straight", "orthogonal", "curved", "polyline"]
+        "enum": ["straight", "orthogonal", "curved", "polyline"],
+        "description": "How the edge is drawn. `orthogonal`, the default when `router` is left off (and `polyline`, drawn the same), is right-angle segments the engine routes round other nodes where a route exists. `straight` is one line between the two nodes' centers, ending where it crosses each node's outline. `curved` is one bowed arc between the two nodes, ending on each outline; a lone curve bows to the side that clears other nodes where one does, and curves between one pair of nodes spread into a lens. Neither `straight` nor `curved` is routed round nodes: one that runs through a node gets the warning EDGE_CROSSES_NODE. Sequence messages ignore `router`."
       },
       "anchor": {
         "type": "object",
@@ -1501,11 +1502,15 @@
           "router": {
             "type": "string",
             "enum": ["polyline", "curved"],
-            "description": "How the renderer draws `points`. `\"curved\"` only for an edge whose own `router` is `curved`: the 2-point points list is drawn as a quadratic Bezier with a perpendicular-offset control point. Every other edge is drawn as a polyline; the engine never turns an orthogonal edge into a curve, and a long back-edge detour becomes an orthogonal U-hook below the diagram instead."
+            "description": "How the renderer draws `points`. `\"curved\"` only for an edge whose own `router` is `curved`: the 2-point points list is drawn as the quadratic Bezier `M points[0] Q control points[1]`. Every other edge is drawn as a polyline; the engine never turns an orthogonal edge into a curve, and a long back-edge detour becomes an orthogonal U-hook below the diagram instead."
+          },
+          "control": {
+            "$ref": "#/$defs/point",
+            "description": "A curved edge's quadratic Bezier control point. The engine picks the side and depth of the curve and puts its ends on the nodes' outlines; the curve is `M points[0] Q control points[1]`. A curved path without it, laid out by an earlier engine, is drawn with its control point 30% of the chord off the chord's middle, left of travel."
           },
           "cornerRadius": {
             "type": "number",
-            "description": "Engine-applied corner-rounding radius for the polyline path. Set today by the sequence resolver for self-message U-shapes."
+            "description": "Engine-applied corner-rounding radius for the polyline path: a sequence diagram's self-message and a curved self-loop are drawn as a U with rounded corners."
           },
           "isFanInFeeder": {
             "type": "boolean",

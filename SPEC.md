@@ -215,7 +215,7 @@ An edge connects two elements. Required fields: `id`, `kind`, `from` and `to`.
 | `edgeType` | `default` when absent, or a family edge type (3.3). |
 | `label` | The text. `\n` starts a new line. |
 | `endpoints` | `startArrow` and `endArrow`: `none`, `triangle`, `diamond`, `circle`, `bar`, `openTriangle` or `openCircle`. |
-| `router` | `straight`, `orthogonal`, `curved` or `polyline`. |
+| `router` | `straight` (one line between the nodes' centers, ending on each outline), `orthogonal` (right-angle segments routed round nodes), `curved` (one bowed arc between the nodes, ending on each outline) or `polyline` (drawn as `orthogonal`). `straight` and `curved` aren't routed round nodes; one that runs through a node gets the warning `EDGE_CROSSES_NODE`. Sequence messages ignore `router`. |
 | `waypoints` | Points (`x`, `y`) kept with the edge. |
 
 An end has an `elementId` (required) and can have:
@@ -612,7 +612,7 @@ Two documents have the same content when their stored forms (section 11), withou
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
-| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, `cornerRadius` rounds the path's corners, and `isFanInFeeder` and `keepFeederArrowhead` mark edges merged into a shared trunk near their target. |
+| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and `isFanInFeeder` and `keepFeederArrowhead` mark edges merged into a shared trunk near their target. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
 | `normalizedHash` | A hash an implementation can set. The reference engine doesn't. |
 
