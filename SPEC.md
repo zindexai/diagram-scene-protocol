@@ -617,7 +617,7 @@ Two documents have the same content when their stored forms (section 11), withou
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
-| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. |
+| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. Where a flowchart decision's branches share a vertex, one of them carries each point where their shared line splits in `junctions` too. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
 | `normalizedHash` | A hash an implementation can set. The reference engine doesn't. |
 

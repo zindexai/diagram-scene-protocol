@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.9.2
+
+Changed: descriptions only; no field, value or rule changed.
+- `resizeElement`'s `anchor` (ops schema): to make a placed node bigger where it stands, name the side its flow enters (`left` left to right, the direction when none is set; `top` top to bottom and in an org chart); without it the top-left corner stays put, as before, and the node's center moves by half the growth.
+- `junctions` on a computed edge path (13): a flowchart decision's branches that share a vertex also carry the point where their shared line splits. The reference engine now draws a decision's branches past its free vertices that way (5.3).
+
 ## v8.9.0
 
 Added: `"auto"` for `textStyle.wrap`, now a node's default (5.2). A label stays on one line while its node is at most 250 px wide, or 400 px for a diamond, and a longer one wraps at spaces there in lines of even length; a node whose `layout` is wider keeps the line up to its own width. A text element's default stays `none` (5.6). Documents an earlier engine saved store `wrap: "none"` on their nodes and draw as before. 6.5 says how `auto` sizes a node.

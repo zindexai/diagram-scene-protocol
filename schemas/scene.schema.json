@@ -1519,7 +1519,7 @@
             "type": "array",
             "items": { "$ref": "#/$defs/point" },
             "minItems": 1,
-            "description": "Set on the edge whose last leg, the trunk, carries a shared port's joined edges into the target with one arrowhead: every point where the joined edges' lines branch: where the feeders meet the trunk, and where one feeder's line meets another's on the way there. The renderer draws a filled dot at each."
+            "description": "Set on the edge whose last leg, the trunk, carries a shared port's joined edges into the target with one arrowhead: every point where the joined edges' lines branch: where the feeders meet the trunk, and where one feeder's line meets another's on the way there. On a flowchart decision's branches that share a vertex, the point where the shared line splits, set on the branch that runs straight on (else the first written). The renderer draws a filled dot at each."
           }
         }
       },
