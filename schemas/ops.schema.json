@@ -297,8 +297,8 @@
       },
       "textWrap": {
         "type": "string",
-        "enum": ["none", "word", "character"],
-        "description": "'none' breaks lines only at \\n. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
+        "enum": ["auto", "none", "word", "character"],
+        "description": "'auto', a node's default, keeps the label on one line while its node can grow to hold it, up to 250 px of content (wider if the layout gives more); a longer label wraps by word there and the node grows taller. On a text element, 'auto' wraps by word when the text is wider than its box. 'none', a text element's default, breaks lines only at \\n, and a node grows as wide as the line. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
       },
       "textAlign": {
         "type": "string",
@@ -342,7 +342,7 @@
             "type": "string",
             "enum": ["content", "none"],
             "default": "none",
-            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label that doesn't wrap (the engine already grows that node to fit it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points. The same fields as scene.schema.json#/$defs/absoluteLayout."
+            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label set to 'auto' or 'none' (the engine already sizes that node to it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points. The same fields as scene.schema.json#/$defs/absoluteLayout."
           }
         }
       },
@@ -1010,7 +1010,7 @@
               },
               "textStyle": {
                 "$ref": "#/$defs/textStyle",
-                "description": "How the label wraps and aligns. Leave a field out for its default: wrap 'none', align 'center', verticalAlign 'middle'."
+                "description": "How the label wraps and aligns. Leave a field out for its default: wrap 'auto', align 'center', verticalAlign 'middle'."
               },
               "x": {
                 "type": "number",

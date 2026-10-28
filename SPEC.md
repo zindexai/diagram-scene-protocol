@@ -171,7 +171,7 @@ A node is a shape with a label. Required fields: `id`, `kind` and `nodeType`.
 | `label` | The text. `\n` starts a new line. |
 | `layout` | Position and size (section 6). |
 | `icon` | A `family:id` key, such as `lucide:database`, or an image URL. |
-| `textStyle` | `wrap` (`none`, `word` or `character`), `align` (`left`, `center` or `right`) and `verticalAlign` (`top`, `middle` or `bottom`). |
+| `textStyle` | `wrap` (`auto`, `none`, `word` or `character`), `align` (`left`, `center` or `right`) and `verticalAlign` (`top`, `middle` or `bottom`). |
 
 Generic node types: `generic`, `service`, `database`, `queue`, `actor`, `note`, `decision`, `document`, `process`, `container`, `externalSystem`, `storage`, `objectStorage`, `event` and `iconNode`.
 
@@ -197,7 +197,7 @@ When `shape` is absent, the reference engine sets it from `nodeType` and stores 
 | `iconBox` | `iconNode` |
 | `rect` | Every other type |
 
-When `textStyle` or one of its fields is absent, a node's text has `wrap: "none"`, `align: "center"` and `verticalAlign: "middle"`.
+When `textStyle` or one of its fields is absent, a node's text has `wrap: "auto"`, `align: "center"` and `verticalAlign: "middle"`. `auto` keeps a label on one line while its node is at most 250 px wide, or 400 px for a diamond (the reference engine's widths), and wraps a longer one at spaces there, in lines of even length; a node whose `layout` is wider keeps the line up to its own width. `none` keeps one line however long. A text element's default is `none` (5.6).
 
 The reference engine has its own icon registry. An icon key it doesn't know is kept, and the node draws nothing in the icon's place.
 
@@ -313,13 +313,13 @@ Sequence diagrams are the exception. The reference engine lays them out from the
 
 ### 6.5 Sizes
 
-A placed node's `width` and `height` are a minimum. In the reference engine, a node whose label or icon needs more room is drawn larger. The drawn box is in `computed.layout` (section 13).
+A placed node's `width` and `height` are a minimum. In the reference engine, a node whose label or icon needs more room is drawn larger: wider for a label set to `none`, and for one set to `auto` up to the width where it wraps, then taller. The drawn box is in `computed.layout` (section 13).
 
-A node whose label wraps (`textStyle.wrap` is `word` or `character`) keeps its width instead, and its label wraps to fit. With `autoSize: "content"`, the reference engine also gives it the height its wrapped label and icon need, growing it down from its top edge, and the stored `height` stays the minimum. `content` changes nothing for a label that doesn't wrap, or for nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, workflow events and gateways, and UI flow entry and exit points.
+A node whose label wraps (`textStyle.wrap` is `word` or `character`) keeps its width instead, and its label wraps to fit. With `autoSize: "content"`, the reference engine also gives it the height its wrapped label and icon need, growing it down from its top edge, and the stored `height` stays the minimum. `content` changes nothing for a label set to `auto` or `none`, or for nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, workflow events and gateways, and UI flow entry and exit points.
 
-The size of an unplaced node is the reference engine's to choose. When it places one, it stores the size the node's content needs, whatever size the layout gave, so a wrapped label is measured on one line. The exception is a node whose label wraps and whose layout has `autoSize: "content"`: it keeps its width, and its height stays the minimum. `resizeElement` refuses an unplaced node (10.5).
+The size of an unplaced node is the reference engine's to choose. When it places one, it stores the size the node's content needs, whatever size the layout gave, so a label set to `word` or `character` is measured on one line. The exception is such a node whose layout has `autoSize: "content"`: it keeps its width, and its height stays the minimum. `resizeElement` refuses an unplaced node (10.5).
 
-When an edit changes what a placed node shows (its label, shape, node type, icon, ER columns, text style, or the font size or weight its style gives it) and doesn't set its `layout`, the reference engine measures the node again. It stores the size the new content needs, which can be smaller than before, and keeps the node in its place in the layout. A node whose label wraps isn't measured again.
+When an edit changes what a placed node shows (its label, shape, node type, icon, ER columns, text style, or the font size or weight its style gives it) and doesn't set its `layout`, the reference engine measures the node again. It stores the size the new content needs, which can be smaller than before, and keeps the node in its place in the layout. A node whose label is set to `word` or `character` isn't measured again.
 
 When a placed node is drawn bigger than its stored box, whatever the reason (a new label, `autoSize: "content"`, a layout smaller than its content, or `resizeElement`), the reference engine makes room for it. The nodes in its way move just far enough to keep the gap they had, at most the spacing (`nodeSpacing` across the flow, `rankSpacing` along it), and keep their order; a frame in the way moves whole, with its members. Nodes push only what shares their frame, lane or the top level: a frame, a lane and a pool without lanes each make room inside themselves, and groups don't count. A frame without a `layout` grows with its members and pushes what is around it, and a frame with a `layout` grows where a member that grew or was pushed would cross its border (6.6). The engine stores each node it moved at its new position, and the grown node at the box it is drawn with, apart from an `autoSize: "content"` height, which stays the minimum. A node drawn bigger with nothing in its way pushes nothing, and keeps its stored size unless an edit measured it again (above). A smaller node pulls nothing back. Nodes that already overlap in the stored document stay where they are, and the overlap is a warning (`NODE_OVERLAP_DETECTED`). Sequence diagrams don't make room: they are laid out from their messages (6.4).
 
@@ -617,7 +617,7 @@ Two documents have the same content when their stored forms (section 11), withou
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
-| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and `isFanInFeeder` and `keepFeederArrowhead` mark edges merged into a shared trunk near their target. |
+| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
 | `normalizedHash` | A hash an implementation can set. The reference engine doesn't. |
 

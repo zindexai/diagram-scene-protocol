@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.9.0
+
+Added: `"auto"` for `textStyle.wrap`, now a node's default (5.2). A label stays on one line while its node is at most 250 px wide, or 400 px for a diamond, and a longer one wraps at spaces there in lines of even length; a node whose `layout` is wider keeps the line up to its own width. A text element's default stays `none` (5.6). Documents an earlier engine saved store `wrap: "none"` on their nodes and draw as before. 6.5 says how `auto` sizes a node.
+
+Changed: the reference engine routes a decision's exits out of different vertices, and edges entering one side of a flowchart decision join one trunk into its vertex, with a dot where their lines branch (5.3). No input field, value or rule changed.
+
+Changed: computed edge paths (13). `junctions`, on the edge whose last leg carries a shared port's joined edges, lists every point where their lines branch, and `isFanInFeeder` marks the others. `keepFeederArrowhead` is removed, and `fanInPoint` and `isFanInTrunkOwner`, which earlier engines wrote without the schema listing them, aren't part of it: a document whose `computed.edgePaths` carries any of the three is refused. Computed output is the engine's to write, so a document sent without `computed` is unaffected.
+
 ## v8.8.0
 
 Added: the operations `createText` and `createImage`, which add a text element and an image element to a saved document, and `assets` on `updateScene`, merged entry by entry, `null` removing one (10.3, 10.8).

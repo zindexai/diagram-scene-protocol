@@ -597,7 +597,7 @@
             "type": "string",
             "enum": ["content", "none"],
             "default": "none",
-            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label that doesn't wrap (the engine already grows that node to fit it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points."
+            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label set to 'auto' or 'none' (the engine already sizes that node to it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points."
           }
         }
       },
@@ -921,9 +921,8 @@
         "properties": {
           "wrap": {
             "type": "string",
-            "enum": ["none", "word", "character"],
-            "default": "none",
-            "description": "'none' breaks lines only at \\n. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
+            "enum": ["auto", "none", "word", "character"],
+            "description": "'auto', a node's default, keeps the label on one line while its node can grow to hold it, up to 250 px of content (wider if the layout gives more); a longer label wraps by word there and the node grows taller. On a text element, 'auto' wraps by word when the text is wider than its box. 'none', a text element's default, breaks lines only at \\n, and a node grows as wide as the line. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
           },
           "align": {
             "type": "string",
@@ -1514,11 +1513,13 @@
           },
           "isFanInFeeder": {
             "type": "boolean",
-            "description": "True when this edge is a feeder in a fan-in trunk merge: one of N edges sharing a target+label that have been geometrically merged so they all meet at a common fan-in point near the target. The terminal point sits at the fan-in T (24 px outward from the target's face center) instead of on the face itself. Set on BOTH collapsing and bundle-only feeders."
+            "description": "True when this edge is a feeder of a shared port: one of several edges that enter one port of their target and join one trunk there (a flowchart decision's face, which one flow line enters; a face with no room to keep them apart; edges whose shared label is drawn once). Its last point is the junction, on the last leg of the edge that carries `junctions`, off the target's face, and it draws no arrowhead."
           },
-          "keepFeederArrowhead": {
-            "type": "boolean",
-            "description": "Set on bundle-only fan-in feeders only. When true, the renderer keeps the terminal arrowhead even though `isFanInFeeder` is also true. Bundle-only groups have structurally distinct sources sharing only target+label; labels and arrowheads are deliberately preserved. Collapsing feeders set `isFanInFeeder` only and the renderer omits their arrowhead."
+          "junctions": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/point" },
+            "minItems": 1,
+            "description": "Set on the edge whose last leg, the trunk, carries a shared port's joined edges into the target with one arrowhead: every point where the joined edges' lines branch: where the feeders meet the trunk, and where one feeder's line meets another's on the way there. The renderer draws a filled dot at each."
           }
         }
       },
