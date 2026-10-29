@@ -21,7 +21,7 @@
       },
       "ops": {
         "type": "array",
-        "description": "The operations, applied in order, each to the document the ones before it left. An edit applies whole or not at all: an operation that can't apply, or a result with an error the base revision didn't have, saves nothing (VALIDATION_FAILED). The element an operation changes must exist when it runs; what an operation only names (an edge's ends, children, a style, a relative layout's target, a constraint's elements) may be created by a later operation of the same edit, except the element after or before names, which must exist when the operation runs.",
+        "description": "The operations, applied in order, each to the document the ones before it left. An edit applies whole or not at all: an operation that can't apply, or a result with an error the base revision didn't have, saves nothing (VALIDATION_FAILED). The element an operation changes must exist when it runs; what an operation only names (an edge's ends, children, a style, a relative layout's target, a constraint's elements) may be created by a later operation of the same edit, except the element after or before names and the frame a createNode or updateNode frame names, which must exist when the operation runs.",
         "items": {
           "$ref": "#/$defs/op"
         }
@@ -1029,6 +1029,10 @@
                 "type": "number",
                 "minimum": 0,
                 "description": "Position shorthand: height (equivalent to layout.height)"
+              },
+              "frame": {
+                "$ref": "#/$defs/id",
+                "description": "The ID of the frame the node goes in: any frame (a pool, a lane, a boundary, a generic frame), not a group or a node. The node is appended to that frame's children. The frame must exist when this op runs: create it in an earlier op, or list the node in its createFrame children instead. A string only."
               }
             }
           }
@@ -1098,6 +1102,10 @@
               "textStyle": {
                 "$ref": "#/$defs/textStyle",
                 "description": "How the label wraps and aligns. Only the fields given change."
+              },
+              "frame": {
+                "$ref": "#/$defs/id",
+                "description": "Moves the node into the frame with this ID: any frame (a pool, a lane, a boundary, a generic frame), not a group or a node. The node leaves the children of every other frame and group that lists it, a group inside the target frame included, and is appended to this frame's children unless it is there already; when it is already this frame's direct child and in no other frame or group, nothing changes. The frame must exist when this op runs. A string only (null isn't accepted): frame can't take a node out of every frame. To do that, delete the frames that hold the node and create them again without it, in one edit."
               }
             },
             "anyOf": [
@@ -1115,7 +1123,8 @@
               { "required": ["metadata"] },
               { "required": ["extensions"] },
               { "required": ["after"] },
-              { "required": ["before"] }
+              { "required": ["before"] },
+              { "required": ["frame"] }
             ]
           }
         ]
@@ -1438,11 +1447,13 @@
               },
               "containerType": {
                 "type": "string",
-                "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment"]
+                "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment"],
+                "description": "What the frame stands for; generic when absent. pool and lane are BPMN's swimlanes, which the engine lays out itself: a pool's children are its lanes (frames with containerType lane), in the order they stack, and a lane's children are its tasks, events and gateways, or lanes of its own. Lanes run along the flow and stack across it, every node a lane lists is placed inside it, each lane is as deep as its contents need, and columns are shared across lanes and pools. Leave layout off pools, lanes and their nodes: a pool's or lane's layout is a minimum, not a fixed box, and a lane's x and y are ignored. fragment is a sequence diagram's combined fragment, laid out with its rows. The other types draw as a generic frame does."
               },
               "laneDirection": {
                 "type": "string",
-                "enum": ["horizontal", "vertical"]
+                "enum": ["horizontal", "vertical"],
+                "description": "On a pool: how its lanes stack. Lanes always run along the flow and stack across it. vertical stacks them top to bottom, which BPMN calls a horizontal pool, and the flow runs left to right (LR, or RL when layoutStrategy.direction asks for it). horizontal puts them side by side, a vertical pool, and the flow runs top to bottom (TB, or BT). When layoutStrategy.direction runs along the lanes' stacking, laneDirection wins and the flow turns. Without laneDirection, lanes stack across the scene's direction: top to bottom in a left-to-right flow, the default. The first pool in document order with a laneDirection sets the flow for the whole diagram. Lanes along the flow (phases) aren't supported."
               }
             }
           }
@@ -1673,7 +1684,7 @@
         ]
       },
       "autoLayoutOp": {
-        "description": "Have the engine place nodes again and keep the new positions. Nodes keep their positions after the first save. They move only when a node that grows needs the room; when a node an edit adds needs more room for its edge label than the column it joins; when an edit adds or deletes a frame round them and keeping them would leave frames overlapping or a frame holding a node that isn't its member; when an added order constraint finds its two nodes the wrong way round; or when updateScene changes or removes layoutStrategy or diagramFamily. So this op is how to get a fresh arrangement. Nodes with a relative layout follow the node they are placed against, and sequence diagrams are laid out from their messages, so autoLayout moves neither.",
+        "description": "Have the engine place nodes again and keep the new positions. Nodes keep their positions after the first save. They move only when a node that grows needs the room; when a node an edit adds needs more room for its edge label than the column it joins; when a task an edit adds to a lane needs the lane to grow (what lies past the lane moves across the flow) or is inserted between two placed columns of a pool (a column opens, and what lies past it moves along the flow, in every lane); when an edit moves a task to another lane, which places it again there; when an edit adds or deletes a frame round them and keeping them would leave frames overlapping or a frame holding a node that isn't its member; when an added order constraint finds its two nodes the wrong way round; or when updateScene changes or removes layoutStrategy or diagramFamily. So this op is how to get a fresh arrangement. Nodes with a relative layout follow the node they are placed against, and sequence diagrams are laid out from their messages, so autoLayout moves neither.",
         "unevaluatedProperties": false,
         "allOf": [
           {

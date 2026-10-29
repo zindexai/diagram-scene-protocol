@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.10.0
+
+Added: `frame` on `createNode` and `updateNode`, the ID of a frame of any `containerType` (10.3, 10.4). On `createNode` it appends the new node to that frame's `children`, such as a task in a lane that already exists; on `updateNode` it moves the node into that frame and out of every other frame and group that lists it. The frame must exist when the operation runs, as the element `after` or `before` names must, and a missing one is `OP_TARGET_NOT_FOUND`, one that isn't a frame `OP_TARGET_KIND_MISMATCH` (10.2). `frame` takes a string only, so it can't take a node out of every frame.
+
+Changed: the reference engine lays pools and lanes out as BPMN tools do (5.5, 6.4, 6.6). Lanes run along the flow and stack across it in the order the pool's `children` list them, every node a lane lists is placed inside it, and columns are shared across lanes and pools. A pool's `laneDirection` sets the flow (`vertical`, lanes stacked top to bottom, flows left to right; `horizontal`, lanes side by side, top to bottom), winning over the document's direction when the two disagree; without one, lanes stack across the document's direction. A pool's or lane's `layout` is a minimum: they grow to hold their members, so their members no longer get `NODE_OUTSIDE_FRAME`, and a pool's lanes no longer split its box evenly. A node an edit adds to a lane takes a free place in its column or grows the lane, one added between two placed columns opens a column, and a node an edit moves into a lane is placed again there (6.4, 6.6). Pools and lanes are drawn with BPMN header strips. No input field or value changed; every stored document with pools draws differently on its next layout.
+
+Changed: descriptions of `containerType` and `laneDirection` in both schemas, and of the node `layout` and `autoLayout`, which list the new ways a placed node can move.
+
 ## v8.9.2
 
 Changed: descriptions only; no field, value or rule changed.
