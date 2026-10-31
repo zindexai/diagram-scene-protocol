@@ -51,7 +51,7 @@
           "autoGroup": {
             "type": "string",
             "enum": ["byNodeType"],
-            "description": "Architecture-family only. When set, the engine synthesizes subtle background bands grouping nodes by their `nodeType` (e.g. one band for all `service` nodes, one for `database` nodes, one for `externalSystem` nodes). Each band is labeled with the pluralized type name (\"Services\", \"Databases\", \"External Systems\"). Skipped when the scene already authors frames containing the candidate nodes (no double-wrap), when all nodes share a single `nodeType` (trivial), or when the nodes of a type are scattered (a node of another type sits between two of them in a column). Opt-in only; omit the field to render with no banding (existing default)."
+            "description": "Architecture-family only. When set, the engine synthesizes subtle background bands grouping nodes by their `nodeType` (e.g. one band for all `service` nodes, one for `database` nodes, one for `externalSystem` nodes). Each band is labeled with the pluralized type name (\"Services\", \"Databases\", \"External Systems\"). Skipped when the scene already authors frames containing the candidate nodes (no double-wrap), when all nodes share a single `nodeType` (trivial), or when the nodes of a type are scattered (a node of another type sits between two of them in a column) or placed so that their band would overlap a frame or another band. Opt-in only; omit the field to render with no banding (existing default)."
           }
         }
       },
@@ -344,7 +344,7 @@
           "visible": {
             "type": "boolean",
             "default": true,
-            "description": "false hides the element: the engine still lays it out, so it keeps its space, but doesn't draw it or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group only its title, not their members."
+            "description": "false hides the element: the engine still lays it out, so it keeps its space, but doesn't draw it or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group (which draws nothing) drops only its SVG `<title>`; their members stay drawn."
           },
           "style": {
             "oneOf": [
@@ -858,7 +858,8 @@
                 "const": "group"
               },
               "title": {
-                "type": "string"
+                "type": "string",
+                "description": "Not drawn: written into the SVG as the group's `<title>`. For a visible titled box, use a frame."
               },
               "children": {
                 "type": "array",

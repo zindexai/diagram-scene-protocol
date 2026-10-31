@@ -154,9 +154,9 @@ Constraint IDs (section 7) use the same characters. They are optional, and a con
 | `extensions` | An open object (section 8). |
 | `x`, `y`, `width`, `height` | Shorthand for an absolute layout (6.2). |
 
-When `zIndex` is absent, the reference engine assigns one by kind, counting up in array order within each kind: frames from 0, groups from 100, edges from 200, nodes from 300, text from 400, images from 500 and guides from 600. So frames draw behind edges, and edges behind nodes.
+When `zIndex` is absent, the reference engine assigns one by kind, counting up in array order within each kind: frames from 0, groups from 100, edges from 200, nodes from 300, text from 400, images from 500 and guides from 600. So frames draw behind edges, and edges behind nodes. In a sequence diagram, the reference engine draws messages over lifelines, actors and activation bars whatever their `zIndex`; `zIndex` still orders notes and every other element.
 
-`visible: false` hides an element. The reference engine still lays it out, so it keeps its space, but doesn't draw it, or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group only its title, not their members.
+`visible: false` hides an element. The reference engine still lays it out, so it keeps its space, but doesn't draw it, or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group only its SVG `<title>` (5.4), not their members.
 
 The reference engine keeps `locked` but doesn't act on it: it edits and draws an element whatever its value.
 
@@ -247,7 +247,7 @@ A group gathers elements. Required fields: `id`, `kind` and `children`, an array
 
 Each ID in `children` MUST name an element in the document. An element MUST NOT be in more than one group. A group MUST NOT contain itself, directly or through other groups and frames, and a guide MUST NOT be a child of a group.
 
-The reference engine draws no box or border for a group, and doesn't use a group's `layout`. It draws a group's `title` without a position, at the canvas origin. Moving a group moves its members (10.5).
+The reference engine draws nothing for a group (no box, border or title) and doesn't use a group's `layout`. In an SVG, a group's `title` is written as the group's `<title>` element, which isn't drawn. For a visible box with a title, use a frame (5.5). Moving a group moves its members (10.5).
 
 ### 5.5 Frames
 
@@ -365,7 +365,7 @@ The reference engine reads these keys:
 | Where | Key | Meaning |
 |---|---|---|
 | Document | `showLifelineFeet` | Sequence diagrams: `false` stops drawing a foot bar at the bottom of each lifeline. |
-| Document | `autoGroup` | Architecture diagrams: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, or when a type's nodes are scattered. |
+| Document | `autoGroup` | Architecture diagrams: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
 | `sequence.note` | `anchor` | The lifeline or actor ID the note sits over, or an array of two or more IDs it spans. |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |

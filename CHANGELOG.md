@@ -2,6 +2,16 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.12.0
+
+Changed: the reference engine draws nothing for a group (5.4). Its `title` is written into an SVG as the group's `<title>` element, which isn't drawn; earlier engines drew it as text without a position, at the canvas origin. A hidden group drops only that `<title>` (5.1). For a visible box with a title, use a frame (5.5).
+
+Changed: in a sequence diagram the reference engine draws messages over lifelines, actors and activation bars, whatever their `zIndex` (5.1). `zIndex` still orders notes and every other element. No input field, value or rule changed.
+
+Changed: descriptions only; no field, value or rule changed.
+- A group's `title` (both schemas) and a hidden group (`visible`): not drawn, written into the SVG as the group's `<title>`.
+- `autoGroup` (scene schema): it is also skipped when a band would overlap a frame or another band.
+
 ## v8.10.0
 
 Added: `frame` on `createNode` and `updateNode`, the ID of a frame of any `containerType` (10.3, 10.4). On `createNode` it appends the new node to that frame's `children`, such as a task in a lane that already exists; on `updateNode` it moves the node into that frame and out of every other frame and group that lists it. The frame must exist when the operation runs, as the element `after` or `before` names must, and a missing one is `OP_TARGET_NOT_FOUND`, one that isn't a frame `OP_TARGET_KIND_MISMATCH` (10.2). `frame` takes a string only, so it can't take a node out of every frame.

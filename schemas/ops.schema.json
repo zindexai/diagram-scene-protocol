@@ -1345,7 +1345,7 @@
               },
               "visible": {
                 "type": "boolean",
-                "description": "false hides only the group's title, not its members."
+                "description": "false: the group (which draws nothing) drops only its SVG `<title>`; its members stay drawn."
               },
               "style": {
                 "oneOf": [
@@ -1355,7 +1355,8 @@
                 "description": "Element style: either a named-style string key (resolved against scene.styles) or an inline StyleValue object"
               },
               "title": {
-                "type": "string"
+                "type": "string",
+                "description": "Not drawn: written into the SVG as the group's `<title>`. For a visible titled box, use a frame."
               },
               "children": {
                 "$ref": "#/$defs/elementIdList"
