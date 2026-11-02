@@ -2,6 +2,24 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.13.0
+
+Added: AWS's groups as `containerType` values: `aws.cloud`, `aws.region`, `aws.az`, `aws.vpc`, `aws.subnet.public`, `aws.subnet.private`, `aws.securityGroup`, `aws.autoScalingGroup`, `aws.account` and `aws.corporateDataCenter` (5.5). The reference engine draws each as the AWS Architecture Icons draw that group, in AWS's color and line with its corner icon and no fill; a frame's `style` overrides the preset. It warns about a preset inside one AWS doesn't nest it in (`AWS_GROUP_NESTING`) and about a frame titled like an AWS group that holds AWS icons and has no preset (`AWS_GROUP_UNTYPED`). In an `architecture` document, or one without a family, it lays the Cloud, Region, VPC, Availability Zone and subnet frames out as AWS's reference diagrams do: zones as columns in the order of the VPC's `children`, subnets as rows every zone shares (public before private), a gateway the VPC holds on its top border, a Region's other members in a column beside its VPCs, and AWS Cloud's above its Regions. Their `layout` is a minimum. A node an edit adds takes a free place in its row or column; when there is none, the row or column grows and what lies past it moves (6.6).
+
+Added: `icon` on frames, `createFrame` and `updateFrame`, a `family:id` key or an image URL drawn in the frame's header (5.5). A frame's `icon` replaces its preset's.
+
+Added: `frame` on `createFrame`, the ID of a frame (10.3). It appends the new frame to that frame's `children`, so a lane goes after a pool's other lanes and an Availability Zone after a VPC's. A missing frame is `OP_TARGET_NOT_FOUND`, one that isn't a frame `OP_TARGET_KIND_MISMATCH` (10.2).
+
+Added: the operation `updateFrame`, which changes a saved frame's `title`, `style`, `icon`, `containerType` or `laneDirection` (10.4). `null` removes the `style`, the `icon`, the `containerType` (the frame becomes `generic`) or the `laneDirection`. It doesn't change the frame's `children`, `layout` or `extensions`, and the reference engine keeps its members' positions.
+
+Changed: in a document with an `aws.*` frame, an edge whose type's default end is `triangle` ends in `openTriangle`, AWS's open arrow, unless it sets its own (5.3). An arrowhead equal to the document's default is treated as absent, so adding or removing a document's AWS groups changes the arrowheads that weren't set.
+
+Changed: computed edge paths (13). In an architecture, entity-relationship or network diagram, or one without a family, `junctions` also lists each point where edges drawn alike that leave one point (or end at one point) fork, drawn as a dot; a crossing carries none.
+
+Changed: descriptions only; no field, value or rule changed.
+- `style.dash` (scene schema) loses a wrong default of `[]`: left out, a generic frame is dashed `[4, 4]` and a preset takes its own; `[]` draws solid.
+- A node's `layout` and stored positions (6.4) list an AWS row or column growing among the ways a placed node can move.
+
 ## v8.12.0
 
 Changed: the reference engine draws nothing for a group (5.4). Its `title` is written into an SVG as the group's `<title>` element, which isn't drawn; earlier engines drew it as text without a position, at the canvas origin. A hidden group drops only that `<title>` (5.1). For a visible box with a title, use a frame (5.5).
