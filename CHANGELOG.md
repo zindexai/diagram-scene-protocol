@@ -2,6 +2,16 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.13.1
+
+Changed: corrects v8.13.0's open arrow (5.3). In a document with an `aws.*` frame, only an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type ends in `openTriangle`; `workflow.sequenceFlow`, `sequence.message`, `sequence.create`, `sequence.destroy` and the `uiflow.*` types keep `triangle`. The reference engine drew it this way in v8.13.0; v8.13.0's text said every type ending in `triangle`.
+
+Changed: the reference engine applies an `order` constraint an edit adds to an AWS diagram (6.4): when its two nodes stand the wrong way around in one row or column, they trade places and nothing else moves; when they don't share one line, or trading would leave two nodes nearer each other than both the node spacing and the nearest two stood before, they are placed again as nodes an edit adds are, which can grow their row or column. New nodes an edit joins by an order constraint are placed in the order asked. In v8.13.0 the engine placed such a pair again still the wrong way around and could move other nodes. A fresh layout no longer splits an ordered pair between the two halves of a Region's column. No input field, value or rule changed.
+
+Changed: descriptions only; no field, value or rule changed.
+- AWS's arrangement (5.5): a Region holding zones or subnets directly lays them out as a VPC it doesn't draw. A frame of another type between a Region and its VPC, or a VPC and its zones, is laid out as a generic frame is, with the presets inside it; one between a zone and its subnets is placed in the zone's row after its subnets, everything in it on that row.
+- The edge arrowheads' description and `containerType`'s (both schemas) say the same.
+
 ## v8.13.0
 
 Added: AWS's groups as `containerType` values: `aws.cloud`, `aws.region`, `aws.az`, `aws.vpc`, `aws.subnet.public`, `aws.subnet.private`, `aws.securityGroup`, `aws.autoScalingGroup`, `aws.account` and `aws.corporateDataCenter` (5.5). The reference engine draws each as the AWS Architecture Icons draw that group, in AWS's color and line with its corner icon and no fill; a frame's `style` overrides the preset. It warns about a preset inside one AWS doesn't nest it in (`AWS_GROUP_NESTING`) and about a frame titled like an AWS group that holds AWS icons and has no preset (`AWS_GROUP_UNTYPED`). In an `architecture` document, or one without a family, it lays the Cloud, Region, VPC, Availability Zone and subnet frames out as AWS's reference diagrams do: zones as columns in the order of the VPC's `children`, subnets as rows every zone shares (public before private), a gateway the VPC holds on its top border, a Region's other members in a column beside its VPCs, and AWS Cloud's above its Regions. Their `layout` is a minimum. A node an edit adds takes a free place in its row or column; when there is none, the row or column grows and what lies past it moves (6.6).
