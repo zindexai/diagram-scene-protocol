@@ -2,6 +2,17 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.17.0
+
+Changed: in a document with a node whose `icon` is an `aws:` key, with or without an `aws.*` frame, an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type ends in `openTriangle`, AWS's open arrow (5.3). Before, only a document with an `aws.*` frame did. An arrowhead equal to the document's default is treated as absent, so adding or removing a document's AWS icons changes the arrowheads that weren't set.
+
+Changed: the reference engine docks a gateway a VPC holds on the side of its border facing the gateway's neighbors outside the VPC, when its lines inside stay in the zone nearest that side, or reach the row above the zones or an item beside a lone zone on that side, and on the top otherwise, where every gateway docked before (5.5). A gateway already placed keeps its side until the document is laid out again. No input field, value or rule changed.
+
+Changed: the reference engine reads through a `generic` frame round whole VPCs of a Region, or round all of a VPC's zones, and arranges the presets inside it as AWS's reference diagrams do, the frame fitted round them (5.5). It warns about any other generic frame inside a Region, VPC, zone or subnet that holds presets (`AWS_FRAME_HIDES_GROUPS`), whose presets are still laid out as a generic frame's members. No input field, value or rule changed.
+
+Changed: descriptions only; no field, value or rule changed.
+- The edge arrowheads' description and `containerType`'s (both schemas) say the same.
+
 ## v8.13.1
 
 Changed: corrects v8.13.0's open arrow (5.3). In a document with an `aws.*` frame, only an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type ends in `openTriangle`; `workflow.sequenceFlow`, `sequence.message`, `sequence.create`, `sequence.destroy` and the `uiflow.*` types keep `triangle`. The reference engine drew it this way in v8.13.0; v8.13.0's text said every type ending in `triangle`.
