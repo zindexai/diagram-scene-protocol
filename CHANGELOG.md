@@ -2,6 +2,21 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.28.0
+
+Added: `step` and `stepText` on edges, `createEdge` and `updateEdge` (5.3, 10.3, 10.4). `step` is an integer from 1 to 99; `stepText`, the edge's line in the step list, needs `step`. On `updateEdge`, `stepText: null` removes the text and `step: null` removes both. The reference engine draws a numbered badge beside the start of each stepped edge's line, one for the edges with one step and one source, and lists the steps with text beside the drawing. It warns about a step in a `sequence` document, which it doesn't draw (`STEP_NOT_DRAWN`).
+
+Added: `spans` on frames, `createFrame` and `updateFrame` (5.5, 10.3, 10.4). A frame with `spans` instead of `children` is a spanning frame, drawn round the nodes and frames it names, outside the containment tree, such as an Auto Scaling group across Availability Zones. A frame needs `children` or `spans`; before, `children` was required. A spanning frame holds nothing, sits in no group or frame, and spans no other spanning frame (`SPAN_INVALID`), and each target must exist (`SPAN_TARGET_NOT_FOUND`, 9.2). In an edit, a target that nothing creates is `OP_TARGET_NOT_FOUND`, and `createFrame` with `spans` takes neither `children` nor `frame` (10.2). `deleteElement` drops what it removes from every `spans`, and removes a spanning frame left with no target (`SPAN_REMOVED`). The reference engine draws spanning frames in `architecture` documents and documents without a family, keeps room round their targets, and warns about one elsewhere (`SPAN_NOT_DRAWN`) and about a box that covers a node it doesn't span (`SPAN_COVERS_NODE`).
+
+Changed: the reference engine reads through a `generic` frame round subnets next to each other in one Availability Zone's rows (5.5): the subnets join the zone's rows, shared with the other zones, and the frame is fitted round them. `AWS_FRAME_HIDES_GROUPS` no longer warns about such a frame, and for a frame that hides subnets its fix names `spans`. A document stored with such a frame drawn as a box keeps its node positions until it is laid out again. No input field, value or rule changed.
+
+Changed: in an AWS diagram, the reference engine moves a Region's column right for a labeled line's room after an edit that only adds edges, as it did after one that places nodes, and a spanning frame's header grows the row it starts in (6.4). No input field, value or rule changed.
+
+Changed: descriptions only; no field, value or rule changed.
+- The node `layout` description lists the new cases of 6.4.
+- `containerType`'s description (both schemas) says a frame round subnets next to each other in one zone is read through, and that a group across zones is a spanning frame.
+- The descriptions of `updateFrame` and `deleteElement` name `spans`.
+
 ## v8.25.0
 
 Changed: descriptions only; no field, value or rule changed.

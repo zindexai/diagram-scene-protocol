@@ -1134,7 +1134,7 @@
         ]
       },
       "deleteElementOp": {
-        "description": "Remove an element, and every edge with an end at it. Its ID leaves every group's and frame's children; the members of a deleted group or frame stay. A constraint that names it as containerId, source or target is removed, as is one left with fewer elements than it needs, and any other loses it (a CONSTRAINT_REMOVED note). An element placed relative to it gets an absolute layout where it was drawn (a RELATIVE_LAYOUT_FIXED note). In a sequence diagram, an operand or activation that names a deleted row moves to the next one, and one left with nothing is removed (a FRAGMENT_OPERAND_REMOVED or ACTIVATION_REMOVED note).",
+        "description": "Remove an element, and every edge with an end at it. Its ID leaves every group's and frame's children; the members of a deleted group or frame stay. A constraint that names it as containerId, source or target is removed, as is one left with fewer elements than it needs, and any other loses it (a CONSTRAINT_REMOVED note). An element placed relative to it gets an absolute layout where it was drawn (a RELATIVE_LAYOUT_FIXED note). In a sequence diagram, an operand or activation that names a deleted row moves to the next one, and one left with nothing is removed (a FRAGMENT_OPERAND_REMOVED or ACTIVATION_REMOVED note). Its ID leaves every spanning frame's spans too, and a spanning frame left spanning nothing is removed with its edges (a SPAN_REMOVED note).",
         "unevaluatedProperties": false,
         "allOf": [
           {
@@ -1224,8 +1224,19 @@
               "edgeType": {
                 "type": "string",
                 "enum": ["default", "workflow.sequenceFlow", "workflow.messageFlow", "er.relationship", "er.identifying", "sequence.message", "sequence.reply", "sequence.create", "sequence.async", "sequence.destroy", "network.dataFlow", "network.controlFlow", "org.directReport", "org.dottedLine", "uiflow.navigate", "uiflow.back", "uiflow.action"]
+              },
+              "step": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 99,
+                "description": "A numbered step: a badge with this number beside the start of the line. Edges with one number and one source share a badge. Not drawn in sequence diagrams (STEP_NOT_DRAWN)."
+              },
+              "stepText": {
+                "type": "string",
+                "description": "This edge's line in the step list drawn right of the diagram. Needs step."
               }
-            }
+            },
+            "dependentRequired": { "stepText": ["step"] }
           }
         ]
       },
@@ -1299,9 +1310,22 @@
               "edgeType": {
                 "type": "string",
                 "enum": ["default", "workflow.sequenceFlow", "workflow.messageFlow", "er.relationship", "er.identifying", "sequence.message", "sequence.reply", "sequence.create", "sequence.async", "sequence.destroy", "network.dataFlow", "network.controlFlow", "org.directReport", "org.dottedLine", "uiflow.navigate", "uiflow.back", "uiflow.action"]
+              },
+              "step": {
+                "oneOf": [
+                  { "type": "integer", "minimum": 1, "maximum": 99 },
+                  { "type": "null" }
+                ],
+                "description": "A numbered step, as on createEdge; null removes the step and its text."
+              },
+              "stepText": {
+                "type": ["string", "null"],
+                "description": "This edge's line in the step list, as on createEdge; null removes it."
               }
             },
             "anyOf": [
+              { "required": ["step"] },
+              { "required": ["stepText"] },
               { "required": ["name"] },
               { "required": ["zIndex"] },
               { "required": ["locked"] },
@@ -1412,7 +1436,11 @@
           },
           {
             "type": "object",
-            "required": ["op", "id", "children"],
+            "required": ["op", "id"],
+            "anyOf": [
+              { "required": ["children"] },
+              { "required": ["spans"] }
+            ],
             "properties": {
               "op": {
                 "const": "createFrame"
@@ -1450,6 +1478,12 @@
               "children": {
                 "$ref": "#/$defs/elementIdList"
               },
+              "spans": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/id" },
+                "description": "Makes the new frame a spanning frame, drawn round these nodes and frames outside the containment tree, such as an Auto Scaling group across Availability Zones; each target keeps its own frame. Give children or spans, not both, and no frame field (SPAN_INVALID). A target may be an element this edit creates. Drawn in architecture diagrams and diagrams without a family."
+              },
               "layout": {
                 "$ref": "#/$defs/layout",
                 "description": "A frame's box. A sequence fragment's is ignored: a fragment is laid out with its rows."
@@ -1457,7 +1491,7 @@
               "containerType": {
                 "type": "string",
                 "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment", "aws.cloud", "aws.region", "aws.az", "aws.vpc", "aws.subnet.public", "aws.subnet.private", "aws.securityGroup", "aws.autoScalingGroup", "aws.account", "aws.corporateDataCenter"],
-                "description": "What the frame stands for; generic when absent. pool and lane are BPMN's swimlanes, which the engine lays out itself: a pool's children are its lanes (frames with containerType lane), in the order they stack, and a lane's children are its tasks, events and gateways, or lanes of its own. Lanes run along the flow and stack across it, every node a lane lists is placed inside it, each lane is as deep as its contents need, and columns are shared across lanes and pools. Leave layout off pools, lanes and their nodes: a pool's or lane's layout is a minimum, not a fixed box, and a lane's x and y are ignored. fragment is a sequence diagram's combined fragment, laid out with its rows. The aws.* types are AWS's groups (AWS Architecture Icons): aws.cloud, aws.region, aws.vpc, aws.az, aws.subnet.public, aws.subnet.private, aws.securityGroup, aws.autoScalingGroup, aws.account and aws.corporateDataCenter, each drawn in AWS's color, line and corner icon with no fill and its title in the node label's size, nested as AWS nests them (AWS Cloud, Region, VPC, Availability Zone, subnets); style overrides the preset. In an architecture diagram, or one without a family, aws.cloud, aws.region, aws.vpc, aws.az and the two subnet types also place what they hold as AWS's reference diagrams do (Availability Zones as columns, subnets as rows across them, gateways on the side of the VPC they face, or on its top when they serve several AZs or the load balancer between two, regional services beside the VPCs, global ones above the Regions): leave layout off them and their nodes, a preset's layout being only a minimum, and nest them directly: a generic frame round whole VPCs of a Region, or round all of a VPC's Availability Zones, is read through, but any other frame between a Region and its VPC, or a VPC and its Availability Zones, is laid out as any frame with the presets inside it, and one between a zone and its subnets puts everything in it on one row after the zone's subnets; a generic one there gets the warning AWS_FRAME_HIDES_GROUPS. The other aws.* types only draw (an aws.account holding Regions is arranged as aws.cloud is). The other types draw as a generic frame does."
+                "description": "What the frame stands for; generic when absent. pool and lane are BPMN's swimlanes, which the engine lays out itself: a pool's children are its lanes (frames with containerType lane), in the order they stack, and a lane's children are its tasks, events and gateways, or lanes of its own. Lanes run along the flow and stack across it, every node a lane lists is placed inside it, each lane is as deep as its contents need, and columns are shared across lanes and pools. Leave layout off pools, lanes and their nodes: a pool's or lane's layout is a minimum, not a fixed box, and a lane's x and y are ignored. fragment is a sequence diagram's combined fragment, laid out with its rows. The aws.* types are AWS's groups (AWS Architecture Icons): aws.cloud, aws.region, aws.vpc, aws.az, aws.subnet.public, aws.subnet.private, aws.securityGroup, aws.autoScalingGroup, aws.account and aws.corporateDataCenter, each drawn in AWS's color, line and corner icon with no fill and its title in the node label's size, nested as AWS nests them (AWS Cloud, Region, VPC, Availability Zone, subnets); style overrides the preset. In an architecture diagram, or one without a family, aws.cloud, aws.region, aws.vpc, aws.az and the two subnet types also place what they hold as AWS's reference diagrams do (Availability Zones as columns, subnets as rows across them, gateways on the side of the VPC they face, or on its top when they serve several AZs or the load balancer between two, regional services beside the VPCs, global ones above the Regions): leave layout off them and their nodes, a preset's layout being only a minimum, and nest them directly: a generic frame round whole VPCs of a Region, round all of a VPC's Availability Zones, or round subnets next to each other in one zone's rows (a tier), is read through, but any other frame between a Region and its VPC, or a VPC and its Availability Zones, is laid out as any frame with the presets inside it, and one between a zone and its subnets puts everything in it on one row after the zone's subnets; a generic one there gets the warning AWS_FRAME_HIDES_GROUPS. A security group or Auto Scaling group across Availability Zones is a spanning frame: give it spans instead of children. The other aws.* types only draw (an aws.account holding Regions is arranged as aws.cloud is). The other types draw as a generic frame does."
               },
               "laneDirection": {
                 "type": "string",
@@ -1473,7 +1507,7 @@
         ]
       },
       "updateFrameOp": {
-        "description": "Change a frame: its title, style, icon, containerType or laneDirection. Each field given replaces the frame's; null removes the style, the icon, the containerType (the frame becomes generic) or the laneDirection. The frame's members, position and size stay, so a frame that becomes an AWS group (containerType aws.vpc and the like) is drawn as one where it is. Its children and its position aren't changed here: createNode or updateNode with frame puts a node in it, createFrame with frame a new frame, and moveElement or resizeElement move or resize it. A sequence fragment's operands are its extensions, which this doesn't change: delete the fragment and create it again in one edit.",
+        "description": "Change a frame: its title, style, icon, containerType or laneDirection, or a spanning frame's spans. Each field given replaces the frame's; null removes the style, the icon, the containerType (the frame becomes generic) or the laneDirection. The frame's members, position and size stay, so a frame that becomes an AWS group (containerType aws.vpc and the like) is drawn as one where it is. Its children and its position aren't changed here: createNode or updateNode with frame puts a node in it, createFrame with frame a new frame, and moveElement or resizeElement move or resize it. A sequence fragment's operands are its extensions, which this doesn't change: delete the fragment and create it again in one edit.",
         "unevaluatedProperties": false,
         "allOf": [
           { "$ref": "#/$defs/opBase" },
@@ -1508,9 +1542,16 @@
                 "type": ["string", "null"],
                 "enum": ["horizontal", "vertical", null],
                 "description": "On a pool: how its lanes stack, as on createFrame; null removes it."
+              },
+              "spans": {
+                "type": "array",
+                "minItems": 1,
+                "items": { "$ref": "#/$defs/id" },
+                "description": "A spanning frame's targets, replacing its whole list; at least one. Only on a frame written with spans: on a frame with children it is SPAN_INVALID."
               }
             },
             "anyOf": [
+              { "required": ["spans"] },
               { "required": ["title"] },
               { "required": ["style"] },
               { "required": ["icon"] },
