@@ -1518,7 +1518,7 @@
           },
           "isFanInFeeder": {
             "type": "boolean",
-            "description": "True when this edge is a feeder of a shared port: one of several edges that enter one port of their target and join one trunk there (a flowchart decision's face, which one flow line enters; a face with no room to keep them apart; edges whose shared label is drawn once). Its last point is the junction, on the last leg of the edge that carries `junctions`, off the target's face, and it draws no arrowhead."
+            "description": "True when this edge is a feeder of a shared port: one of several edges that enter one port of their target and join one trunk there (a flowchart decision's face, which one flow line enters; a face with no room to keep them apart, in a family that dots forks: architecture, entity-relationship and network diagrams and diagrams without a family; edges whose shared label is drawn once). Its last point is the junction, on the last leg of the edge that carries `junctions`, off the target's face, and it draws no arrowhead."
           },
           "junctions": {
             "type": "array",

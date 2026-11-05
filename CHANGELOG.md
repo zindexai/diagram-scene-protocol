@@ -2,6 +2,11 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.25.0
+
+Changed: descriptions only; no field, value or rule changed.
+- `isFanInFeeder`'s description says that edges join at a face with no room to keep them apart only in a family that dots forks: `architecture`, `entityRelationship` and `network` documents and documents without a family.
+
 ## v8.17.0
 
 Changed: in a document with a node whose `icon` is an `aws:` key, with or without an `aws.*` frame, an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type ends in `openTriangle`, AWS's open arrow (5.3). Before, only a document with an `aws.*` frame did. An arrowhead equal to the document's default is treated as absent, so adding or removing a document's AWS icons changes the arrowheads that weren't set.
