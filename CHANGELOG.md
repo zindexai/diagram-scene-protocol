@@ -2,6 +2,29 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.30.0
+
+Added: `flowchart`, an eighth value of `diagramFamily` and of `updateScene`'s `diagramFamily` (3.3, 10.8), for steps, decisions and loops. It uses the generic node and edge types. The reference engine lays a flowchart out top to bottom when `layoutStrategy.direction` is absent, and aims for 50 px between ranks when `rankSpacing` is absent (3.4). It sends a decision's exit labeled with an affirmative answer (such as `yes`) straight on and one labeled with a negative answer (such as `no`) to the right, below in `LR` and `RL`; other labels, and a flowchart with a frame laid out with its members, keep the general decision rules. Each entry into a node keeps its own arrowhead, entries into one side of a decision join, and edges with the same label keep their labels. In the default style its nodes, except external systems, notes and nodes with an `aws:` icon, draw a light blue fill with a blue border unless their style or the palette sets a fill or stroke. When an edit inserts nodes between two placed nodes, the reference engine puts them on the first one's line and moves what lies past them along the flow (6.4), except a new node on a decision's negative exit, which goes beside its decision, and in a flowchart with a frame laid out with its members. It warns (9.3) about a decision with fewer than two exits (`FAMILY_FLOWCHART_DECISION_FEW_EXITS`) and about an unlabeled exit of a decision with two or more (`FAMILY_FLOWCHART_EXIT_UNLABELED`).
+
+Added: the `document` (a box with a wavy bottom) and `subroutine` (a predefined process: a box with a line inside each side) values of `shape`, on nodes, `createNode` and `updateNode` (5.2). Every shape is valid in every family. When `shape` is absent, the reference engine sets a `document` node's `shape` to `document`; a `document` node stored with another shape keeps it.
+
+Changed: the reference engine draws a document without `diagramFamily` as an `architecture` document (3.3). `extensions.autoGroup` bands it (8), and edges with the same label into one target each keep their label and arrowhead, as in `architecture`; before, it collapsed such edges into one labeled flow where their sources formed one unit. A document stored without a family keeps its node positions until it is laid out again.
+
+Changed: the reference engine draws a parallelogram leaning by half its height, at most a quarter of its width, and a hexagon's side points a quarter of its height out from its top's corners, at most a quarter of its width. It widens either shape so its label fits between the slanted sides. No input field, value or rule changed.
+
+Changed: the reference engine keeps an end that draws an arrowhead or glyph on a `roundedRect` or `pill` 6 px past the corner's curve, an anchored end included: at least 14 px from a `roundedRect`'s corners, and half the height plus 6 px along a pill's top and bottom. No input field, value or rule changed.
+
+Changed: the reference service imports Mermaid `flowchart` and `graph` text as a `flowchart` document; before, as `architecture`. Mermaid's `doc` and `document` shapes become `document`, and `[[ ]]`, `subroutine`, `fr-rect` and `subproc` become `subroutine`. Reading a document of any family but `flowchart` and `entityRelationship` as Mermaid notes that the text doesn't name its family (`FAMILY_NOT_EXPORTED`). Mermaid isn't part of this spec; the service's documentation describes it (section 14).
+
+Changed: descriptions only; no field, value or rule changed.
+- `layoutStrategy`'s `direction` and `rankSpacing` give the flowchart defaults, and `layoutStrategy` lists `flowchart` among the layered families.
+- `extensions.autoGroup` applies to `architecture` documents and documents without a family.
+- `isFanInFeeder` and `junctions` call a decision diamond outside the `workflow.*` types a plain decision, and list `flowchart` among the families that draw no fork dots.
+- `laneDirection` says lanes stack top to bottom in a left-to-right flow, the default outside flowcharts and org charts, and side by side in a top-to-bottom one.
+- `resizeElement`'s `anchor` names the side a flow enters in each family's default direction.
+- An edge end's `anchor` with an `offset` keeps the same corner distance as any end (8 px, more past a rounded corner); before, it said 8 px.
+- The node `layout` description (scene schema) and `autoLayout`'s (ops schema) list the new case of 6.4.
+
 ## v8.28.3
 
 Changed: the reference engine's layout and drawing. No input field, value or rule changed.

@@ -280,7 +280,9 @@
           "cloud",
           "box3d",
           "textBox",
-          "iconBox"
+          "iconBox",
+          "document",
+          "subroutine"
         ]
       },
       "axis": {
@@ -342,7 +344,7 @@
             "type": "string",
             "enum": ["content", "none"],
             "default": "none",
-            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (80 px by default) in a top-to-bottom one. No effect on a label set to 'auto' or 'none' (the engine already sizes that node to it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points. The same fields as scene.schema.json#/$defs/absoluteLayout."
+            "description": "'content' sizes a node whose label wraps (textStyle.wrap 'word' or 'character') to its text: it keeps this width and gets at least the height its wrapped label and icon need, the height a TEXT_OVERFLOW warning gives, growing down from its top edge. The height here is the minimum. Nodes it grows into move down to make room, keeping the full spacing from it: the node spacing in a left-to-right flow, the rank spacing (layoutStrategy.rankSpacing) in a top-to-bottom one. No effect on a label set to 'auto' or 'none' (the engine already sizes that node to it) or on nodes that lay out their own text: org chart people and roles, UI flow screens and modals, ER tables with columns, sequence nodes, BPMN events and gateways, UI flow entry and exit points. The same fields as scene.schema.json#/$defs/absoluteLayout."
           }
         }
       },
@@ -419,7 +421,7 @@
       },
       "anchor": {
         "type": "object",
-        "description": "Where this end of the edge meets its node: `side` alone fixes the side, and the end sits where the engine spreads ends on that side; with `offset` it sits at that place, 0 to 1 from the top of a left or right side or the left of a top or bottom side, kept 8 px from the side's corners. An anchored edge joins no shared trunk. The engine doesn't move nodes for it, so an anchor on the side facing away from the other node routes round the node. Ignored, with EDGE_ANCHOR_IGNORED, on a sequence message, a self-loop, or an end that names a column.",
+        "description": "Where this end of the edge meets its node: `side` alone fixes the side, and the end sits where the engine spreads ends on that side; with `offset` it sits at that place, 0 to 1 from the top of a left or right side or the left of a top or bottom side, with the same corner distance as any end (8 px, more past a rounded corner). An anchored edge joins no shared trunk. The engine doesn't move nodes for it, so an anchor on the side facing away from the other node routes round the node. Ignored, with EDGE_ANCHOR_IGNORED, on a sequence message, a self-loop, or an end that names a column.",
         "additionalProperties": false,
         "required": ["side"],
         "properties": {
@@ -1496,7 +1498,7 @@
               "laneDirection": {
                 "type": "string",
                 "enum": ["horizontal", "vertical"],
-                "description": "On a pool: how its lanes stack. Lanes always run along the flow and stack across it. vertical stacks them top to bottom, which BPMN calls a horizontal pool, and the flow runs left to right (LR, or RL when layoutStrategy.direction asks for it). horizontal puts them side by side, a vertical pool, and the flow runs top to bottom (TB, or BT). When layoutStrategy.direction runs along the lanes' stacking, laneDirection wins and the flow turns. Without laneDirection, lanes stack across the scene's direction: top to bottom in a left-to-right flow, the default. The first pool in document order with a laneDirection sets the flow for the whole diagram. Lanes along the flow (phases) aren't supported."
+                "description": "On a pool: how its lanes stack. Lanes always run along the flow and stack across it. vertical stacks them top to bottom, which BPMN calls a horizontal pool, and the flow runs left to right (LR, or RL when layoutStrategy.direction asks for it). horizontal puts them side by side, a vertical pool, and the flow runs top to bottom (TB, or BT). When layoutStrategy.direction runs along the lanes' stacking, laneDirection wins and the flow turns. Without laneDirection, lanes stack across the scene's direction: top to bottom in a left-to-right flow (the default outside flowcharts and org charts), side by side in a top-to-bottom one. The first pool in document order with a laneDirection sets the flow for the whole diagram. Lanes along the flow (phases) aren't supported."
               },
               "frame": {
                 "$ref": "#/$defs/id",
@@ -1678,7 +1680,7 @@
               },
               "anchor": {
                 "$ref": "#/$defs/side",
-                "description": "The side that stays put: the element grows or shrinks away from it and stays centered along it. Without it, the top-left corner stays put. To make a placed node bigger where it stands, name the side its flow enters ('left' left to right, the direction when none is set; 'top' top to bottom and in an org chart): it keeps its center across the flow, so edges that ran straight into it still do. Without it, its center moves by half the growth, and an edge into a diamond's corner or a BPMN sequence flow can take a step. Leave it out for an element placed relative to another, whose placement sets where it is. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing; a smaller one pulls nothing back."
+                "description": "The side that stays put: the element grows or shrinks away from it and stays centered along it. Without it, the top-left corner stays put. To make a placed node bigger where it stands, name the side its flow enters ('left' left to right, the default outside flowcharts and org charts; 'top' top to bottom, the flowchart and org chart default): it keeps its center across the flow, so edges that ran straight into it still do. Without it, its center moves by half the growth, and an edge into a diamond's corner or a BPMN sequence flow can take a step. Leave it out for an element placed relative to another, whose placement sets where it is. A placed node made bigger pushes the nodes in its way, keeping the gap they had, at most the node spacing; a smaller one pulls nothing back."
               }
             }
           }
@@ -1786,7 +1788,7 @@
         ]
       },
       "autoLayoutOp": {
-        "description": "Have the engine place nodes again and keep the new positions. Nodes keep their positions after the first save. They move only when a node that grows needs the room; when a node an edit adds needs more room for its edge label than the column it joins; when a task an edit adds to a lane needs the lane to grow (what lies past the lane moves across the flow) or is inserted between two placed columns of a pool (a column opens, and what lies past it moves along the flow, in every lane); when a node an edit adds to an AWS diagram needs its row or column to grow (what lies past the growth moves); when an edit moves a task to another lane, which places it again there; when an edit adds or deletes a frame around them and keeping them would leave frames overlapping or a frame holding a node that isn't its member; when an added order constraint finds its two nodes the wrong way around; or when updateScene changes or removes layoutStrategy or diagramFamily. So this op is how to get a fresh arrangement. Nodes with a relative layout follow the node they are placed against, and sequence diagrams are laid out from their messages, so autoLayout moves neither.",
+        "description": "Have the engine place nodes again and keep the new positions. Nodes keep their positions after the first save. They move only when a node that grows needs the room; when a node an edit adds needs more room for its edge label than the column it joins; when a task an edit adds to a lane needs the lane to grow (what lies past the lane moves across the flow) or is inserted between two placed columns of a pool (a column opens, and what lies past it moves along the flow, in every lane); when a node an edit inserts in a flowchart, between two placed nodes, needs room (what lies past it moves along the flow); when a node an edit adds to an AWS diagram needs its row or column to grow (what lies past the growth moves); when an edit moves a task to another lane, which places it again there; when an edit adds or deletes a frame around them and keeping them would leave frames overlapping or a frame holding a node that isn't its member; when an added order constraint finds its two nodes the wrong way around; or when updateScene changes or removes layoutStrategy or diagramFamily. So this op is how to get a fresh arrangement. Nodes with a relative layout follow the node they are placed against, and sequence diagrams are laid out from their messages, so autoLayout moves neither.",
         "unevaluatedProperties": false,
         "allOf": [
           {
@@ -1801,7 +1803,7 @@
               },
               "elements": {
                 "$ref": "#/$defs/elementIdList",
-                "description": "Node IDs to place again, next to their neighbors and clear of the other nodes, which stay where they are. Leave it out to lay out every node, as on a new diagram, and size the canvas to fit: in architecture, workflow, entityRelationship and uiflow diagrams and diagrams without a family, every frame but a pool, lane or fragment then drops its own layout and is laid out with its members, and the members of a frame that keeps its layout keep their positions. Name them here to place them again inside their frame."
+                "description": "Node IDs to place again, next to their neighbors and clear of the other nodes, which stay where they are. Leave it out to lay out every node, as on a new diagram, and size the canvas to fit: in architecture, flowchart, workflow, entityRelationship and uiflow diagrams and diagrams without a family, every frame but a pool, lane or fragment then drops its own layout and is laid out with its members, and the members of a frame that keeps its layout keep their positions. Name them here to place them again inside their frame."
               }
             }
           }
@@ -1866,7 +1868,7 @@
               },
               "diagramFamily": {
                 "type": ["string", "null"],
-                "enum": ["architecture", "workflow", "entityRelationship", "sequence", "network", "orgchart", "uiflow", null],
+                "enum": ["architecture", "flowchart", "workflow", "entityRelationship", "sequence", "network", "orgchart", "uiflow", null],
                 "description": "Update the diagram family declaration, or pass null to remove it. A new or removed family places every node again, as autoLayout without elements does."
               },
               "canvas": {

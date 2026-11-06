@@ -84,6 +84,7 @@ The reference engine keeps `units`, `canvas.grid`, `canvas.snap`, `viewport` and
 | Family | Node types | Edge types |
 |---|---|---|
 | `architecture` | The generic types (5.2) | `default` |
+| `flowchart` | The generic types (5.2) | `default` |
 | `workflow` | `workflow.*` | `workflow.sequenceFlow`, `workflow.messageFlow` |
 | `entityRelationship` | `er.*` | `er.relationship`, `er.identifying` |
 | `sequence` | `sequence.*` | `sequence.message`, `sequence.reply`, `sequence.create`, `sequence.async`, `sequence.destroy` |
@@ -93,13 +94,13 @@ The reference engine keeps `units`, `canvas.grid`, `canvas.snap`, `viewport` and
 
 Workflow diagrams use `pool` and `lane` frames for swimlanes, and sequence diagrams use `fragment` frames for combined fragments (5.5). The table shows each family's own types. The schemas don't tie a type to a family: any node type, edge type and frame type is valid in any document.
 
-`diagramFamily` is optional. Without it, the reference engine lays the diagram out and draws it as a generic flowchart, and applies no family's validation warnings. Declare it on every document that has a family.
+`diagramFamily` is optional. Without it, the reference engine lays the diagram out and draws it as an architecture diagram, and applies no family's validation warnings. Declare it on every document that has a family.
 
 ### 3.4 Layout strategy
 
 `layoutStrategy` guides where an implementation places the nodes that have no position (6.4). It has `direction` (`TB`, `BT`, `LR` or `RL`: top to bottom, bottom to top, left to right, right to left), `nodeSpacing` (pixels between nodes in the same rank) and `rankSpacing` (pixels between ranks). The schema accepts other keys in `layoutStrategy`, and implementations ignore them.
 
-The reference engine chooses its placement method from `diagramFamily`, not from `layoutStrategy`. Its layered layout, used for architecture, workflow, entity-relationship and UI flow diagrams and for diagrams without a family, reads all three fields, and a field left out takes the `default` the schema shows: `LR`, 30 and 80. The spacings are what it aims for, not minimums: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best. Org charts (a tree, top to bottom), network diagrams (placed by forces) and sequence diagrams (placed from their messages) don't read `layoutStrategy`. The document's `extensions.layoutHints.primaryDirection` turns an org chart's tree, and wins over `direction` in the layered layout (section 8).
+The reference engine chooses its placement method from `diagramFamily`, not from `layoutStrategy`. Its layered layout, used for architecture, flowchart, workflow, entity-relationship and UI flow diagrams and for diagrams without a family, reads all three fields, and a field left out takes its default: `LR` (`TB` for flowcharts) for `direction`, 30 for `nodeSpacing`, and 80 (50 for flowcharts) for `rankSpacing`. The spacings are what it aims for, not minimums: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best. Org charts (a tree, top to bottom), network diagrams (placed by forces) and sequence diagrams (placed from their messages) don't read `layoutStrategy`. The document's `extensions.layoutHints.primaryDirection` turns an org chart's tree, and wins over `direction` in the layered layout (section 8).
 
 ### 3.5 Styles and the palette
 
@@ -167,7 +168,7 @@ A node is a shape with a label. Required fields: `id`, `kind` and `nodeType`.
 | Field | Meaning |
 |---|---|
 | `nodeType` | What the node is (below). |
-| `shape` | `rect`, `roundedRect`, `ellipse`, `diamond`, `cylinder`, `bucket`, `pill`, `hexagon`, `parallelogram`, `cloud`, `box3d`, `textBox` or `iconBox`. |
+| `shape` | `rect`, `roundedRect`, `ellipse`, `diamond`, `cylinder`, `bucket`, `pill`, `hexagon`, `parallelogram`, `cloud`, `box3d`, `textBox`, `iconBox`, `document` (a box with a wavy bottom) or `subroutine` (a predefined process: a box with a line inside each side). Every shape is valid in every family. |
 | `label` | The text. `\n` starts a new line. |
 | `layout` | Position and size (section 6). |
 | `icon` | A `family:id` key, such as `lucide:database`, or an image URL. |
@@ -195,6 +196,7 @@ When `shape` is absent, the reference engine sets it from `nodeType` and stores 
 | `diamond` | `decision`, `workflow.decision`, `workflow.gateway*`, `er.relationship` |
 | `cloud` | `network.cloud` |
 | `iconBox` | `iconNode` |
+| `document` | `document` |
 | `rect` | Every other type |
 
 When `textStyle` or one of its fields is absent, a node's text has `wrap: "auto"`, `align: "center"` and `verticalAlign: "middle"`. `auto` keeps a label on one line while its node is at most 250 px wide, or 400 px for a diamond (the reference engine's widths), and wraps a longer one at spaces there, in lines of even length; a node whose `layout` is wider keeps the line up to its own width. `none` keeps one line however long. A text element's default is `none` (5.6).
@@ -230,7 +232,7 @@ An end has an `elementId` (required) and can have:
 
 When an arrowhead is absent, it comes from `edgeType`: `workflow.messageFlow` has `openCircle` at the start and `openTriangle` at the end; `sequence.async` and `sequence.reply` have none at the start and `openTriangle` at the end; every other type has none at the start and `triangle` at the end. In a document with a frame whose `containerType` is an `aws.*` one, or a node whose `icon` is an `aws:` key, an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type has `openTriangle`, AWS's open arrow, at the end instead; `workflow.sequenceFlow`, `sequence.message`, `sequence.create`, `sequence.destroy` and the `uiflow.*` types keep `triangle`. The reference engine stores only arrowheads that differ from these, and works the rest out from `edgeType` and the document each time it draws the edge, so changing an edge's `edgeType`, or adding or removing a document's AWS groups and AWS icons, changes the arrowheads that weren't set. An arrowhead equal to its type's (or the document's) is treated as absent.
 
-The reference engine routes every edge itself. It draws `polyline` like `orthogonal` and keeps `waypoints` without drawing through them. An `anchor` places its end: with a `side` alone the end meets that side where the engine spreads ends on it, and with an `offset` it meets that place, kept 8 px from the side's corners. An anchored edge shares no trunk with other edges. The engine doesn't move nodes for an anchor. It ignores, with the warning `EDGE_ANCHOR_IGNORED`, an anchor on a sequence message, on a self-loop, or on an end that names a `column`.
+The reference engine routes every edge itself. It draws `polyline` like `orthogonal` and keeps `waypoints` without drawing through them. An `anchor` places its end: with a `side` alone the end meets that side where the engine spreads ends on it, and with an `offset` it meets that place, with the same corner distance as any end (8 px, more past a rounded corner). An anchored edge shares no trunk with other edges. The engine doesn't move nodes for an anchor. It ignores, with the warning `EDGE_ANCHOR_IGNORED`, an anchor on a sequence message, on a self-loop, or on an end that names a `column`.
 
 A `step` MUST be an integer from 1 to 99, and an edge with `stepText` MUST have a `step`. Numbers may repeat. The reference engine draws a numbered badge for each step beside the start of its edge's line, one for the edges with that step and one source. It lists the steps whose edges have `stepText` beside the drawing, in number order, each edge's text under its step's badge in document order. It draws the numbers as given: it doesn't number edges or check their order. In a `sequence` document it draws no badges and warns (`STEP_NOT_DRAWN`). Badges and the list are worked out each time the document is drawn, and none of them is stored.
 
@@ -322,6 +324,7 @@ The reference engine places each unplaced node when it lays the document out: ar
 - an operation moves it (`updateNode` with a new `layout`, `moveElement`, `resizeElement`, `autoLayout`, `addConstraint` with an `order` constraint, `updateScene` with a new `layoutStrategy` or `diagramFamily`, or `restoreRevision`);
 - an edit changes what it shows, or a node that grows pushes it (6.5);
 - a node an edit adds needs room: for its edge label, its column and what lies past it move along the flow; in a pool, a new task grows its lane or opens a column (6.6);
+- in a flowchart, nodes an edit inserts between two placed nodes go on the first one's line, and what lies past them moves along the flow; not a new node on a decision's exit labeled with a negative answer, such as `no`, which goes beside its decision, nor in a flowchart with a frame laid out with its members;
 - in an AWS diagram, a node or a spanning frame's header an edit adds grows its row or column (5.5);
 - in an AWS diagram, the room round a tier frame (a `generic` frame round subnets next to each other in one zone's rows) narrows a gap round the VPC's zones, and the gap gets back what the tier took, up to the room a fresh layout keeps there (5.5);
 - an edit that places nodes in or joined to a Region's column, or adds an edge into it, can move the column right to keep a labeled line into it clear (5.5);
@@ -383,7 +386,7 @@ The reference engine reads these keys:
 | Where | Key | Meaning |
 |---|---|---|
 | Document | `showLifelineFeet` | Sequence diagrams: `false` stops drawing a foot bar at the bottom of each lifeline. |
-| Document | `autoGroup` | Architecture diagrams: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
+| Document | `autoGroup` | Architecture diagrams and diagrams without a family: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
 | `sequence.note` | `anchor` | The lifeline or actor ID the note sits over, or an array of two or more IDs it spans. |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |
@@ -641,7 +644,7 @@ Two documents have the same content when their stored forms (section 11), withou
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
-| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. Where a flowchart decision's branches share a vertex, one of them carries each point where their shared line splits in `junctions` too, and in an architecture, entity-relationship or network diagram or one without a family, so does one of the edges drawn alike that leave one point (or end at one point) at each point where they fork: a crossing carries none. |
+| `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. Where a plain decision's branches (any decision diamond but the `workflow.*` types) share a vertex, one of them carries each point where their shared line splits in `junctions` too, and in an architecture, entity-relationship or network diagram or one without a family, so does one of the edges drawn alike that leave one point (or end at one point) at each point where they fork: a crossing carries none. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
 | `normalizedHash` | A hash an implementation can set. The reference engine doesn't. |
 

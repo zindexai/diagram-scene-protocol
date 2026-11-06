@@ -17,7 +17,7 @@ Both use JSON Schema draft 2020-12. Each schema's `$id` is its official URL, and
 
 SPEC.md defines:
 
-- the scene document: its fields, the seven diagram families and the seven element kinds;
+- the scene document: its fields, the eight diagram families and the seven element kinds;
 - element IDs, and how documents and edits refer to elements;
 - the operation envelope and every operation;
 - revisions: base revisions, conflicts, safe retries with `requestId`, and edits that change nothing;
