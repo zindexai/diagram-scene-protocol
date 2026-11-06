@@ -2,6 +2,22 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.28.3
+
+Changed: the reference engine's layout and drawing. No input field, value or rule changed.
+- A tier, a `generic` frame round subnets next to each other in one Availability Zone's rows, is fitted as a group nested in the zone (5.5). Its border stands 20 px out from its subnets, and the zone's border 20 px out from it; v8.28.0 fitted it 10 px out, inside the zone's border. Every zone of a VPC that holds a tier starts its subnets 40 px in from its left and right borders, so the subnets keep one width and the zones one size.
+- A step badge that stands opposite another badge across that badge's line moves beside its own line, where its line has a clean place (5.3).
+- Two lines that run along one side of a node from the same direction, into it or out of it, nest instead of crossing, where one run can move clear of nodes and other lines.
+- Outside `sequence` documents, an edge label keeps off a place where another line crosses its run and ends nearby in an arrowhead or ER glyph, where the run has room.
+- In an AWS diagram, an end leg moved apart from another line is never laid on another edge's line or left seeming to run through an icon.
+
+Changed: in an AWS diagram, the reference engine keeps the room round a tier frame, a `generic` frame round subnets next to each other in one zone's rows, when it lays out stored positions (6.4). Where the tier's padding or its header narrows a gap round the zones, the gap gets back what the tier took, up to the room a fresh layout keeps there, such as each side of a load balancer between two zones. What lies past the gap moves right or down by that much. It does so whether an edit adds the tier or the document was stored with one. A document stored with the tier drawn as a box still keeps its node positions until it is laid out again. No input field, value or rule changed.
+
+Changed: wording only; 6.4 lists the cases in which a stored position moves one to an item. No input field, value or rule changed.
+
+Changed: descriptions only; no field, value or rule changed.
+- The node `layout` description lists the new case of 6.4.
+
 ## v8.28.0
 
 Added: `step` and `stepText` on edges, `createEdge` and `updateEdge` (5.3, 10.3, 10.4). `step` is an integer from 1 to 99; `stepText`, the edge's line in the step list, needs `step`. On `updateEdge`, `stepText: null` removes the text and `step: null` removes both. The reference engine draws a numbered badge beside the start of each stepped edge's line, one for the edges with one step and one source, and lists the steps with text beside the drawing. It warns about a step in a `sequence` document, which it doesn't draw (`STEP_NOT_DRAWN`).

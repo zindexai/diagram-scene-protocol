@@ -317,7 +317,15 @@ A relatively placed element follows the element it names. The reference engine n
 
 A document stores where its nodes are. A node is placed when it has an absolute layout that isn't at exactly `x` 0, `y` 0 and whose `width` or `height` is above 0. Any other node with an absolute layout is unplaced, and a node with no `layout` counts as an absolute layout at `x` 0, `y` 0.
 
-The reference engine places each unplaced node when it lays the document out: around the placed nodes, which it doesn't move, or every node when none is placed. When it stores the document, it writes each box it chose into the node's `layout`, with the numbers exactly as computed. From then on the node keeps that position. It moves only when an operation moves it (`updateNode` with a new `layout`, `moveElement`, `resizeElement`, `autoLayout`, `addConstraint` with an `order` constraint, `updateScene` with a new `layoutStrategy` or `diagramFamily`, or `restoreRevision`), when an edit changes what it shows (6.5), when a node that grows pushes it (6.5), when a node an edit adds needs room (for its edge label, its column and what lies past it move along the flow; in a pool, a new task grows its lane or opens a column, 6.6; in an AWS diagram, a node or a spanning frame's header an edit adds grows its row or column, and an edit that places nodes in or joined to a Region's column, or adds an edge into it, can move the column right to keep a labeled line into it clear, 5.5), or when an edit changes its frame (6.6), as when it moves a task to another lane.
+The reference engine places each unplaced node when it lays the document out: around the placed nodes, which it doesn't move, or every node when none is placed. When it stores the document, it writes each box it chose into the node's `layout`, with the numbers exactly as computed. From then on the node keeps that position. It moves only when:
+
+- an operation moves it (`updateNode` with a new `layout`, `moveElement`, `resizeElement`, `autoLayout`, `addConstraint` with an `order` constraint, `updateScene` with a new `layoutStrategy` or `diagramFamily`, or `restoreRevision`);
+- an edit changes what it shows, or a node that grows pushes it (6.5);
+- a node an edit adds needs room: for its edge label, its column and what lies past it move along the flow; in a pool, a new task grows its lane or opens a column (6.6);
+- in an AWS diagram, a node or a spanning frame's header an edit adds grows its row or column (5.5);
+- in an AWS diagram, the room round a tier frame (a `generic` frame round subnets next to each other in one zone's rows) narrows a gap round the VPC's zones, and the gap gets back what the tier took, up to the room a fresh layout keeps there (5.5);
+- an edit that places nodes in or joined to a Region's column, or adds an edge into it, can move the column right to keep a labeled line into it clear (5.5);
+- an edit changes its frame, as when it moves a task to another lane (6.6).
 
 Sequence diagrams are the exception. The reference engine lays them out from their messages every time and writes nothing back, so their nodes stay at `x` 0, `y` 0.
 
