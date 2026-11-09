@@ -2,6 +2,27 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.31.0
+
+Added: `autonumber` in a document's `extensions` (8). In a `sequence` document it numbers every drawn message in row order: `true` counts from 1 by 1, and `{ "start", "increment" }` sets where the count starts and what it goes up by, each an integer from 1. A message's own `step` is drawn as given and the count goes on from it; notes, hidden messages and messages to or from a hidden lifeline take no number. The reference engine draws each number as a step badge centered on the start of the message's arrow, and in any other family draws nothing for it and warns (`AUTONUMBER_NOT_DRAWN`).
+
+Added: `side` in a `sequence.note`'s `extensions` (8), `left` or `right`: with a string `anchor` the note sits beside that lifeline instead of over it. The scene schema now lists the note's `anchor` (a string, or an array of strings) beside it. With an array `anchor` the reference engine draws the note over the lifelines and warns (`FAMILY_SEQ_NOTE_SIDE_IGNORED`).
+
+Added: `cross`, an eighth value of `startArrow` and `endArrow` (5.3): an X on the line just short of the node.
+
+Added: `extensions` on `updateScene` (10.8), which sets `autonumber`, `showLifelineFeet`, `autoGroup` and `layoutHints` in the document's `extensions`, each given replacing its value and `null` removing it; no other key. A changed `layoutHints` lays the document out again, as a changed `layoutStrategy` does.
+
+Changed: `step` is drawn in every family (5.3); before, a `sequence` document drew no badges and warned (`STEP_NOT_DRAWN`, removed). In a `sequence` document the badge is centered on the start of the message's arrow.
+
+Changed: `createFrame`'s `frame` takes each element the new frame lists out of that frame's `children` (10.3), so a nested `fragment` frame deleted and created again in one envelope goes back round its rows; before, its rows stayed in both frames (`MULTIPLE_FRAME_MEMBERSHIP`).
+
+Changed: the reference engine's drawing of `sequence` documents. No input field, value or rule changed beyond those above.
+- A lifeline whose first row is a `sequence.create` message arriving at it begins at that row, and one that a `sequence.destroy` message arrives at ends there with no foot bar (5.9). A lifeline used above its create message or below its destroy message is drawn full height on that side, with a warning (`FAMILY_SEQ_USED_BEFORE_CREATE`, `FAMILY_SEQ_USED_AFTER_DESTROY`).
+- An activation bar that opens while another is open on its lifeline is drawn 8 px to the right of it, and messages meet the outermost bar face.
+- A dashed message type's `6,3` dash gives way to the edge's `style.dash`, and `[]` draws it solid.
+
+Changed: the reference service reads and writes Mermaid `sequenceDiagram` text, so a document of every family has a Mermaid view, and imports Mermaid's cross ends exactly as `cross`. Mermaid isn't part of this spec; the service's documentation describes it (section 14).
+
 ## v8.30.0
 
 Added: `flowchart`, an eighth value of `diagramFamily` and of `updateScene`'s `diagramFamily` (3.3, 10.8), for steps, decisions and loops. It uses the generic node and edge types. The reference engine lays a flowchart out top to bottom when `layoutStrategy.direction` is absent, and aims for 50 px between ranks when `rankSpacing` is absent (3.4). It sends a decision's exit labeled with an affirmative answer (such as `yes`) straight on and one labeled with a negative answer (such as `no`) to the right, below in `LR` and `RL`; other labels, and a flowchart with a frame laid out with its members, keep the general decision rules. Each entry into a node keeps its own arrowhead, entries into one side of a decision join, and edges with the same label keep their labels. In the default style its nodes, except external systems, notes and nodes with an `aws:` icon, draw a light blue fill with a blue border unless their style or the palette sets a fill or stroke. When an edit inserts nodes between two placed nodes, the reference engine puts them on the first one's line and moves what lies past them along the flow (6.4), except a new node on a decision's negative exit, which goes beside its decision, and in a flowchart with a frame laid out with its members. It warns (9.3) about a decision with fewer than two exits (`FAMILY_FLOWCHART_DECISION_FEW_EXITS`) and about an unlabeled exit of a decision with two or more (`FAMILY_FLOWCHART_EXIT_UNLABELED`).

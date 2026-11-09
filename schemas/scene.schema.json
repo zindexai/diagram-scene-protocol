@@ -39,7 +39,7 @@
       },
       "extensions": {
         "type": "object",
-        "description": "Reserved extension point for protocol additions. Recognized keys include `showLifelineFeet` (sequence diagrams only) and `autoGroup` (architecture diagrams and diagrams without a family).",
+        "description": "Reserved extension point for protocol additions. Recognized keys include `showLifelineFeet` and `autonumber` (sequence diagrams only) and `autoGroup` (architecture diagrams and diagrams without a family). updateScene sets these keys and `layoutHints`, and no others.",
         "additionalProperties": true,
         "default": {},
         "properties": {
@@ -47,6 +47,20 @@
             "type": "boolean",
             "default": true,
             "description": "Sequence-diagram only. When true (default), the renderer draws a foot bar at the bottom of each lifeline mirroring the head (UML / PlantUML / Mermaid convention). Set to false to suppress foot bars - useful when the author authors their own bottom row of shapes."
+          },
+          "autonumber": {
+            "description": "Sequence diagrams only: numbers every drawn message, top to bottom, each time the diagram is drawn, with a numbered badge at the start of its arrow. true counts from 1 by 1; an object sets where the count starts (start) and what it goes up by (increment), each a whole number from 1 and 1 when left out. A message's own step is drawn as given and the count goes on from it, as Mermaid's autonumber with a number restarts it partway down. Notes, hidden messages and messages to or from a hidden lifeline take no number, and the count skips them. Numbers are whole numbers: write numbering such as 1.1 in the label instead. In every other family it draws nothing (AUTONUMBER_NOT_DRAWN): give the edges you want numbered a step.",
+            "oneOf": [
+              { "const": true },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "start": { "type": "integer", "minimum": 1, "description": "The first message's number; 1 when left out." },
+                  "increment": { "type": "integer", "minimum": 1, "description": "What each next message's number goes up by; 1 when left out." }
+                }
+              }
+            ]
           },
           "autoGroup": {
             "type": "string",
@@ -386,6 +400,18 @@
               "endsAt": {
                 "$ref": "#/$defs/id",
                 "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
+              },
+              "anchor": {
+                "description": "A sequence.note's place: the ID of the lifeline or actor it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a lifeline or actor isn't drawn.",
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "array", "items": { "type": "string" } }
+                ]
+              },
+              "side": {
+                "type": "string",
+                "enum": ["left", "right"],
+                "description": "A sequence.note with one anchor: drawn beside that lifeline, on its left or right, instead of over it. Ignored on a note across lifelines (an array anchor), which is always drawn over them (FAMILY_SEQ_NOTE_SIDE_IGNORED)."
               }
             }
           },
@@ -763,7 +789,7 @@
       },
       "arrowhead": {
         "type": "string",
-        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle"]
+        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle", "cross"]
       },
       "edgeEndpoints": {
         "type": "object",
@@ -826,7 +852,7 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 99,
-                "description": "A numbered step: a badge with this number beside the start of the line, as AWS's architecture diagrams number a request's path. Edges may share a number; those with one number and one source share a badge. The engine draws the numbers given and doesn't number edges. Drawn in every family but sequence (STEP_NOT_DRAWN): number a message in its label instead."
+                "description": "A numbered step: a badge with this number beside the start of the line, as AWS's architecture diagrams number a request's path, and at the start of a sequence message's arrow, as Mermaid numbers messages. Drawn in every family, never for a hidden edge. Edges may share a number; those with one number and one source share a badge. The engine draws the numbers given and numbers no other edge, except in a sequence diagram whose document sets extensions.autonumber, which numbers every message and counts on from a message's step. Whole numbers only: write numbering such as 1.1 in the label instead."
               },
               "stepText": {
                 "type": "string",

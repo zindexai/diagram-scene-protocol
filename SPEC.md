@@ -216,7 +216,7 @@ An edge connects two elements. Required fields: `id`, `kind`, `from` and `to`.
 | `from`, `to` | The two ends (below). |
 | `edgeType` | `default` when absent, or a family edge type (3.3). |
 | `label` | The text. `\n` starts a new line. |
-| `endpoints` | `startArrow` and `endArrow`: `none`, `triangle`, `diamond`, `circle`, `bar`, `openTriangle` or `openCircle`. |
+| `endpoints` | `startArrow` and `endArrow`: `none`, `triangle`, `diamond`, `circle`, `bar`, `openTriangle`, `openCircle` or `cross` (an X on the line just short of the node). |
 | `router` | `straight` (one line between the nodes' centers, ending on each outline), `orthogonal` (right-angle segments routed round nodes), `curved` (one bowed arc between the nodes, ending on each outline) or `polyline` (drawn as `orthogonal`). `straight` and `curved` aren't routed round nodes; one that runs through a node gets the warning `EDGE_CROSSES_NODE`. Sequence messages ignore `router`. |
 | `waypoints` | Points (`x`, `y`) kept with the edge. |
 | `step` | Optional. A numbered step, an integer from 1 to 99. |
@@ -234,7 +234,9 @@ When an arrowhead is absent, it comes from `edgeType`: `workflow.messageFlow` ha
 
 The reference engine routes every edge itself. It draws `polyline` like `orthogonal` and keeps `waypoints` without drawing through them. An `anchor` places its end: with a `side` alone the end meets that side where the engine spreads ends on it, and with an `offset` it meets that place, with the same corner distance as any end (8 px, more past a rounded corner). An anchored edge shares no trunk with other edges. The engine doesn't move nodes for an anchor. It ignores, with the warning `EDGE_ANCHOR_IGNORED`, an anchor on a sequence message, on a self-loop, or on an end that names a `column`.
 
-A `step` MUST be an integer from 1 to 99, and an edge with `stepText` MUST have a `step`. Numbers may repeat. The reference engine draws a numbered badge for each step beside the start of its edge's line, one for the edges with that step and one source. It lists the steps whose edges have `stepText` beside the drawing, in number order, each edge's text under its step's badge in document order. It draws the numbers as given: it doesn't number edges or check their order. In a `sequence` document it draws no badges and warns (`STEP_NOT_DRAWN`). Badges and the list are worked out each time the document is drawn, and none of them is stored.
+A `step` MUST be an integer from 1 to 99, and an edge with `stepText` MUST have a `step`. Numbers may repeat. The reference engine draws a numbered badge for each step beside the start of its edge's line, one for the edges with that step and one source, in every family. It lists the steps whose edges have `stepText` beside the drawing, in number order, each edge's text under its step's badge in document order. It draws the numbers as given: it doesn't number edges or check their order, apart from `autonumber` (below). It draws no badge for a hidden edge or one with a hidden end. Badges and the list are worked out each time the document is drawn, and none of them is stored.
+
+In a `sequence` document the badge is centered on the start of the message's arrow, and the document's `extensions.autonumber` (8) numbers the messages that have no `step`.
 
 #### ER edges
 
@@ -292,6 +294,8 @@ A guide is a horizontal or vertical line across the canvas. Required fields: `id
 ### 5.9 The order of elements
 
 The order of `elements` matters in two places. In a sequence diagram, lifelines and actors appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
+
+In the reference engine, a lifeline or actor whose first row is a `sequence.create` message arriving at it begins at that row, and one that a `sequence.destroy` message arrives at ends at that row, with no foot bar. Only the first such message counts, and one from a lifeline to itself counts as neither. A lifeline that a message or note uses above its create message, or below its destroy message, is drawn the full height on that side, and the reference engine warns (`FAMILY_SEQ_USED_BEFORE_CREATE`, `FAMILY_SEQ_USED_AFTER_DESTROY`).
 
 ## 6. Positions and sizes
 
@@ -386,9 +390,11 @@ The reference engine reads these keys:
 | Where | Key | Meaning |
 |---|---|---|
 | Document | `showLifelineFeet` | Sequence diagrams: `false` stops drawing a foot bar at the bottom of each lifeline. |
+| Document | `autonumber` | Sequence diagrams: numbers every drawn message in row order (5.9), each time the document is drawn. `true` counts from 1 by 1; `{ "start", "increment" }` sets where the count starts and what it goes up by, each an integer from 1 and 1 when absent. A message's own `step` is drawn as given, and the count goes on from it. Notes, hidden messages and messages with a hidden end take no number, and the count skips them. In any other family the reference engine draws nothing for it and warns (`AUTONUMBER_NOT_DRAWN`). |
 | Document | `autoGroup` | Architecture diagrams and diagrams without a family: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
 | `sequence.note` | `anchor` | The lifeline or actor ID the note sits over, or an array of two or more IDs it spans. |
+| `sequence.note` | `side` | `left` or `right`, with a string `anchor`: the note sits beside that lifeline instead of over it, its near edge 25 px from the lifeline in the reference engine. With an array `anchor` the note is drawn over the lifelines, and the reference engine warns (`FAMILY_SEQ_NOTE_SIDE_IGNORED`). |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |
 | `fragment` frame | `operands` | The operands after the first: an array of `{ "startsAt", "guard" }`, where `startsAt` is the ID of the message or note the operand starts at and `guard` is optional. Each draws a dashed line across the fragment above that row, with `[guard]` under it. The frame's `title` is the first operand's guard. |
 | `sequence.activation` | `startsAt`, `endsAt` | The IDs of the messages a bar runs between: it is drawn on the lifeline `startsAt` arrives at, from that message's arrow to `endsAt`'s, or one row tall without `endsAt`. |
@@ -503,7 +509,7 @@ The document an edit produces is a document like any other, and the rules of sec
 
 `createEdge` adds an edge. Required: `id`, `from` and `to`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `label`, `edgeType`, `endpoints`, `router`, `waypoints`, `step`, `stepText`, `after` or `before`, `metadata` and `extensions`. Missing arrowheads come from `edgeType`, as in a document (5.3).
 
-`createFrame` adds a frame. Required: `id`, and `children` (at least one) or `spans` (at least one), which makes a spanning frame (5.5). A `createFrame` with `spans` MUST NOT have `children` or `frame`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `icon`, `layout`, `containerType`, `laneDirection`, `frame`, `metadata` and `extensions`. Without a `layout`, the frame fits around its members (6.6). `frame`, the ID of a frame, appends the new frame to that frame's `children`, so a lane goes after a pool's other lanes.
+`createFrame` adds a frame. Required: `id`, and `children` (at least one) or `spans` (at least one), which makes a spanning frame (5.5). A `createFrame` with `spans` MUST NOT have `children` or `frame`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `icon`, `layout`, `containerType`, `laneDirection`, `frame`, `metadata` and `extensions`. Without a `layout`, the frame fits around its members (6.6). `frame`, the ID of a frame, appends the new frame to that frame's `children`, so a lane goes after a pool's other lanes, and removes from that frame's `children` each element the new frame lists in its own, so each stays in one frame. A nested `fragment` frame deleted and created again in one envelope, with `frame` naming the fragment that held it, therefore goes back round its rows.
 
 `createText` adds a text element (5.6). Required: `id`, `text` and `layout`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `textStyle`, and `metadata` and `extensions`, which become the element's.
 
@@ -577,8 +583,9 @@ The reference engine refuses a resize it would undo. An unplaced node (6.4) gets
 | `assets` | Merged into `assets`: each entry given replaces the one with that ID; `null` removes it. |
 | `layoutStrategy` | Replaces `layoutStrategy`; `null` removes it. |
 | `diagramFamily` | Replaces `diagramFamily`; `null` removes it. |
+| `extensions` | Sets keys of the document's `extensions` (8), only `autonumber`, `showLifelineFeet`, `autoGroup` and `layoutHints`: each key given replaces its value whole, and `null` removes it. Every other key of the document's `extensions` stays as it is, and an envelope that names one is invalid. |
 
-A `layoutStrategy` or `diagramFamily` that differs from the current one, including its removal, lays the document out again as `autoLayout` without `elements` does (10.6), in the family the document has after the edit. Sending the current value again changes nothing.
+A `layoutStrategy`, `diagramFamily` or `extensions.layoutHints` that differs from the current one, including its removal, lays the document out again as `autoLayout` without `elements` does (10.6), in the family the document has after the edit. Sending the current value again changes nothing.
 
 ### 10.9 History
 

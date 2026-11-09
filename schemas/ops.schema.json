@@ -145,6 +145,18 @@
           "endsAt": {
             "$ref": "#/$defs/id",
             "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
+          },
+          "anchor": {
+            "description": "A sequence.note's place: the ID of the lifeline or actor it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a lifeline or actor isn't drawn.",
+            "oneOf": [
+              { "type": "string" },
+              { "type": "array", "items": { "type": "string" } }
+            ]
+          },
+          "side": {
+            "type": "string",
+            "enum": ["left", "right"],
+            "description": "A sequence.note with one anchor: drawn beside that lifeline, on its left or right, instead of over it. Ignored on a note across lifelines (an array anchor), which is always drawn over them (FAMILY_SEQ_NOTE_SIDE_IGNORED)."
           }
         }
       },
@@ -188,7 +200,7 @@
       },
       "arrowhead": {
         "type": "string",
-        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle"]
+        "enum": ["none", "triangle", "diamond", "circle", "bar", "openTriangle", "openCircle", "cross"]
       },
       "fitMode": {
         "type": "string",
@@ -1231,7 +1243,7 @@
                 "type": "integer",
                 "minimum": 1,
                 "maximum": 99,
-                "description": "A numbered step: a badge with this number beside the start of the line. Edges with one number and one source share a badge. Not drawn in sequence diagrams (STEP_NOT_DRAWN)."
+                "description": "A numbered step: a badge with this number beside the start of the line, or at the start of a sequence message's arrow. Drawn in every family, never for a hidden edge. Edges with one number and one source share a badge. In a sequence diagram whose document sets extensions.autonumber, the count goes on from it."
               },
               "stepText": {
                 "type": "string",
@@ -1502,14 +1514,14 @@
               },
               "frame": {
                 "$ref": "#/$defs/id",
-                "description": "The ID of the frame the new frame goes in: any frame (a pool, a VPC, a generic frame), not a group or a node. The new frame is appended to that frame's children, so a lane goes after the pool's lanes and an Availability Zone becomes the VPC's last. The frame must exist when this op runs: create it in an earlier op, or list the new frame in its createFrame children instead. A string only."
+                "description": "The ID of the frame the new frame goes in: any frame (a pool, a VPC, a generic frame, a sequence fragment), not a group or a node. The new frame is appended to that frame's children, so a lane goes after the pool's lanes and an Availability Zone becomes the VPC's last, and each element the new frame lists in children leaves that frame's children, so it stays in one frame: a nested fragment deleted and created again in one edit goes back round its rows inside the fragment that held it. An element the new frame lists that sits in another frame stays there too (MULTIPLE_FRAME_MEMBERSHIP). The frame must exist when this op runs: create it in an earlier op, or list the new frame in its createFrame children instead. A string only."
               }
             }
           }
         ]
       },
       "updateFrameOp": {
-        "description": "Change a frame: its title, style, icon, containerType or laneDirection, or a spanning frame's spans. Each field given replaces the frame's; null removes the style, the icon, the containerType (the frame becomes generic) or the laneDirection. The frame's members, position and size stay, so a frame that becomes an AWS group (containerType aws.vpc and the like) is drawn as one where it is. Its children and its position aren't changed here: createNode or updateNode with frame puts a node in it, createFrame with frame a new frame, and moveElement or resizeElement move or resize it. A sequence fragment's operands are its extensions, which this doesn't change: delete the fragment and create it again in one edit.",
+        "description": "Change a frame: its title, style, icon, containerType or laneDirection, or a spanning frame's spans. Each field given replaces the frame's; null removes the style, the icon, the containerType (the frame becomes generic) or the laneDirection. The frame's members, position and size stay, so a frame that becomes an AWS group (containerType aws.vpc and the like) is drawn as one where it is. Its children and its position aren't changed here: createNode or updateNode with frame puts a node in it, createFrame with frame a new frame, and moveElement or resizeElement move or resize it. A sequence fragment's operator and operands are its extensions, which this doesn't change: delete the fragment and create it again in one edit with the same id, with createFrame's frame naming the fragment that held it when it was nested.",
         "unevaluatedProperties": false,
         "allOf": [
           { "$ref": "#/$defs/opBase" },
@@ -1889,6 +1901,49 @@
                   }
                 },
                 "additionalProperties": false
+              },
+              "extensions": {
+                "type": "object",
+                "description": "Set keys of the document's top-level extensions (scene.schema.json), only these four: each given replaces its value whole, null removes it, and the document's other keys stay. No other key can be set or removed here.",
+                "additionalProperties": false,
+                "properties": {
+                  "autonumber": {
+                    "description": "Sequence diagrams only: number every drawn message, as the document's extensions.autonumber: true counts from 1 by 1, an object sets start and increment (whole numbers from 1, each 1 when left out). null stops numbering; messages with a step keep their numbers. In other families it draws nothing (AUTONUMBER_NOT_DRAWN).",
+                    "oneOf": [
+                      { "const": true },
+                      {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "start": { "type": "integer", "minimum": 1 },
+                          "increment": { "type": "integer", "minimum": 1 }
+                        }
+                      },
+                      { "type": "null" }
+                    ]
+                  },
+                  "showLifelineFeet": {
+                    "type": ["boolean", "null"],
+                    "description": "Sequence diagrams only: false draws no foot bar under each lifeline; true or null draws them again."
+                  },
+                  "autoGroup": {
+                    "type": ["string", "null"],
+                    "enum": ["byNodeType", null],
+                    "description": "Architecture diagrams and diagrams without a family only: byNodeType draws a band behind each set of nodes of one nodeType, as the document's extensions.autoGroup; null removes it."
+                  },
+                  "layoutHints": {
+                    "type": ["object", "null"],
+                    "description": "Replaces the document's layoutHints whole, or null removes them. A new or removed value places every node again, as autoLayout without elements does.",
+                    "additionalProperties": false,
+                    "properties": {
+                      "primaryDirection": {
+                        "type": "string",
+                        "enum": ["TB", "BT", "LR", "RL"],
+                        "description": "The direction of an org chart's tree (TB when absent), and of the layered layout, where it wins over layoutStrategy.direction. Other families' layouts don't read it."
+                      }
+                    }
+                  }
+                }
               }
             }
           }
