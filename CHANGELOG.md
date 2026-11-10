@@ -2,6 +2,15 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.35.0
+
+Changed: the reference engine's drawing of frames in `sequence` documents (5.5). No input field or value changed. Before, only `fragment` frames were laid out with the document's rows.
+- A frame of any other `containerType` whose `children` hold lifelines or actors is drawn as a participant box: a bordered rectangle round their columns, with its `title` centered above their heads.
+- One whose `children` hold messages, notes, `fragment` frames or other bands is drawn as a highlight band: a filled rectangle behind those rows, in its `style.fill` or a faint tint, with its `title` at its top-left. Bands and fragments nest in each other.
+- Both ignore their `layout`. A frame that holds lifelines and rows isn't drawn (`FAMILY_SEQ_FRAME_MIXED`), nor is one that holds neither (`FAMILY_SEQ_EMPTY_FRAGMENT`). Of two boxes that share a lifeline one is drawn (`FAMILY_SEQ_BOX_NESTED`), and a lifeline between a box's lifelines that the box doesn't list is drawn inside it (`FAMILY_SEQ_BOX_SPLIT`).
+
+Changed: `after` and `before` (10.3) take a highlight band where they take a `fragment` frame: a message or note placed next to one of a band's rows joins the band, one given the band goes outside it, and a deleted band's rows stay in the fragment or band that holds it (10.4).
+
 ## v8.33.2
 
 Changed: the reference engine's drawing of `sequence` documents. No input field, value or rule changed.

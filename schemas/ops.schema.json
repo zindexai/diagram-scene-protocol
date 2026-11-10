@@ -985,11 +985,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and operand), or below a fragment's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and operand, so one placed before an operand's first row starts it), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1075,11 +1075,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and operand and leaving any other), or below a fragment's last row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1187,11 +1187,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and operand), or below a fragment's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and operand, so one placed before an operand's first row starts it), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1273,11 +1273,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment and operand and leaving any other), or below a fragment's last row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment and operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1500,12 +1500,12 @@
               },
               "layout": {
                 "$ref": "#/$defs/layout",
-                "description": "A frame's box. A sequence fragment's is ignored: a fragment is laid out with its rows."
+                "description": "A frame's box. Ignored in a sequence diagram, where a fragment or highlight band is laid out with its rows and a participant box with its lifelines."
               },
               "containerType": {
                 "type": "string",
                 "enum": ["generic", "pool", "lane", "subprocess", "partition", "package", "boundary", "fragment", "aws.cloud", "aws.region", "aws.az", "aws.vpc", "aws.subnet.public", "aws.subnet.private", "aws.securityGroup", "aws.autoScalingGroup", "aws.account", "aws.corporateDataCenter"],
-                "description": "What the frame stands for; generic when absent. pool and lane are BPMN's swimlanes, which the engine lays out itself: a pool's children are its lanes (frames with containerType lane), in the order they stack, and a lane's children are its tasks, events and gateways, or lanes of its own. Lanes run along the flow and stack across it, every node a lane lists is placed inside it, each lane is as deep as its contents need, and columns are shared across lanes and pools. Leave layout off pools, lanes and their nodes: a pool's or lane's layout is a minimum, not a fixed box, and a lane's x and y are ignored. fragment is a sequence diagram's combined fragment, laid out with its rows. The aws.* types are AWS's groups (AWS Architecture Icons): aws.cloud, aws.region, aws.vpc, aws.az, aws.subnet.public, aws.subnet.private, aws.securityGroup, aws.autoScalingGroup, aws.account and aws.corporateDataCenter, each drawn in AWS's color, line and corner icon with no fill and its title in the node label's size, nested as AWS nests them (AWS Cloud, Region, VPC, Availability Zone, subnets); style overrides the preset. In an architecture diagram, or one without a family, aws.cloud, aws.region, aws.vpc, aws.az and the two subnet types also place what they hold as AWS's reference diagrams do (Availability Zones as columns, subnets as rows across them, gateways on the side of the VPC they face, or on its top when they serve several AZs or the load balancer between two, regional services beside the VPCs, global ones above the Regions): leave layout off them and their nodes, a preset's layout being only a minimum, and nest them directly: a generic frame round whole VPCs of a Region, round all of a VPC's Availability Zones, or round subnets next to each other in one zone's rows (a tier), is read through, but any other frame between a Region and its VPC, or a VPC and its Availability Zones, is laid out as any frame with the presets inside it, and one between a zone and its subnets puts everything in it on one row after the zone's subnets; a generic one there gets the warning AWS_FRAME_HIDES_GROUPS. A security group or Auto Scaling group across Availability Zones is a spanning frame: give it spans instead of children. The other aws.* types only draw (an aws.account holding Regions is arranged as aws.cloud is). The other types draw as a generic frame does."
+                "description": "What the frame stands for; generic when absent. pool and lane are BPMN's swimlanes, which the engine lays out itself: a pool's children are its lanes (frames with containerType lane), in the order they stack, and a lane's children are its tasks, events and gateways, or lanes of its own. Lanes run along the flow and stack across it, every node a lane lists is placed inside it, each lane is as deep as its contents need, and columns are shared across lanes and pools. Leave layout off pools, lanes and their nodes: a pool's or lane's layout is a minimum, not a fixed box, and a lane's x and y are ignored. fragment is a sequence diagram's combined fragment, laid out with its rows. Any other frame in a sequence diagram is drawn by its children: a participant box round lifelines, or a highlight band behind messages and notes; one that holds both isn't drawn, and boxes don't nest or overlap. The aws.* types are AWS's groups (AWS Architecture Icons): aws.cloud, aws.region, aws.vpc, aws.az, aws.subnet.public, aws.subnet.private, aws.securityGroup, aws.autoScalingGroup, aws.account and aws.corporateDataCenter, each drawn in AWS's color, line and corner icon with no fill and its title in the node label's size, nested as AWS nests them (AWS Cloud, Region, VPC, Availability Zone, subnets); style overrides the preset. In an architecture diagram, or one without a family, aws.cloud, aws.region, aws.vpc, aws.az and the two subnet types also place what they hold as AWS's reference diagrams do (Availability Zones as columns, subnets as rows across them, gateways on the side of the VPC they face, or on its top when they serve several AZs or the load balancer between two, regional services beside the VPCs, global ones above the Regions): leave layout off them and their nodes, a preset's layout being only a minimum, and nest them directly: a generic frame round whole VPCs of a Region, round all of a VPC's Availability Zones, or round subnets next to each other in one zone's rows (a tier), is read through, but any other frame between a Region and its VPC, or a VPC and its Availability Zones, is laid out as any frame with the presets inside it, and one between a zone and its subnets puts everything in it on one row after the zone's subnets; a generic one there gets the warning AWS_FRAME_HIDES_GROUPS. A security group or Auto Scaling group across Availability Zones is a spanning frame: give it spans instead of children. The other aws.* types only draw (an aws.account holding Regions is arranged as aws.cloud is). The other types draw as a generic frame does."
               },
               "laneDirection": {
                 "type": "string",
