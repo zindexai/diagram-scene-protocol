@@ -155,7 +155,7 @@ Constraint IDs (section 7) use the same characters. They are optional, and a con
 | `extensions` | An open object (section 8). |
 | `x`, `y`, `width`, `height` | Shorthand for an absolute layout (6.2). |
 
-When `zIndex` is absent, the reference engine assigns one by kind, counting up in array order within each kind: frames from 0, groups from 100, edges from 200, nodes from 300, text from 400, images from 500 and guides from 600. So frames draw behind edges, and edges behind nodes. In a sequence diagram, the reference engine draws messages over lifelines, actors and activation bars whatever their `zIndex`; `zIndex` still orders notes and every other element.
+When `zIndex` is absent, the reference engine assigns one by kind, counting up in array order within each kind: frames from 0, groups from 100, edges from 200, nodes from 300, text from 400, images from 500 and guides from 600. So frames draw behind edges, and edges behind nodes. In a sequence diagram, the reference engine draws messages over participants and activation bars whatever their `zIndex`; `zIndex` still orders notes and every other element.
 
 `visible: false` hides an element. The reference engine still lays it out, so it keeps its space, but doesn't draw it, or any edge with an end at it. A hidden frame hides only its box and title, and a hidden group only its SVG `<title>` (5.4), not their members.
 
@@ -180,10 +180,12 @@ Family node types:
 
 - `workflow.start`, `workflow.end`, `workflow.task`, `workflow.decision`, `workflow.gateway`, `workflow.gatewayParallel`, `workflow.gatewayInclusive`, `workflow.gatewayEvent`, `workflow.subprocess`, `workflow.timer`, `workflow.error`, `workflow.intermediateTimer`, `workflow.intermediateMessage`, `workflow.intermediateError`, `workflow.intermediateThrowMessage`, `workflow.terminate`, `workflow.messageStart` and `workflow.messageEnd`;
 - `er.entity`, `er.weakEntity`, `er.attribute` and `er.relationship`;
-- `sequence.lifeline`, `sequence.activation`, `sequence.actor` and `sequence.note`;
+- `sequence.lifeline`, `sequence.actor`, `sequence.boundary`, `sequence.control`, `sequence.entity`, `sequence.database`, `sequence.collections`, `sequence.queue`, `sequence.activation` and `sequence.note`;
 - `network.server`, `network.router`, `network.switch`, `network.firewall`, `network.cloud` and `network.client`;
 - `org.person`, `org.role` and `org.department`;
 - `uiflow.screen`, `uiflow.modal`, `uiflow.entry` and `uiflow.exit`.
+
+The first eight `sequence.*` types are a sequence diagram's participants: each heads a column, and a message runs from one to another. Six of them say what a participant is, as UML's stereotypes do (`boundary`, `control`, `entity`, `database`, `collections`, `queue`). The reference engine draws each type's head and foot differently and treats them alike in every other way.
 
 When `shape` is absent, the reference engine sets it from `nodeType` and stores it:
 
@@ -279,7 +281,7 @@ The `aws.*` container types are AWS's groups, as the AWS Architecture Icons draw
 
 In the reference engine, lanes run along the flow and stack across it, in the order the pool's `children` list them, and every node a lane lists is placed inside it. A pool's `laneDirection` sets the flow: left to right for `vertical`, top to bottom for `horizontal`, winning over the document's direction when the two disagree. Without `laneDirection`, lanes stack across the document's direction. A pool's or lane's `layout` is a minimum: they grow to hold their members. A `fragment` frame is a sequence diagram's combined fragment: its `extensions.operator` (such as `alt`, `loop` or `opt`) is drawn in its corner, and `ref` is drawn when it is absent. Its `children` are the messages and notes it holds, and the fragments nested in it. In a sequence diagram the reference engine lays a fragment out with its rows, from its first message or note to its last, and ignores its `layout`. Each operand after the first starts at a message or note in the fragment, after its first row (`extensions.operands`, 8), and is drawn as a dashed line above that row with its guard under it, for every operator.
 
-In a sequence diagram the reference engine draws a frame of any other `containerType` by what its `children` hold, at any depth, and ignores its `layout`. One that holds lifelines or actors is a participant box: a bordered rectangle round their columns, from above their heads to below their feet, with its `title` centered above the heads. One that holds messages, notes, `fragment` frames or other bands is a highlight band: a filled rectangle behind those rows, from its first row to its last, with its `title` at its top-left. A band's `style.fill` is its color, and without one it takes a faint tint. A frame that holds both, or neither, isn't drawn (`FAMILY_SEQ_FRAME_MIXED`, `FAMILY_SEQ_EMPTY_FRAGMENT`). Participant boxes don't nest or overlap: of two that share a lifeline, the one that holds the other is drawn, or else the earlier in `elements` (`FAMILY_SEQ_BOX_NESTED`). Bands and fragments nest in each other.
+In a sequence diagram the reference engine draws a frame of any other `containerType` by what its `children` hold, at any depth, and ignores its `layout`. One that holds participants (5.2) is a participant box: a bordered rectangle round their columns, from above their heads to below their feet, with its `title` centered above the heads. One that holds messages, notes, `fragment` frames or other bands is a highlight band: a filled rectangle behind those rows, from its first row to its last, with its `title` at its top-left. A band's `style.fill` is its color, and without one it takes a faint tint. A frame that holds both, or neither, isn't drawn (`FAMILY_SEQ_FRAME_MIXED`, `FAMILY_SEQ_EMPTY_FRAGMENT`). Participant boxes don't nest or overlap: of two that share a lifeline, the one that holds the other is drawn, or else the earlier in `elements` (`FAMILY_SEQ_BOX_NESTED`). Bands and fragments nest in each other.
 
 ### 5.6 Text
 
@@ -295,9 +297,9 @@ A guide is a horizontal or vertical line across the canvas. Required fields: `id
 
 ### 5.9 The order of elements
 
-The order of `elements` matters in two places. In a sequence diagram, lifelines and actors appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
+The order of `elements` matters in two places. In a sequence diagram, participants (5.2) appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
 
-In the reference engine, a lifeline or actor whose first row is a `sequence.create` message arriving at it begins at that row, and one that a `sequence.destroy` message arrives at ends at that row, with no foot bar. Only the first such message counts, and one from a lifeline to itself counts as neither. A lifeline that a message or note uses above its create message, or below its destroy message, is drawn the full height on that side, and the reference engine warns (`FAMILY_SEQ_USED_BEFORE_CREATE`, `FAMILY_SEQ_USED_AFTER_DESTROY`).
+In the reference engine, a participant whose first row is a `sequence.create` message arriving at it begins at that row, and one that a `sequence.destroy` message arrives at ends at that row, with no foot bar. Only the first such message counts, and one from a lifeline to itself counts as neither. A lifeline that a message or note uses above its create message, or below its destroy message, is drawn the full height on that side, and the reference engine warns (`FAMILY_SEQ_USED_BEFORE_CREATE`, `FAMILY_SEQ_USED_AFTER_DESTROY`).
 
 ## 6. Positions and sizes
 
@@ -395,7 +397,7 @@ The reference engine reads these keys:
 | Document | `autonumber` | Sequence diagrams: numbers every drawn message in row order (5.9), each time the document is drawn. `true` counts from 1 by 1; `{ "start", "increment" }` sets where the count starts and what it goes up by, each an integer from 1 and 1 when absent. A message's own `step` is drawn as given, and the count goes on from it. Notes, hidden messages and messages with a hidden end take no number, and the count skips them. In any other family the reference engine draws nothing for it and warns (`AUTONUMBER_NOT_DRAWN`). |
 | Document | `autoGroup` | Architecture diagrams and diagrams without a family: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
-| `sequence.note` | `anchor` | The lifeline or actor ID the note sits over, or an array of two or more IDs it spans. |
+| `sequence.note` | `anchor` | The participant ID the note sits over, or an array of two or more IDs it spans. |
 | `sequence.note` | `side` | `left` or `right`, with a string `anchor`: the note sits beside that lifeline instead of over it, its near edge 25 px from the lifeline in the reference engine. With an array `anchor` the note is drawn over the lifelines, and the reference engine warns (`FAMILY_SEQ_NOTE_SIDE_IGNORED`). |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |
 | `fragment` frame | `operands` | The operands after the first: an array of `{ "startsAt", "guard" }`, where `startsAt` is the ID of the message or note the operand starts at and `guard` is optional. Each draws a dashed line across the fragment above that row, with `[guard]` under it. The frame's `title` is the first operand's guard. |
@@ -492,7 +494,7 @@ An implementation applies the operations in order, each to the document that the
 | A style name an operation gives is in `styles`, or an `updateScene` of the envelope adds it. | `STYLE_NOT_FOUND` |
 | A relative layout an operation gives names an element that exists or that the envelope creates. | `RELATIVE_TARGET_NOT_FOUND` |
 | The element `after` or `before` names exists when the operation runs. | `ORDER_TARGET_NOT_FOUND` |
-| `after` and `before` place a sequence lifeline, actor, message or note next to another element than itself: a lifeline or actor next to a lifeline or actor, a message or note next to a message, a note, a `fragment` frame or a highlight band (5.5). (Giving both is a schema error.) | `ORDER_NOT_SUPPORTED` |
+| `after` and `before` place a sequence participant, message or note next to another element than itself: a participant next to a participant, a message or note next to a message, a note, a `fragment` frame or a highlight band (5.5). (Giving both is a schema error.) | `ORDER_NOT_SUPPORTED` |
 | The elements an `addConstraint` constraint names exist or the envelope creates them, and its `id` isn't in use. | `CONSTRAINT_TARGET_NOT_FOUND`, `CONSTRAINT_ID_DUPLICATE` |
 | `setText` names a node, an edge or a text element. | `TEXT_OPERATION_KIND_INVALID` |
 | `resizeElement` names a node, a frame, an image or a text element. | `RESIZE_NOT_SUPPORTED` |
@@ -521,7 +523,7 @@ The document an edit produces is a document like any other, and the rules of sec
 
 Each of these adds its element at the end of `elements`, unless `createNode` or `createEdge` gives `after` or `before`, an element ID: then it goes right after or right before that element, which puts it in its place in a sequence diagram's order (5.9).
 
-- A lifeline or actor goes next to a lifeline or actor.
+- A participant (5.2) goes next to a participant.
 - A message or note goes next to a message or note, and joins the `children` of the `fragment` frame or highlight band (5.5) that holds that one, leaving any other.
 - A message or note given a `fragment` frame or a highlight band goes right after the last message or note it holds, at any depth, or right before the first, outside it and in the fragment or band that holds it, if any.
 - A message or note joins the operand of the row it goes next to, so one placed right before an operand's first row becomes the row that operand starts at (`extensions.operands[].startsAt`, 8). An operand whose first row moves away starts at its next row, and one left with no rows is removed (`FRAGMENT_OPERAND_REMOVED`).

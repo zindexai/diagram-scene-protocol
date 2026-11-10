@@ -402,7 +402,7 @@
                 "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
               },
               "anchor": {
-                "description": "A sequence.note's place: the ID of the lifeline or actor it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a lifeline or actor isn't drawn.",
+                "description": "A sequence.note's place: the ID of the participant it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a participant isn't drawn.",
                 "oneOf": [
                   { "type": "string" },
                   { "type": "array", "items": { "type": "string" } }
@@ -493,6 +493,12 @@
           "sequence.lifeline",
           "sequence.activation",
           "sequence.actor",
+          "sequence.boundary",
+          "sequence.control",
+          "sequence.entity",
+          "sequence.database",
+          "sequence.collections",
+          "sequence.queue",
           "sequence.note",
           "network.server",
           "network.router",

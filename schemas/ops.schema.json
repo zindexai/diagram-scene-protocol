@@ -147,7 +147,7 @@
             "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
           },
           "anchor": {
-            "description": "A sequence.note's place: the ID of the lifeline or actor it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a lifeline or actor isn't drawn.",
+            "description": "A sequence.note's place: the ID of the participant it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a participant isn't drawn.",
             "oneOf": [
               { "type": "string" },
               { "type": "array", "items": { "type": "string" } }
@@ -253,6 +253,12 @@
           "sequence.lifeline",
           "sequence.activation",
           "sequence.actor",
+          "sequence.boundary",
+          "sequence.control",
+          "sequence.entity",
+          "sequence.database",
+          "sequence.collections",
+          "sequence.queue",
           "sequence.note",
           "network.server",
           "network.router",
@@ -985,11 +991,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a participant to the right of another participant, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a participant to the left of another participant, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1075,11 +1081,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a participant to the right of another participant, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a participant to the left of another participant, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1187,11 +1193,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right after the element with this ID: a participant to the right of another participant, a message or note below another message or note (joining its fragment or highlight band, and its operand), or below a fragment's or highlight band's last row. That element must exist when this op runs. Without after or before, the element is added last. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Where it goes in a sequence diagram's order, right before the element with this ID: a participant to the left of another participant, a message or note above another message or note (joining its fragment or highlight band, and its operand, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"
@@ -1273,11 +1279,11 @@
               },
               "after": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a lifeline or actor to the right of another lifeline or actor, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right after the element with this ID: a participant to the right of another participant, a message or note below another message or note (joining its fragment or highlight band, and its operand and leaving any other), or below a fragment's or highlight band's last row. That element must exist when this op runs. Give after or before, not both."
               },
               "before": {
                 "$ref": "#/$defs/id",
-                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a lifeline or actor to the left of another lifeline or actor, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
+                "description": "Moves it in a sequence diagram's order to right before the element with this ID: a participant to the left of another participant, a message or note above another message or note (joining its fragment or highlight band, and its operand and leaving any other, so one placed before an operand's first row starts it), or above a fragment's or highlight band's first row. That element must exist when this op runs. Give after or before, not both."
               },
               "name": {
                 "type": "string"

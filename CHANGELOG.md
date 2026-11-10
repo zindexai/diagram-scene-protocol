@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.36.0
+
+Added: six `nodeType` values for a sequence diagram's participants (5.2): `sequence.boundary`, `sequence.control`, `sequence.entity`, `sequence.database`, `sequence.collections` and `sequence.queue`. Each heads a column as `sequence.lifeline` and `sequence.actor` do. Messages, notes, activation bars, participant boxes (5.5), create and destroy messages (5.9) and `after` and `before` (10.3) take any of the eight; before, they took a lifeline or an actor.
+
+The reference engine draws `sequence.boundary`, `sequence.control`, `sequence.entity` and `sequence.database` as an icon with the label under it, as it draws an actor. It draws `sequence.collections` and `sequence.queue` as a box with the label inside, as it draws a lifeline.
+
 ## v8.35.0
 
 Changed: the reference engine's drawing of frames in `sequence` documents (5.5). No input field or value changed. Before, only `fragment` frames were laid out with the document's rows.
