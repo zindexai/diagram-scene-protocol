@@ -236,7 +236,7 @@ The reference engine routes every edge itself. It draws `polyline` like `orthogo
 
 A `step` MUST be an integer from 1 to 99, and an edge with `stepText` MUST have a `step`. Numbers may repeat. The reference engine draws a numbered badge for each step beside the start of its edge's line, one for the edges with that step and one source, in every family. It lists the steps whose edges have `stepText` beside the drawing, in number order, each edge's text under its step's badge in document order. It draws the numbers as given: it doesn't number edges or check their order, apart from `autonumber` (below). It draws no badge for a hidden edge or one with a hidden end. Badges and the list are worked out each time the document is drawn, and none of them is stored.
 
-In a `sequence` document the badge is centered on the start of the message's arrow, and the document's `extensions.autonumber` (8) numbers the messages that have no `step`.
+In a `sequence` document the badge is centered on the start of the message's arrow, or on the axis of the activation bar the arrow leaves, and the document's `extensions.autonumber` (8) numbers the messages that have no `step`.
 
 #### ER edges
 

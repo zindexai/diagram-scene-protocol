@@ -2,6 +2,15 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.33.2
+
+Changed: the reference engine's drawing of `sequence` documents. No input field, value or rule changed.
+- A numbered message leaving an activation bar has its badge centered on the bar's axis (5.3, 8); the arrow still starts on the bar's face.
+- The first row starts below the tallest head at the top, an actor's figure and name included, so a first message's label clears an actor's name.
+- A fragment's guard whose text would meet an activation bar open in its row starts 6 px past that bar; the fragment's guards share one column when they can, and its right edge grows for a guard moved right.
+- Fragments of one depth beside the same lifeline share a left edge.
+- A dashed line ending at a `cross` has a dash end at the X's center.
+
 ## v8.31.0
 
 Added: `autonumber` in a document's `extensions` (8). In a `sequence` document it numbers every drawn message in row order: `true` counts from 1 by 1, and `{ "start", "increment" }` sets where the count starts and what it goes up by, each an integer from 1. A message's own `step` is drawn as given and the count goes on from it; notes, hidden messages and messages to or from a hidden lifeline take no number. The reference engine draws each number as a step badge centered on the start of the message's arrow, and in any other family draws nothing for it and warns (`AUTONUMBER_NOT_DRAWN`).
