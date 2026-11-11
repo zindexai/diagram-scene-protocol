@@ -119,6 +119,8 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 
 `accentColor` colors the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
 
+The reference engine draws all text in Inter, whatever `fontFamily` says. Inter has Latin, Cyrillic and Greek letters, digits, punctuation and many signs. The engine draws any other character, such as a letter of another script, an emoji or a sign Inter lacks, as an empty box, and checking or storing the document returns the warning `CHARACTER_NOT_DRAWN`.
+
 `styles` maps names (the characters an element ID allows) to style objects. A style name that an element uses MUST be in `styles`.
 
 `palette` sets colors for elements that don't set their own: `background`, `foreground` (the text of nodes and frames), `nodeFill`, `nodeStroke`, `edgeStroke`, `accentPrimary` (the `accentColor` of nodes that set none), `accentSecondary` (no effect: nothing draws a second accent yet), `mutedForeground` (edge label text), `containerFill` and `containerStroke` (frames and groups). In the reference engine an element's style wins over the palette, and the palette wins over the drawing theme. The schema accepts other keys in `palette`, and implementations ignore them.
@@ -456,7 +458,7 @@ A diagnostic reports one problem. Its shape is the scene schema's `diagnostic`: 
 
 A document with an `error` or `fatal` diagnostic is invalid. An implementation MUST NOT store a document it is sent when checking it gives an `error` or `fatal` diagnostic, or apply an edit when checking the edit gives one or the edit's result has one its base didn't have (10.2). Warnings and info never block either.
 
-Codes are strings in capitals with underscores. The error codes in 9.2 and 10.2 are the reference engine's, and other implementations can use them. The reference engine also returns warnings: rules for each diagram family (such as a workflow with no start node), and problems its layout notices (such as overlapping nodes or text that doesn't fit). Those warnings aren't part of this spec.
+Codes are strings in capitals with underscores. The error codes in 9.2 and 10.2 are the reference engine's, and other implementations can use them. The reference engine also returns warnings: rules for each diagram family (such as a workflow with no start node), and problems its layout and drawing notice (such as overlapping nodes, text that doesn't fit or characters drawn as boxes). Those warnings aren't part of this spec.
 
 ## 10. Operations
 

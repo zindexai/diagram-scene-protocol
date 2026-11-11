@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.39.0
+
+Changed: the reference engine returns one warning, `CHARACTER_NOT_DRAWN`, for a document whose text holds a character it draws as an empty box (3.5). Such a character is a letter of a script other than Latin, Cyrillic or Greek, an emoji, or a sign Inter lacks. The warning lists up to five of the characters and names up to three of the elements whose drawn text holds one. The document is valid and is stored as written. No input field or value changed.
+
+The spec now says that the reference engine draws all text in Inter, whatever `fontFamily` says (3.5). It always has.
+
 ## v8.36.0
 
 Added: six `nodeType` values for a sequence diagram's participants (5.2): `sequence.boundary`, `sequence.control`, `sequence.entity`, `sequence.database`, `sequence.collections` and `sequence.queue`. Each heads a column as `sequence.lifeline` and `sequence.actor` do. Messages, notes, activation bars, participant boxes (5.5), create and destroy messages (5.9) and `after` and `before` (10.3) take any of the eight; before, they took a lifeline or an actor.
