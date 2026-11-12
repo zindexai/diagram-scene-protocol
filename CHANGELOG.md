@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.39.7
+
+Changed: `computed` is `readOnly` in the schema and accepts any value (3.1, 13). The reference engine ignores a document's `computed` without checking it, and works it out again as it always has. Before, a document carrying the reference engine's own `computed` failed validation, because the schema listed four of its fields and refused the rest. No input field changed.
+
+The schema drops the definitions only `computed` used: `computedLayoutRegistry`, `computedEdgePathRegistry`, `computedEdgePath`, `diagnostic` and `bounds`. Section 9.3 gives a diagnostic's shape itself, and section 13 no longer lists `normalizedHash`. A schema of your own that refers to one of the definitions can copy it from the v8.39.0 tag.
+
 ## v8.39.0
 
 Changed: the reference engine returns one warning, `CHARACTER_NOT_DRAWN`, for a document whose text holds a character it draws as an empty box (3.5). Such a character is a letter of a script other than Latin, Cyrillic or Greek, an emoji, or a sign Inter lacks. The warning lists up to five of the characters and names up to three of the elements whose drawn text holds one. The document is valid and is stored as written. No input field or value changed.

@@ -164,25 +164,6 @@
           }
         }
       },
-      "bounds": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["x", "y", "width", "height"],
-        "properties": {
-          "x": {
-            "type": "number"
-          },
-          "y": {
-            "type": "number"
-          },
-          "width": {
-            "$ref": "#/$defs/nonNegativeNumber"
-          },
-          "height": {
-            "$ref": "#/$defs/nonNegativeNumber"
-          }
-        }
-      },
       "rotation": {
         "type": "number",
         "default": 0,
@@ -1527,116 +1508,9 @@
           }
         ]
       },
-      "computedLayoutRegistry": {
-        "type": "object",
-        "default": {},
-        "patternProperties": {
-          "^[A-Za-z0-9._:-]+$": {
-            "$ref": "#/$defs/bounds"
-          }
-        },
-        "additionalProperties": false
-      },
-      "computedEdgePath": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["points"],
-        "properties": {
-          "points": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/point"
-            },
-            "minItems": 2
-          },
-          "labelPosition": {
-            "$ref": "#/$defs/point"
-          },
-          "labelWidth": {
-            "type": "number",
-            "description": "Measured label width including padding. Used by the renderer to draw a background rect behind edge labels."
-          },
-          "labelHeight": {
-            "type": "number",
-            "description": "Measured label height including padding."
-          },
-          "router": {
-            "type": "string",
-            "enum": ["polyline", "curved"],
-            "description": "How the renderer draws `points`. `\"curved\"` only for an edge whose own `router` is `curved`: the 2-point points list is drawn as the quadratic Bezier `M points[0] Q control points[1]`. Every other edge is drawn as a polyline; the engine never turns an orthogonal edge into a curve, and a long back-edge detour becomes an orthogonal U-hook below the diagram instead."
-          },
-          "control": {
-            "$ref": "#/$defs/point",
-            "description": "A curved edge's quadratic Bezier control point. The engine picks the side and depth of the curve and puts its ends on the nodes' outlines; the curve is `M points[0] Q control points[1]`. A curved path without it, laid out by an earlier engine, is drawn with its control point 30% of the chord off the chord's middle, left of travel."
-          },
-          "cornerRadius": {
-            "type": "number",
-            "description": "Engine-applied corner-rounding radius for the polyline path: a sequence diagram's self-message and a curved self-loop are drawn as a U with rounded corners."
-          },
-          "isFanInFeeder": {
-            "type": "boolean",
-            "description": "True when this edge is a feeder of a shared port: one of several edges that enter one port of their target and join one trunk there (a plain decision's face, any decision diamond but the workflow.* types, which one flow line enters; a face with no room to keep them apart, in a family that dots forks: architecture, entity-relationship and network diagrams and diagrams without a family; edges whose shared label is drawn once). Its last point is the junction, on the last leg of the edge that carries `junctions`, off the target's face, and it draws no arrowhead."
-          },
-          "junctions": {
-            "type": "array",
-            "items": { "$ref": "#/$defs/point" },
-            "minItems": 1,
-            "description": "Set on the edge whose last leg, the trunk, carries a shared port's joined edges into the target with one arrowhead: every point where the joined edges' lines branch: where the feeders meet the trunk, and where one feeder's line meets another's on the way there. On a plain decision's branches that share a vertex, the point where the shared line splits, set on the branch that runs straight on (else the first written). In an architecture, entity-relationship or network diagram or one without a family, also every point where edges drawn alike that leave one point (or end at one point) fork, so a fork isn't read as a crossing; crossings carry none, and flowchart, workflow, UI flow, org chart and sequence diagrams draw no fork dots. The renderer draws a filled dot at each."
-          }
-        }
-      },
-      "computedEdgePathRegistry": {
-        "type": "object",
-        "default": {},
-        "patternProperties": {
-          "^[A-Za-z0-9._:-]+$": {
-            "$ref": "#/$defs/computedEdgePath"
-          }
-        },
-        "additionalProperties": false
-      },
-      "diagnostic": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": ["code", "message", "severity"],
-        "properties": {
-          "code": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string",
-            "enum": ["info", "warning", "error", "fatal"]
-          }
-        }
-      },
       "computed": {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-          "layout": {
-            "$ref": "#/$defs/computedLayoutRegistry"
-          },
-          "edgePaths": {
-            "$ref": "#/$defs/computedEdgePathRegistry"
-          },
-          "diagnostics": {
-            "type": "array",
-            "items": {
-              "$ref": "#/$defs/diagnostic"
-            },
-            "default": []
-          },
-          "normalizedHash": {
-            "type": "string"
-          }
-        },
-        "default": {}
+        "readOnly": true,
+        "description": "The drawing output an implementation works out: element boxes, edge routes, label positions and the layout's diagnostics. Output, not input: any value passes. The reference engine ignores it, works it out again each time it lays the document out, and leaves it out of the documents it returns."
       }
     }
   }

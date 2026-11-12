@@ -54,7 +54,7 @@ Paths such as `/elements/0/layout` are JSON Pointers into a document. "Absent" m
 | `extensions` | No | Data the schemas don't define (section 8). |
 | `computed` | No | Output of a layout, not input (section 13). |
 
-Most objects in the schemas reject properties they don't list. `metadata` and `extensions` objects accept any properties, for data the schemas don't define.
+Most objects in the schemas reject properties they don't list. `metadata` and `extensions` objects accept any properties, for data the schemas don't define, and `computed` accepts any value (section 13).
 
 ### 3.2 The scene object
 
@@ -447,7 +447,7 @@ The reference engine also limits size, with the error `CONTENT_LIMIT_EXCEEDED`: 
 
 ### 9.3 Diagnostics
 
-A diagnostic reports one problem. Its shape is the scene schema's `diagnostic`: a `code`, a `message`, a `severity`, and an optional `path`, a JSON Pointer to the field concerned.
+A diagnostic reports one problem: an object with a `code`, a `message`, a `severity`, and an optional `path`, a JSON Pointer to the field concerned.
 
 | Severity | Meaning |
 |---|---|
@@ -652,18 +652,17 @@ Two documents have the same content when their stored forms (section 11), withou
 
 ## 13. Computed output
 
-`computed` holds what an implementation worked out when it laid the document out. It is output, not input:
+`computed` holds what an implementation worked out when it laid the document out. It is output, not input: the schema marks it `readOnly` and accepts any value for it. The reference engine keeps these fields in it, among others:
 
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
 | `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. Where a plain decision's branches (any decision diamond but the `workflow.*` types) share a vertex, one of them carries each point where their shared line splits in `junctions` too, and in an architecture, entity-relationship or network diagram or one without a family, so does one of the edges drawn alike that leave one point (or end at one point) at each point where they fork: a crossing carries none. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
-| `normalizedHash` | A hash an implementation can set. The reference engine doesn't. |
 
 The boxes in `computed.layout` are where the elements were drawn. They can be larger than the stored sizes (6.5), and the drawing can be shifted from the document's coordinates by one offset shared by every element.
 
-The reference engine works `computed` out again each time it lays a document out, whatever the document carried. It leaves `computed` out of content comparisons (12.4) and out of the documents it returns.
+The reference engine ignores a document's `computed` without checking it, and works it out again each time it lays the document out. It leaves `computed` out of content comparisons (12.4) and out of the documents it returns.
 
 ## 14. The reference implementation
 

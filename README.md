@@ -24,7 +24,7 @@ SPEC.md defines:
 - constraints;
 - what stored positions and sizes mean;
 - extensions;
-- the diagnostic format the schemas carry (`code`, `path`, `message`, `severity`), and the rules a valid document follows beyond its shape, such as unique element IDs and edges whose ends exist.
+- the diagnostic format (`code`, `path`, `message`, `severity`), and the rules a valid document follows beyond its shape, such as unique element IDs and edges whose ends exist.
 
 It doesn't define how to place nodes, route edges or draw a diagram. Those algorithms belong to each implementation, and two implementations can draw the same document differently. It doesn't define an HTTP API either.
 
