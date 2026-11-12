@@ -43,7 +43,7 @@ Paths such as `/elements/0/layout` are JSON Pointers into a document. "Absent" m
 | Field | Required | Meaning |
 |---|---|---|
 | `schemaVersion` | Yes | The string `"0.1"`. |
-| `scene` | Yes | The diagram's ID, title, brief and canvas (3.2). |
+| `scene` | Yes | The diagram's ID, title, brief, language and canvas (3.2). |
 | `elements` | Yes | The diagram's elements, in order (section 5). |
 | `diagramFamily` | No | The kind of diagram (3.3). |
 | `layoutStrategy` | No | How to place nodes that have no position (3.4). |
@@ -64,6 +64,7 @@ Most objects in the schemas reject properties they don't list. `metadata` and `e
 | `title` | A title for people. |
 | `description` | A longer description. |
 | `brief` | Up to 1,000 characters for the next editor: what the diagram shows, conventions to keep, decisions made. It belongs to the document, so each revision has its own. |
+| `lang` | The language the text is in: a BCP 47 language tag, such as `ja`, `ko`, `zh-Hans`, `zh-Hant` or `zh-HK`. When it names Chinese, Japanese or Korean, it decides the letterforms of Chinese characters; another language leaves them to the text, as without `lang`. |
 | `units` | `"px"`, the only unit. |
 | `canvas` | `width`, `height`, `background` (a CSS color), `grid` and `snap`. |
 | `viewport` | `originX`, `originY` and `zoom` (above 0). |
@@ -76,6 +77,15 @@ A service that stores documents can assign `scene.id` itself. The reference serv
 `canvas.width` and `canvas.height` are a minimum. The reference engine grows the drawing to fit its content, and on a layout that places every node it writes the size it used into `canvas`. When `canvas` has no size, the reference engine uses 800 by 600.
 
 The reference engine keeps `units`, `canvas.grid`, `canvas.snap`, `viewport` and `defaults`, but doesn't use them to lay out or draw. It doesn't keep `scene.extensions`: put extension data at the document's top level or on an element.
+
+Without `lang`, or with a `lang` other than Chinese, Japanese or Korean, the reference engine infers the language of the Chinese characters from the diagram's text, its title included:
+
+- Any kana: Japanese.
+- Otherwise, any Hangul: Korean.
+- Otherwise, the list with the most of the Chinese characters only it has, from the Unicode Han Database. The lists are the PRC's Table of General Standard Chinese Characters (Simplified Chinese), Big5 (Traditional Chinese), and the Jōyō and Jinmeiyō kanji (Japanese). A tie or none is Simplified Chinese.
+- No kana, Hangul or Chinese character: no language.
+
+Hong Kong forms are never inferred: they need `zh-HK`.
 
 ### 3.3 Diagram families
 
@@ -110,7 +120,7 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 |---|---|
 | `fill`, `stroke`, `textColor`, `labelBackground`, `accentColor` | CSS colors |
 | `strokeWidth`, `cornerRadius`, `fontSize` | Numbers, 0 or more |
-| `fontFamily` | A font family name |
+| `fontFamily` | `sans` or `mono` |
 | `fontWeight` | 100 to 900 in steps of 100, or `normal`, `bold`, `lighter`, `bolder` |
 | `dash` | A dash pattern: numbers, 0 or more, such as `[6, 4]` |
 | `opacity` | 0 to 1 |
@@ -119,7 +129,7 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 
 `accentColor` colors the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
 
-The reference engine draws all text in Inter, whatever `fontFamily` says, with a fallback font for each character Inter lacks. Together they have Latin, Cyrillic, Greek, Armenian and Georgian letters, digits, punctuation and most signs. Text is shaped as browsers shape it, so `->` is drawn as an arrow. The engine draws any other character, such as a letter of another script or an emoji, as an empty box, and checking or storing the document returns the warning `CHARACTER_NOT_DRAWN`.
+The reference engine draws text in Inter for `fontFamily` `sans`, the default, and in a monospace font for `mono`. It draws any other `fontFamily` as `sans`, and checking or storing the document returns the warning `FONT_FAMILY_UNKNOWN`; the schema accepts any string. A fallback font draws each character the font lacks: Latin, Cyrillic, Greek, Armenian and Georgian letters, Chinese, Japanese and Korean, digits, punctuation and most signs. In `sans`, `->` is drawn as an arrow. Any other character, such as a letter of another script or an emoji, is drawn as an empty box, and checking or storing the document returns the warning `CHARACTER_NOT_DRAWN`.
 
 `styles` maps names (the characters an element ID allows) to style objects. A style name that an element uses MUST be in `styles`.
 
@@ -173,7 +183,7 @@ A node is a shape with a label. Required fields: `id`, `kind` and `nodeType`.
 | `shape` | `rect`, `roundedRect`, `ellipse`, `diamond`, `cylinder`, `bucket`, `pill`, `hexagon`, `parallelogram`, `cloud`, `box3d`, `textBox`, `iconBox`, `document` (a box with a wavy bottom) or `subroutine` (a predefined process: a box with a line inside each side). Every shape is valid in every family. |
 | `label` | The text. `\n` starts a new line. |
 | `layout` | Position and size (section 6). |
-| `icon` | A `family:id` key, such as `lucide:database`, or an image URL. |
+| `icon` | A `family:id` key, such as `lucide:database`, or an image as a `data:` URI. An image URL stays a link in the SVG that most viewers don't load, and PNGs leave it out. |
 | `textStyle` | `wrap` (`auto`, `none`, `word` or `character`), `align` (`left`, `center` or `right`) and `verticalAlign` (`top`, `middle` or `bottom`). |
 
 Generic node types: `generic`, `service`, `database`, `queue`, `actor`, `note`, `decision`, `document`, `process`, `container`, `externalSystem`, `storage`, `objectStorage`, `event` and `iconNode`.
@@ -203,7 +213,7 @@ When `shape` is absent, the reference engine sets it from `nodeType` and stores 
 | `document` | `document` |
 | `rect` | Every other type |
 
-When `textStyle` or one of its fields is absent, a node's text has `wrap: "auto"`, `align: "center"` and `verticalAlign: "middle"`. `auto` keeps a label on one line while its node is at most 250 px wide, or 400 px for a diamond (the reference engine's widths), and wraps a longer one at spaces there, in lines of even length; a node whose `layout` is wider keeps the line up to its own width. `none` keeps one line however long. A text element's default is `none` (5.6).
+When `textStyle` or one of its fields is absent, a node's text has `wrap: "auto"`, `align: "center"` and `verticalAlign: "middle"`. `auto` keeps a label on one line while its node is at most 250 px wide, or 400 px for a diamond (the reference engine's widths), and wraps a longer one there, in lines of even length; a node whose `layout` is wider keeps the line up to its own width. `none` keeps one line however long. A text element's default is `none` (5.6). The reference engine breaks lines by the Unicode line breaking rules (UAX #14), with Korean kept whole between spaces; `character` also breaks a piece wider than the line between its characters.
 
 The reference engine has its own icon registry. An icon key it doesn't know is kept, and the node draws nothing in the icon's place.
 
@@ -272,7 +282,7 @@ A frame is a container drawn with a title. Required fields: `id`, `kind`, and `c
 | `title` | The text drawn on the frame. |
 | `layout` | Optional. With one, the frame keeps that box, unless a member that grew or was pushed would cross its border (6.6). Without one, it fits around its members. |
 | `containerType` | `generic` when absent, or `pool`, `lane`, `subprocess`, `partition`, `package`, `boundary` or `fragment`, or one of AWS's groups: `aws.cloud`, `aws.region`, `aws.az`, `aws.vpc`, `aws.subnet.public`, `aws.subnet.private`, `aws.securityGroup`, `aws.autoScalingGroup`, `aws.account` or `aws.corporateDataCenter`. |
-| `icon` | Optional. An icon in the frame's header: a `family:id` key or an image URL. |
+| `icon` | Optional. An icon in the frame's header: a `family:id` key, or an image as a `data:` URI, as on a node. |
 | `laneDirection` | `vertical` or `horizontal`: how a pool's lanes stack. `vertical` stacks them top to bottom (BPMN's horizontal pool), `horizontal` side by side (a vertical pool). |
 
 Each ID in `children` MUST name an element in the document. An element MUST NOT be in more than one frame. To nest frames, list the inner frame in the outer frame's `children`. A container MUST NOT contain itself, directly or through other containers, and a guide MUST NOT be a child of a frame.
@@ -440,6 +450,7 @@ A valid document MUST also follow these rules, which a schema can't express. The
 | Every element a constraint names exists. | `CONSTRAINT_TARGET_NOT_FOUND` |
 | An `order` constraint names two different elements. | `ORDER_CONSTRAINT_SELF_REFERENCE` |
 | An image's `assetRef` is in `assets`. | `ASSET_NOT_FOUND` |
+| `scene.lang` is a well-formed BCP 47 language tag. | `LANG_INVALID` |
 | In a sequence diagram, a fragment operand's `startsAt` names a message or note in the fragment, after its first row. | `FAMILY_SEQ_OPERAND_NOT_FOUND` |
 | In a sequence diagram, an activation's `startsAt` and `endsAt` name messages. | `FAMILY_SEQ_ACTIVATION_ANCHOR_NOT_FOUND` |
 
@@ -583,6 +594,7 @@ The reference engine refuses a resize it would undo. An unplaced node (6.4) gets
 |---|---|
 | `title` | Replaces `scene.title`. |
 | `brief` | Replaces `scene.brief` (up to 1,000 characters); `null` removes it. |
+| `lang` | Replaces `scene.lang`; `null` removes it. |
 | `canvas` | Merged into `scene.canvas`: `width`, `height` and `background`. |
 | `palette` | Merged into `palette`, color by color; `null` removes the palette. |
 | `styles` | Merged into `styles`: each named style given replaces the one with that name. |
@@ -614,6 +626,7 @@ The reference engine stores documents with their defaults written in, and return
 - `scene` gets `units` (`px`), a `canvas` with `width`, `height`, `grid` (0) and `snap` (false), `viewport` (`originX` 0, `originY` 0, `zoom` 1), `defaults` and `metadata.tags`.
 - The document gets `styles` (`{}`), `assets` (`{}`), `constraints` (`[]`) and `extensions` (`{}`).
 - ER columns written with `key` get `pk` or `fk` instead (5.2). In named styles, `color` becomes `textColor`.
+- `scene.lang` is in its canonical form: `zh-hant` becomes `zh-Hant`, and `JA` becomes `ja`.
 - `scene.extensions` and `computed` are dropped.
 
 What the engine infers for ER edge ends (5.3) isn't stored.

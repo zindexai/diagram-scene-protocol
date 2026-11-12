@@ -318,7 +318,7 @@
       "textWrap": {
         "type": "string",
         "enum": ["auto", "none", "word", "character"],
-        "description": "'auto', a node's default, keeps the label on one line while its node can grow to hold it, up to 250 px of content (wider if the layout gives more); a longer label wraps by word there and the node grows taller. On a text element, 'auto' wraps by word when the text is wider than its box. 'none', a text element's default, breaks lines only at \\n, and a node grows as wide as the line. 'word' also wraps at spaces to fit the width, and a word wider than the width runs past it. 'character' wraps at spaces too and breaks such a word between its characters."
+        "description": "'auto', a node's default, keeps the label on one line while its node can grow to hold it, up to 250 px of content (wider if the layout gives more); a longer label wraps there and the node grows taller. On a text element, 'auto' wraps when the text is wider than its box. 'none', a text element's default, breaks lines only at \\n, and a node grows as wide as the line. 'word' wraps to fit the width, and a word wider than the width runs past it. 'character' also breaks such a word between its characters. Wrapped text breaks by the Unicode line breaking rules (UAX #14), with Korean kept whole between spaces: at spaces, after hyphens and slashes, and between Chinese or Japanese characters. Only 'character' breaks inside a word, number or date, and only one wider than the width."
       },
       "textAlign": {
         "type": "string",
@@ -534,7 +534,8 @@
             "$ref": "#/$defs/nonNegativeNumber"
           },
           "fontFamily": {
-            "type": "string"
+            "type": "string",
+            "description": "`sans` (Inter, the default) or `mono`, a monospace font for paths, endpoints and types. Any other value draws in the default font and returns the warning `FONT_FAMILY_UNKNOWN`."
           },
           "fontSize": {
             "$ref": "#/$defs/nonNegativeNumber"
@@ -1121,7 +1122,7 @@
               },
               "icon": {
                 "type": ["string", "null"],
-                "description": "The node's icon: a family:id key such as lucide:database or aws:lambda, or an image URL. null removes it."
+                "description": "The node's icon: a family:id key such as lucide:database or aws:lambda, or an image as a `data:` URI (a URL stays a link most viewers don't load). null removes it."
               },
               "textStyle": {
                 "$ref": "#/$defs/textStyle",
@@ -1493,7 +1494,7 @@
               },
               "icon": {
                 "type": "string",
-                "description": "An icon in the frame's header: a family:id key or an image URL. An AWS key draws as AWS draws a group icon, a 35 px square flush in the frame's top-left corner with the title beside it (and a frame with an AWS service icon and no stroke takes the service's category color, solid: AWS's custom group); any other icon draws 16 px before the title in the title's color. It replaces an aws.* preset's own icon."
+                "description": "An icon in the frame's header: a family:id key, or an image as a `data:` URI (a URL stays a link most viewers don't load). An AWS key draws as AWS draws a group icon, a 35 px square flush in the frame's top-left corner with the title beside it (and a frame with an AWS service icon and no stroke takes the service's category color, solid: AWS's custom group); any other icon draws 16 px before the title in the title's color. It replaces an aws.* preset's own icon."
               },
               "children": {
                 "$ref": "#/$defs/elementIdList"
@@ -1551,7 +1552,7 @@
               },
               "icon": {
                 "type": ["string", "null"],
-                "description": "An icon in the frame's header, as on createFrame: a family:id key or an image URL. null removes it (an AWS group then draws its preset's icon)."
+                "description": "An icon in the frame's header, as on createFrame: a family:id key, or an image as a `data:` URI (a URL stays a link most viewers don't load). null removes it (an AWS group then draws its preset's icon)."
               },
               "containerType": {
                 "type": ["string", "null"],
@@ -1848,6 +1849,10 @@
                 "type": ["string", "null"],
                 "maxLength": 1000,
                 "description": "Replace the diagram's brief (context for the next agent). Pass null to remove it."
+              },
+              "lang": {
+                "type": ["string", "null"],
+                "description": "Set the language the diagram's text is in, a BCP 47 language tag such as `ja`, `ko`, `zh-Hans`, `zh-Hant` or `zh-HK`, as the scene's lang. Pass null to remove it: the language is then inferred from the text."
               },
               "palette": {
                 "type": ["object", "null"],

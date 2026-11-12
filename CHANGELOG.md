@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.42.0
+
+Added: `scene.lang`, the language the document's text is in, as a BCP 47 language tag (3.2). `updateScene` sets it with `lang`, and `null` removes it (10.8). A tag that isn't well formed is invalid (`LANG_INVALID`, 9.2). The reference engine stores it in canonical form (11), and without it infers the language from the text (3.2).
+
+Changed: `fontFamily` names one of two families, `sans`, the default, or `mono`, a monospace font (3.5). The reference engine draws any other value as `sans` and returns the warning `FONT_FAMILY_UNKNOWN`. The schema still accepts any string.
+
+Changed: the reference engine draws Chinese, Japanese and Korean, where it drew empty boxes, a Chinese character in the forms of `scene.lang` (3.2, 3.5). It breaks wrapped text by the Unicode line breaking rules (UAX #14), with Korean kept whole between spaces (5.2). `mono` draws `->` as typed.
+
 ## v8.41.0
 
 Changed: the reference engine draws a character Inter lacks from a fallback font, where it drew an empty box (3.5). That adds Armenian and Georgian letters, the rarer Latin, Cyrillic and Greek letters, the phonetic alphabet, and more arrows, math and logic signs, symbols and box drawing. Text is shaped as browsers shape it: letters are kerned, and `->` is drawn as an arrow. A label can be a few pixels narrower than before, and so can a node sized by its label. No input field or value changed.
