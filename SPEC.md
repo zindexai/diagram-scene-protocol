@@ -119,7 +119,7 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 
 `accentColor` colors the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
 
-The reference engine draws all text in Inter, whatever `fontFamily` says. Inter has Latin, Cyrillic and Greek letters, digits, punctuation and many signs. The engine draws any other character, such as a letter of another script, an emoji or a sign Inter lacks, as an empty box, and checking or storing the document returns the warning `CHARACTER_NOT_DRAWN`.
+The reference engine draws all text in Inter, whatever `fontFamily` says, with a fallback font for each character Inter lacks. Together they have Latin, Cyrillic, Greek, Armenian and Georgian letters, digits, punctuation and most signs. Text is shaped as browsers shape it, so `->` is drawn as an arrow. The engine draws any other character, such as a letter of another script or an emoji, as an empty box, and checking or storing the document returns the warning `CHARACTER_NOT_DRAWN`.
 
 `styles` maps names (the characters an element ID allows) to style objects. A style name that an element uses MUST be in `styles`.
 

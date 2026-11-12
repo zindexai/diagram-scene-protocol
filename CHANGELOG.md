@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v8.41.0
+
+Changed: the reference engine draws a character Inter lacks from a fallback font, where it drew an empty box (3.5). That adds Armenian and Georgian letters, the rarer Latin, Cyrillic and Greek letters, the phonetic alphabet, and more arrows, math and logic signs, symbols and box drawing. Text is shaped as browsers shape it: letters are kerned, and `->` is drawn as an arrow. A label can be a few pixels narrower than before, and so can a node sized by its label. No input field or value changed.
+
 ## v8.39.7
 
 Changed: `computed` is `readOnly` in the schema and accepts any value (3.1, 13). The reference engine ignores a document's `computed` without checking it, and works it out again as it always has. Before, a document carrying the reference engine's own `computed` failed validation, because the schema listed four of its fields and refused the rest. No input field changed.
