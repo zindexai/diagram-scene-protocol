@@ -622,7 +622,7 @@ The reference engine stores documents with their defaults written in, and return
 - `locked` (false), `visible` (true), `metadata` (`{}`) and `extensions` (`{}`) are set on every element.
 - Every node has an absolute or relative `layout`. A node sent without one has `{ "mode": "absolute", "x": 0, "y": 0, "width": 150, "height": 60 }` until it is placed, and then its box (6.4). The shorthand becomes a `layout`, absolute layouts get `rotation` (0) and `autoSize` (`none`), and relative layouts get `place.gap` (0).
 - Edges get `edgeType` (`default`) and `waypoints` (`[]`). An arrowhead its `edgeType` (or the document's AWS groups and icons) gives isn't stored, whether it was sent or not (5.3).
-- Frames get `containerType` (`generic`), and groups get `layout` with `padding` (0), `titleBar` (0) and `autoResize` (false). A frame sent without a `layout` stays without one.
+- Frames get `containerType` (`generic`), and groups get `layout` with `padding` (0), `titleBar` (0) and `autoResize` (false). A frame sent without a `layout` stays without one. A document that carries `autoSize: "children"` on a frame's absolute `layout`, a value the schema doesn't list, is read as if that frame had none.
 - `scene` gets `units` (`px`), a `canvas` with `width`, `height`, `grid` (0) and `snap` (false), `viewport` (`originX` 0, `originY` 0, `zoom` 1), `defaults` and `metadata.tags`.
 - The document gets `styles` (`{}`), `assets` (`{}`), `constraints` (`[]`) and `extensions` (`{}`).
 - ER columns written with `key` get `pk` or `fk` instead (5.2). In named styles, `color` becomes `textColor`.
@@ -675,7 +675,7 @@ Two documents have the same content when their stored forms (section 11), withou
 
 The boxes in `computed.layout` are where the elements were drawn. They can be larger than the stored sizes (6.5), and the drawing can be shifted from the document's coordinates by one offset shared by every element.
 
-The reference engine ignores a document's `computed` without checking it, and works it out again each time it lays the document out. It leaves `computed` out of content comparisons (12.4) and out of the documents it returns.
+The reference engine ignores a document's `computed` without checking it, and works it out again each time it lays the document out. It leaves `computed` out of content comparisons (12.4) and out of the documents it returns. A frame whose `layout` has `autoSize: "children"` (section 11) is read the same way: as if it had none.
 
 ## 14. The reference implementation
 

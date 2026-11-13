@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.1.3
+
+Changed: a document that carries `autoSize: "children"` on a frame's absolute `layout`, a value the schema doesn't list, is read as if the frame had no `layout` (11, 13), as `computed` already is. Before, a version's record sent back whole failed validation on that frame. The schema is unchanged: `autoSize` names what an author writes, `content` or `none`.
+
 ## v9.1.0
 
 Changed: the reference engine draws emoji in their own colors, where it drew empty boxes (3.5): every emoji of Unicode 18.0, with skin tones, flags, keycaps and ZWJ sequences each drawn as one emoji, never bold or slanted. A sign Unicode shows as text by default, such as ⚠ or ❤, is drawn as text, and as an emoji when the emoji selector (U+FE0F) follows it. An emoji is about a quarter wider than the font size, so a node sized by a label that holds one can be wider than before. Checking or storing a document no longer returns `CHARACTER_NOT_DRAWN` for an emoji. No input field or value changed.
