@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.2.0
+
+Changed: the reference engine leaves the characters no SVG can hold out of the drawing (3.5): a NUL, a vertical tab and the other control characters below U+0020, apart from the tab, line feed and carriage return, and U+FFFE and U+FFFF. Text that carries one is measured and drawn as the text without it, and the stored document keeps the text as written. Before, such a character made the SVG not well formed.
+
 ## v9.1.3
 
 Changed: a document that carries `autoSize: "children"` on a frame's absolute `layout`, a value the schema doesn't list, is read as if the frame had no `layout` (11, 13), as `computed` already is. Before, a version's record sent back whole failed validation on that frame. The schema is unchanged: `autoSize` names what an author writes, `content` or `none`.
