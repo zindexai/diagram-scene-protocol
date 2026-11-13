@@ -82,7 +82,7 @@ Without `lang`, or with a `lang` other than Chinese, Japanese or Korean, the ref
 
 - Any kana: Japanese.
 - Otherwise, any Hangul: Korean.
-- Otherwise, the list with the most of the Chinese characters only it has, from the Unicode Han Database. The lists are the PRC's Table of General Standard Chinese Characters (Simplified Chinese), Big5 (Traditional Chinese), and the Jōyō and Jinmeiyō kanji (Japanese). A tie or none is Simplified Chinese.
+- Otherwise, the list that has the most of the Chinese characters, each character counting for every list that has it, from the Unicode Han Database. The lists are the PRC's Table of General Standard Chinese Characters (Simplified Chinese), Big5 (Traditional Chinese), and the Jōyō and Jinmeiyō kanji (Japanese). A tie that takes in the PRC's list, or no listed character, is Simplified Chinese; a tie of Big5 and the Japanese lists is Traditional Chinese.
 - No kana, Hangul or Chinese character: no language.
 
 Hong Kong forms are never inferred: they need `zh-HK`.

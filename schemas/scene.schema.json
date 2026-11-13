@@ -195,7 +195,7 @@
           },
           "lang": {
             "type": "string",
-            "description": "The language the diagram's text is in, a BCP 47 language tag such as `ja`, `ko`, `zh-Hans`, `zh-Hant` or `zh-HK`. When it names Chinese, Japanese or Korean, it picks the letterforms of Chinese characters. Without it, or with another language, the forms are inferred from the text: kana is Japanese, Hangul is Korean, and other Chinese characters are Simplified Chinese, Traditional Chinese or Japanese by the forms they use. A short label whose characters Traditional Chinese and Japanese share is read as Simplified Chinese, so set `lang` when you know the language. Hong Kong forms need `zh-HK`. A tag that isn't well formed is an error (`LANG_INVALID`)."
+            "description": "The language the diagram's text is in, a BCP 47 language tag such as `ja`, `ko`, `zh-Hans`, `zh-Hant` or `zh-HK`. When it names Chinese, Japanese or Korean, it picks the letterforms of Chinese characters. Without it, or with another language, the forms are inferred from the text: kana is Japanese, Hangul is Korean, and other Chinese characters are Simplified Chinese, Traditional Chinese or Japanese by the forms they use. A diagram whose Chinese characters Simplified Chinese, Traditional Chinese and Japanese all share is read as Simplified Chinese. Japanese written without kana can read as Traditional Chinese. Set `lang` when you know the language. Hong Kong forms need `zh-HK`. A tag that isn't well formed is an error (`LANG_INVALID`)."
           },
           "units": {
             "$ref": "#/$defs/units"
@@ -821,7 +821,7 @@
               },
               "label": {
                 "type": "string",
-                "description": "Edge label text. Plain strings render as a single tspan. Labels matching the state-machine / SCXML / BPMN convention 'EVENT [guard] / action' render with multi-tier typography: event 12px, guard 10px muted, action 10px muted italic. Detection is content-based (balanced [...] OR ' / ' separator) and family-agnostic. Multi-line labels (containing \\n) skip the convention parse."
+                "description": "Edge label text. Plain strings render as a single tspan. Labels matching the state-machine / SCXML / BPMN convention 'EVENT [guard] / action' render with multi-tier typography: event 12px, guard 10px muted, action 10px muted italic. Detection is content-based (balanced [...] OR ' / ' separator), in flowchart, workflow, uiflow and sequence diagrams; in every other diagram, one with no diagramFamily included, a label is plain text. Multi-line labels (containing \\n) skip the convention parse."
               },
               "endpoints": {
                 "$ref": "#/$defs/edgeEndpoints"

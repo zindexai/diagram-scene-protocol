@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.0.1
+
+Changed: without `lang`, the reference engine counts each Chinese character for every list that has it, the PRC's general list, Big5 and the Jōyō and Jinmeiyō kanji, and the list that has the most of the text decides; a tie of Big5 and the Japanese lists is Traditional Chinese (3.2). A short Traditional Chinese label, such as 資料庫, read as Simplified Chinese before.
+
+Changed: the reference engine styles an edge label written as `EVENT [guard] / action` only in flowchart, workflow, UI flow and sequence diagrams; every other diagram, one with no `diagramFamily` included, draws edge labels as plain text (the edge `label` description). An icon given as a remote URL returns the warning `ASSET_URI_POLICY_VIOLATION`, as an asset's remote URI does (9.2).
+
 ## v8.42.0
 
 Added: `scene.lang`, the language the document's text is in, as a BCP 47 language tag (3.2). `updateScene` sets it with `lang`, and `null` removes it (10.8). A tag that isn't well formed is invalid (`LANG_INVALID`, 9.2). The reference engine stores it in canonical form (11), and without it infers the language from the text (3.2).
