@@ -2,6 +2,20 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.3.1
+
+Added: Google Cloud's groups as `containerType` values: `gcp.cloud`, `gcp.project`, `gcp.region`, `gcp.vpc`, `gcp.zone`, `gcp.subnet`, `gcp.tier`, `gcp.instanceGroup` and `gcp.onPremises` (5.5). The reference engine draws each as Google's Architecture Center diagrams draw that group, in Google's colors on every canvas, with rounded corners and no icon. A frame's `style` overrides the preset, except on a zone. `gcp.cloud` draws Google's wordmark when it has no `icon` of its own and no title or the title `Google Cloud`. `gcp.vpc` and `gcp.zone` are spanning frames: a VPC is drawn round its subnets across their Regions, and a zone as a strip under each node it spans.
+
+Added: three warnings (5.5): `GCP_GROUP_NESTING` for a preset where Google doesn't nest it; `GCP_GROUP_UNTYPED` for a frame titled like a Google Cloud group that holds `gcp:` icons and has no preset; and `GCP_FRAME_HIDES_GROUPS` for a generic frame that hides presets from Google's arrangement.
+
+Added: Google's arrangement (5.5, 6.4). In an `architecture` document, or one without a family, the reference engine lays the boundary, Region and subnet frames out as Google's reference diagrams do: zones as columns through a Region's tiers, tiers as rows in the order their edges run, and Regions side by side. Their `layout` is a minimum. Edits grow a row, a zone column or a Region for what they add, or open a gap, and what lies past the growth moves. A saved item in a row moves aside from a new line that would cross it; below a Region's subnets it does so only where the row has room.
+
+Added: Google's connector (5.5). In a document with Google's groups or nodes with `gcp:` icons, and no AWS ones, every edge is drawn as Google's connector. An edge's `style` still sets its line's color, width and dash.
+
+Changed: in a document with a `gcp.*` frame or a node whose `icon` is a `gcp:` key, an edge whose `edgeType` is absent, `default`, or an `er.*`, `network.*` or `org.*` type ends in `openTriangle`, the open arrow Google Cloud draws, unless it sets its own (5.3). As in a document with AWS's groups and icons, an arrowhead equal to the document's default is treated as absent, so adding or removing a document's Google Cloud groups and icons changes the arrowheads that weren't set.
+
+Changed: in the layered layout, outside AWS's and Google's arrangements, a node an edit adds to a frame goes inside it, and each frame round it without a `layout` grows to hold it with its padding and title (6.4, 6.6). Where no place keeps those frames clear of the frames and nodes beside them, the node goes past the frame's other members in its column. What lies past the frame's far border then moves across the flow by the growth. Before, the frames round it could grow over a node or a frame beside them. No input field or value changed.
+
 ## v9.2.0
 
 Changed: the reference engine leaves the characters no SVG can hold out of the drawing (3.5): a NUL, a vertical tab and the other control characters below U+0020, apart from the tab, line feed and carriage return, and U+FFFE and U+FFFF. Text that carries one is measured and drawn as the text without it, and the stored document keeps the text as written. Before, such a character made the SVG not well formed.
