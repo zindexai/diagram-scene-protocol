@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.7.1
+
+Changed: in a Google Cloud diagram, a Region with no subnet widens on its title's side when the lines into a card from a global item above the Regions leave the card's top no place clear of the title (5.5).
+
+Changed: a `gcp.vpc` band opens its margin before the first Region for each line between an item above the band and one below it, not between two items of one Region (5.5). Those lines run down beside the Regions, clear of the band's title. A line an edit adds grows the band and the frames around it on that side and moves no node. No input field or value changed.
+
 ## v9.4.2
 
 Changed: a longer `title` on a Google Cloud tier can widen the Region in a saved diagram (6.4, 10.4). When a line from a row above it, inside the boundary, ends on a card and the tier's title leaves no clear place on the card's top, the reference engine widens the Region's tiers on the title's side and moves what lies past the growth by it. An `updateFrame` that sets a longer `title`, or an edit that adds the line, can cause it. A line from outside the boundary causes none, and nothing moves where nothing lies on the title's side. Before, only a title wider than the whole tier widened them. The `updateFrame` description in the operations schema names the exception. No input field or value changed.
