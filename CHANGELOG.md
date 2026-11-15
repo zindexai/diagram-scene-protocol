@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.4.0
+
+Added: `multiple` in a style object (3.5). `multiple: true` says a node stands for several instances of one thing. The reference engine draws it only on a Google Cloud product card: one gray copy behind the card, in a box 4 px wider and 4 px taller. It draws no count, and every other node ignores the property. A named style, `createNode`, `updateNode` and `setStyle` take it as they take any style property.
+
+Changed: in an AWS or Google Cloud diagram, when an edit makes a placed node bigger, what lies past it moves by the growth once (5.5, 6.5). Before, the reference engine could move it by twice the growth or more. No input field or value changed.
+
 ## v9.3.1
 
 Added: Google Cloud's groups as `containerType` values: `gcp.cloud`, `gcp.project`, `gcp.region`, `gcp.vpc`, `gcp.zone`, `gcp.subnet`, `gcp.tier`, `gcp.instanceGroup` and `gcp.onPremises` (5.5). The reference engine draws each as Google's Architecture Center diagrams draw that group, in Google's colors on every canvas, with rounded corners and no icon. A frame's `style` overrides the preset, except on a zone. `gcp.cloud` draws Google's wordmark when it has no `icon` of its own and no title or the title `Google Cloud`. `gcp.vpc` and `gcp.zone` are spanning frames: a VPC is drawn round its subnets across their Regions, and a zone as a strip under each node it spans.

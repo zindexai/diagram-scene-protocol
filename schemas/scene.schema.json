@@ -1137,6 +1137,10 @@
           "forceLabel": {
             "type": "boolean",
             "description": "Edge-only: draw the edge's label where the engine would leave it out. When an edge's label exactly matches the name of a column declared in either endpoint's extensions.columns, the edge anchors at that column's row inside the entity (the dbdiagram.io / DBeaver convention) and the label isn't drawn, because the row carries the FK identity. Set this to true to draw the label as well: the edge still anchors at the column, and its cardinality at that end is inferred from the column."
+          },
+          "multiple": {
+            "type": "boolean",
+            "description": "Google Cloud cards only: true draws the card as a stack, one gray copy behind it, for a node that stands for several instances of one product. It draws no count. Every other node ignores it."
           }
         }
       },

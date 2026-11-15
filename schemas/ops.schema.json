@@ -523,6 +523,10 @@
             "type": "boolean",
             "description": "Edge-only: draw the label where the engine would leave it out. An ER edge whose label names a column still anchors at that column."
           },
+          "multiple": {
+            "type": "boolean",
+            "description": "Google Cloud cards only: true draws the card as a stack, one gray copy behind it, for a node that stands for several instances of one product. It draws no count. Every other node ignores it."
+          },
           "stroke": {
             "type": "string",
             "minLength": 1
