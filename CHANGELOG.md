@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.4.2
+
+Changed: a longer `title` on a Google Cloud tier can widen the Region in a saved diagram (6.4, 10.4). When a line from a row above it, inside the boundary, ends on a card and the tier's title leaves no clear place on the card's top, the reference engine widens the Region's tiers on the title's side and moves what lies past the growth by it. An `updateFrame` that sets a longer `title`, or an edit that adds the line, can cause it. A line from outside the boundary causes none, and nothing moves where nothing lies on the title's side. Before, only a title wider than the whole tier widened them. The `updateFrame` description in the operations schema names the exception. No input field or value changed.
+
+Changed: in a Google Cloud diagram, a line past a tier opens the room it needs (6.4). For a line that runs beside the tiers to an item above or below the subnets, the reference engine opens the inset beside the tiers and the gap between two tiers. An item below the subnets that the line feeds moves under it, and what lies past the opening moves by it. A tier's line to a node of a subnet's own row, past another tier, takes the gap between zone columns, as its line to an item below the subnets did. No input field or value changed.
+
 ## v9.4.1
 
 Changed: where an edge's line runs on the blue of a `gcp.cloud` frame, outside the filled frames it holds, and reads below 3:1 there, the reference engine draws that stretch darker, at its own hue, only as far as 3:1 needs (5.5). A `gcp.cloud` whose `style` sets `fill` keeps the line as written. No input field or value changed.
