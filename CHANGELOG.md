@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.4.1
+
+Changed: where an edge's line runs on the blue of a `gcp.cloud` frame, outside the filled frames it holds, and reads below 3:1 there, the reference engine draws that stretch darker, at its own hue, only as far as 3:1 needs (5.5). A `gcp.cloud` whose `style` sets `fill` keeps the line as written. No input field or value changed.
+
 ## v9.4.0
 
 Added: `multiple` in a style object (3.5). `multiple: true` says a node stands for several instances of one thing. The reference engine draws it only on a Google Cloud product card: one gray copy behind the card, in a box 4 px wider and 4 px taller. It draws no count, and every other node ignores the property. A named style, `createNode`, `updateNode` and `setStyle` take it as they take any style property.
