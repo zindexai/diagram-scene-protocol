@@ -321,11 +321,20 @@ In an `architecture` document, or one without a family, the reference engine als
 - a subnet's tiers and other members are rows, in the order their edges run;
 - Regions stand side by side in the order their parent lists them, their matching rows level;
 - a `gcp.vpc` is one band across its Regions; its margin before the first Region holds its title and a lane for each line between an item above the band and one below it, and for each line from a global item above the Regions into a card past the bands' first row; a line between two items of one Region, or between two items outside the boundary, has none;
-- the other members of the boundary, of a project or of a Region stand in rows above or below, by their edges;
-- in a new layout and after an `autoLayout` without `elements`, the cards that stand together (in one row of a subnet or in one frame, such as a GKE cluster) are drawn at one width, the widest card's, when their labels need nearly the same width;
+- the other members of the boundary or of a Region stand in rows above or below, by their edges;
+- a project's own members stand over or under its own Regions, and its box holds them and its Regions;
+- in a new layout, the boxes of sibling projects, and of a project and a Region beside it, don't overlap;
+- the cards a Region with a subnet lists directly stand in one row above its subnets and one below them, each while the row runs no wider than 1,400 px, a frame it lists directly standing as one block;
+- when one row of the cards a Region with a subnet lists directly would run wider than 1,400 px, they stand in rows by flow, each card one row below the lowest card with an edge into it, and a row wider than 1,400 px wraps onto a further row;
+- the cards of a row by flow stand in an order chosen to cut the crossings between rows, not always to the fewest, a row that wraps being ordered whole, and cards whose lines don't decide their order standing as the Region lists them;
+- in a new layout and after an `autoLayout` without `elements`, cards that stand together are drawn at one width, the widest card's, when their labels need nearly the same width:
+  - those in one row of a subnet, of the boundary or of a project;
+  - those a Region lists directly above its subnets, and those below them, whichever row by flow they stand in;
+  - those in one frame, such as a GKE cluster;
+  - those outside the boundary, on one side;
 - a card in a zone column, whose width the zone column sets, and a stacked card (`style.multiple`), which keeps the width its copy needs, are left out of the one width.
 
-Their `layout` is a minimum. A project, or a `generic` frame round whole Regions, is read through; any other frame between the presets is laid out as a generic frame is, with the presets inside it. A node an edit adds takes its place in its row or zone column, and what lies past the growth moves. A line an edit adds between an item above a `gcp.vpc` band and one below it, not between two items of one Region or between two items outside the boundary, grows the band and the frames around it on the side of its first Region. No node moves. A Region with no subnet widens on its title's side when the lines into a card from a global item above the Regions leave the card's top no place clear of the title; what lies past the growth moves.
+Their `layout` is a minimum. A project, or a `generic` frame round whole Regions, is read through for its Regions, and its box is fitted round them and the members it lists itself. Any other frame between the presets is laid out as a generic frame is, with the presets inside it. A node an edit adds takes its place in its row or zone column, and what lies past the growth moves. A line an edit adds between an item above a `gcp.vpc` band and one below it, not between two items of one Region or between two items outside the boundary, grows the band and the frames around it on the side of its first Region. No node moves. A Region with no subnet widens on its title's side when the lines into a card from a global item above the Regions leave the card's top no place clear of the title; what lies past the growth moves.
 
 In the reference engine, lanes run along the flow and stack across it, in the order the pool's `children` list them, and every node a lane lists is placed inside it. A pool's `laneDirection` sets the flow: left to right for `vertical`, top to bottom for `horizontal`, winning over the document's direction when the two disagree. Without `laneDirection`, lanes stack across the document's direction. A pool's or lane's `layout` is a minimum: they grow to hold their members. A `fragment` frame is a sequence diagram's combined fragment: its `extensions.operator` (such as `alt`, `loop` or `opt`) is drawn in its corner, and `ref` is drawn when it is absent. Its `children` are the messages and notes it holds, and the fragments nested in it. In a sequence diagram the reference engine lays a fragment out with its rows, from its first message or note to its last, and ignores its `layout`. Each operand after the first starts at a message or note in the fragment, after its first row (`extensions.operands`, 8), and is drawn as a dashed line above that row with its guard under it, for every operator.
 
@@ -385,10 +394,14 @@ The reference engine places each unplaced node when it lays the document out: ar
 - in an AWS diagram, a node or a spanning frame's header an edit adds grows its row or column (5.5);
 - in an AWS diagram, the room round a tier frame (a `generic` frame round subnets next to each other in one zone's rows) narrows a gap round the VPC's zones, and the gap gets back what the tier took, up to the room a fresh layout keeps there (5.5);
 - an edit that places nodes in or joined to a Region's column, or adds an edge into it, can move the column right to keep a labeled line into it clear (5.5);
-- in a Google Cloud diagram, what an edit adds, or a group title it widens, grows a row, a zone column or a Region, or opens a gap between two Regions or two zone columns, and what lies past the growth moves (5.5);
+- in a Google Cloud diagram, what an edit adds, or a group title it widens, grows a row, a zone column, a Region or a project's box, or opens a gap between two Regions, two projects or two zone columns, and what lies past the growth moves (5.5);
+- in a Google Cloud diagram, a card an edit adds to a Region's rows of cards joins a row, and the cards after it in that row move along when its place is too small (5.5);
+- in a Google Cloud diagram, an edit to a diagram saved with the boxes of sibling projects overlapping moves the project listed later, and what lies right of it, right until the boxes clear each other by the gap a new layout keeps (5.5);
 - in a Google Cloud diagram, a line an edit adds can move an item in its row aside;
 - in a Google Cloud diagram, a line an edit adds past a tier to an item the Region lists below its subnets opens the gap between zone columns where they take it, and otherwise the inset beside the tiers and the gap between two tiers; the item moves under the line, what lies past the opening moves by it, and the reference engine draws any other line past a tier without opening room (5.5);
 - an edit changes its frame, as when it moves a task to another lane (6.6).
+
+In a Google Cloud diagram, an edit adds no row of a Region's cards, doesn't reorder them and doesn't arrange them by flow again; a layout of every node, such as `autoLayout` without `elements`, arranges them by flow again.
 
 Sequence diagrams are the exception. The reference engine lays them out from their messages every time and writes nothing back, so their nodes stay at `x` 0, `y` 0.
 

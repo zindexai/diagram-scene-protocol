@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.10.0
+
+Changed: in a Google Cloud diagram, a project is one box round its Regions and the global items it lists itself, and the boxes of sibling projects don't overlap (5.5). A project's items stand over or under its own Regions. A row of them wider than the project's Regions widens the box, and the project after it moves right by the growth. A diagram saved on an earlier version keeps its places, unless an edit needs room. Its next edit also clears sibling projects' boxes saved overlapping: the project listed later, and what lies right of it, move right.
+
+Changed: the cards a Google Cloud Region lists directly stand in rows by flow when one row would run wider than 1,400 px (5.5). Each card stands one row below the lowest card with an edge into it, and a row wider than 1,400 px wraps onto a further row. The cards of a row stand in an order chosen to cut the crossings between rows, not always to the fewest. Cards that fit one row stay in it, and a Region's subnets, tiers and zone columns are arranged as before. Cards that stand together in these rows are drawn at one width by the rule of 9.8.3, where their labels need nearly the same width. No input field or value changed.
+
 ## v9.8.3
 
 Changed: in a Google Cloud diagram, cards that stand together are drawn at one width in a new layout and after an `autoLayout` without `elements` (5.5, 6.5). An edit doesn't draw cards at one width again: a card it leaves alone keeps its width, and a card it adds outside a zone column takes the width its own label needs. Cards of different products more than a few pixels apart keep the width their labels need.
