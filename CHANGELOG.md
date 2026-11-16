@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.8.0
+
+Added: `textStyle` on an edge, and `textStyle` on `createEdge` and `updateEdge` (5.3, 10.3, 10.4). It holds `wrap` alone: `auto`, `none`, `word` or `character`. `createEdge` and `updateEdge` refuse `align` and `verticalAlign`, and `setText` ignores them. Absent means `auto`. The reference engine never adds `textStyle` to an edge, and a `wrap` you send is kept as sent. `updateEdge` merges `textStyle` field by field, and `setText` on an edge takes its `wrap`.
+
+Changed: the reference engine wraps an edge's label wider than 200 px (5.3). A label breaks into lines at most that wide, where a node's label breaks, and a `\n` still starts a line. An `EVENT [guard] / action` label breaks between its parts first.
+
+The layout leaves room for the wrapped label: a flow left to right reserves its width between ranks, and a flow top to bottom its height. `textStyle.wrap` `none` keeps the label on one line, as every label was drawn before. A version already saved keeps its image and its fields. An edit to a saved diagram draws a label wider than 200 px wrapped, in the room its layout left. A layout of every node again, such as `autoLayout` without `elements`, makes the room.
+
 ## v9.7.1
 
 Changed: in a Google Cloud diagram, a Region with no subnet widens on its title's side when the lines into a card from a global item above the Regions leave the card's top no place clear of the title (5.5).

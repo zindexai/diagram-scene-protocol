@@ -235,11 +235,18 @@ An edge connects two elements. Required fields: `id`, `kind`, `from` and `to`.
 | `from`, `to` | The two ends (below). |
 | `edgeType` | `default` when absent, or a family edge type (3.3). |
 | `label` | The text. `\n` starts a new line. |
+| `textStyle` | Optional. `wrap` alone: `auto`, `none`, `word` or `character`. Absent is `auto`. |
 | `endpoints` | `startArrow` and `endArrow`: `none`, `triangle`, `diamond`, `circle`, `bar`, `openTriangle`, `openCircle` or `cross` (an X on the line just short of the node). |
 | `router` | `straight` (one line between the nodes' centers, ending on each outline), `orthogonal` (right-angle segments routed round nodes), `curved` (one bowed arc between the nodes, ending on each outline) or `polyline` (drawn as `orthogonal`). `straight` and `curved` aren't routed round nodes; one that runs through a node gets the warning `EDGE_CROSSES_NODE`. Sequence messages ignore `router`. |
 | `waypoints` | Points (`x`, `y`) kept with the edge. |
 | `step` | Optional. A numbered step, an integer from 1 to 99. |
 | `stepText` | Optional. The edge's line in the step list. It needs `step`. |
+
+The reference engine wraps an edge's label that is wider than 200 px, counting 4 px of padding on each side. Its lines are at most that wide and break where a node's label breaks (5.2). A `\n` starts a line in every mode, and in every mode but `none` each line you write wraps by itself.
+
+`auto` and `word` keep a piece wider than the line whole. `character` also breaks it between its characters. `none` keeps each line as written, however wide. A label that fits is drawn as written. The 200 px isn't a field, and an edge's `textStyle` takes no `align` or `verticalAlign`: a label is centered on its line.
+
+A label written as `EVENT [guard] / action`, in a flowchart, workflow, UI flow or sequence diagram, draws its three parts in different type on one line. When that is too wide, it breaks between them: the event first, then the guard and action together if they fit, else each on its own line. A part still too wide wraps by itself.
 
 An end has an `elementId` (required) and can have:
 
@@ -557,7 +564,7 @@ The document an edit produces is a document like any other, and the rules of sec
 
 `createNode` adds a node. Required: `id` and `nodeType`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `shape`, `label`, `layout`, `icon`, `textStyle`, the shorthand `x`, `y`, `width` and `height`, `after` or `before`, `frame`, and `metadata` and `extensions`, which become the node's. `frame`, the ID of a frame (any `containerType`), appends the node to that frame's `children`. A node created without a `layout` is unplaced, and the next layout places it (6.4).
 
-`createEdge` adds an edge. Required: `id`, `from` and `to`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `label`, `edgeType`, `endpoints`, `router`, `waypoints`, `step`, `stepText`, `after` or `before`, `metadata` and `extensions`. Missing arrowheads come from `edgeType`, as in a document (5.3).
+`createEdge` adds an edge. Required: `id`, `from` and `to`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `label`, `textStyle`, `edgeType`, `endpoints`, `router`, `waypoints`, `step`, `stepText`, `after` or `before`, `metadata` and `extensions`. Missing arrowheads come from `edgeType`, as in a document (5.3).
 
 `createFrame` adds a frame. Required: `id`, and `children` (at least one) or `spans` (at least one), which makes a spanning frame (5.5). A `createFrame` with `spans` MUST NOT have `children` or `frame`. Optional: `name`, `zIndex`, `locked`, `visible`, `style`, `title`, `icon`, `layout`, `containerType`, `laneDirection`, `frame`, `metadata` and `extensions`. Without a `layout`, the frame fits around its members (6.6). `frame`, the ID of a frame, appends the new frame to that frame's `children`, so a lane goes after a pool's other lanes, and removes from that frame's `children` each element the new frame lists in its own, so each stays in one frame. A nested `fragment` frame deleted and created again in one envelope, with `frame` naming the fragment that held it, therefore goes back round its rows.
 
@@ -578,11 +585,11 @@ When `zIndex` is absent, the reference engine assigns the next value for the ele
 
 ### 10.4 Changing elements
 
-`updateNode` changes a node, and `updateEdge` an edge. Required: `id`, and at least one other field. They take the fields their create operation takes, except `id`, and `updateNode` doesn't take the shorthand. Each field given replaces the element's field whole: `layout`, `style`, `from`, `to`, `endpoints`, `metadata` and `extensions` aren't merged. To add an ER column, send the whole `extensions` object with the new `columns` array. On `updateNode`, `icon: null` removes the icon, and `textStyle` is merged into the node's field by field, as with `setText`. On `updateEdge`, `stepText: null` removes the step's text, and `step: null` removes the step and its text. `after` or `before` moves the element as 10.3 places a new one; when the element already sits there, nothing changes, its fragment included. `frame` on `updateNode`, a frame's ID, makes the node a direct child of that frame and of nothing else: its ID leaves the `children` of every other frame and group, and is appended to that frame's `children` unless it is there already. `frame` is a string; there is no value that takes a node out of every frame.
+`updateNode` changes a node, and `updateEdge` an edge. Required: `id`, and at least one other field. They take the fields their create operation takes, except `id`, and `updateNode` doesn't take the shorthand. Each field given replaces the element's field whole: `layout`, `style`, `from`, `to`, `endpoints`, `metadata` and `extensions` aren't merged. To add an ER column, send the whole `extensions` object with the new `columns` array. On `updateNode`, `icon: null` removes the icon, and `textStyle` is merged into the node's field by field, as with `setText`. On `updateEdge`, `textStyle` is merged into the edge's field by field, `stepText: null` removes the step's text, and `step: null` removes the step and its text. `after` or `before` moves the element as 10.3 places a new one; when the element already sits there, nothing changes, its fragment included. `frame` on `updateNode`, a frame's ID, makes the node a direct child of that frame and of nothing else: its ID leaves the `children` of every other frame and group, and is appended to that frame's `children` unless it is there already. `frame` is a string; there is no value that takes a node out of every frame.
 
 `updateFrame` changes a frame. Required: `id`, which MUST name a frame, and at least one of `title`, `style`, `icon`, `containerType`, `laneDirection` and `spans`, which take the values `createFrame` takes. Each field given replaces the frame's; `null` removes the `style`, the `icon`, the `containerType` (the frame becomes `generic`) or the `laneDirection`. `spans` replaces a spanning frame's targets, and the frame `updateFrame` names with `spans` MUST be a spanning frame. It doesn't change the frame's `children`, `layout` or `extensions`, and the reference engine keeps the positions of its members, except where a longer title widens a Google Cloud group: what lies past the growth then moves by it.
 
-`setText` sets the text of a node (its `label`), an edge (its `label`) or a text element (its `text`). Required: `id` and `text`. Its optional `textStyle` is merged into the element's, field by field; edges have no `textStyle` and ignore it.
+`setText` sets the text of a node (its `label`), an edge (its `label`) or a text element (its `text`). Required: `id` and `text`. Its optional `textStyle` is merged into the element's, field by field; an edge takes only its `wrap`, and `align` and `verticalAlign` are ignored.
 
 `setStyle` changes an element's style. Required: `id`, and exactly one of `style` and `styleOverride`. `style`, a style name or a style object, replaces the element's style. `styleOverride`, a style object, is merged into what the element looks like now: when the element uses a named style, that style's properties are copied in first, and the element ends up with an inline style. Setting the style name an element already has is a warning.
 
@@ -651,7 +658,7 @@ The restored content is the earlier revision's exactly, node positions included.
 
 The reference engine stores documents with their defaults written in, and returns them that way. A document read back can differ from the one sent:
 
-- `shape` is set on every node (5.2), `textStyle` on every node and text element (5.2, 5.6), and `zIndex` on every element (5.1).
+- `shape` is set on every node (5.2), `textStyle` on every node and text element (5.2, 5.6), and `zIndex` on every element (5.1). An edge has a `textStyle` only when its author set one (5.3).
 - `locked` (false), `visible` (true), `metadata` (`{}`) and `extensions` (`{}`) are set on every element.
 - Every node has an absolute or relative `layout`. A node sent without one has `{ "mode": "absolute", "x": 0, "y": 0, "width": 150, "height": 60 }` until it is placed, and then its box (6.4). The shorthand becomes a `layout`, absolute layouts get `rotation` (0) and `autoSize` (`none`), and relative layouts get `place.gap` (0).
 - Edges get `edgeType` (`default`) and `waypoints` (`[]`). An arrowhead its `edgeType` (or the document's AWS or Google Cloud groups and icons) gives isn't stored, whether it was sent or not (5.3).

@@ -506,6 +506,18 @@
           }
         }
       },
+      "edgeTextStyle": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "How an edge's label wraps, as scene.schema.json#/$defs/edgeTextStyle describes. A label is centered on its line, so align and verticalAlign don't apply.",
+        "properties": {
+          "wrap": {
+            "type": "string",
+            "enum": ["auto", "none", "word", "character"],
+            "description": "'auto', the default when textStyle is absent, and 'word' wrap a label wider than 200 px (its text and 4 px of padding each side). Lines break by the Unicode line breaking rules (UAX #14): at spaces, after hyphens and slashes, and between Chinese or Japanese characters. A word wider than the line runs past it. 'character' also breaks such a word between its characters. 'none' keeps each line as written, however wide, and breaks only at \\n. The 200 px can't be changed: a label has no box of its own to widen."
+          }
+        }
+      },
       "styleValue": {
         "type": "object",
         "additionalProperties": false,
@@ -1259,6 +1271,9 @@
               "stepText": {
                 "type": "string",
                 "description": "This edge's line in the step list drawn right of the diagram. Needs step."
+              },
+              "textStyle": {
+                "$ref": "#/$defs/edgeTextStyle"
               }
             },
             "dependentRequired": { "stepText": ["step"] }
@@ -1346,6 +1361,10 @@
               "stepText": {
                 "type": ["string", "null"],
                 "description": "This edge's line in the step list, as on createEdge; null removes it."
+              },
+              "textStyle": {
+                "$ref": "#/$defs/edgeTextStyle",
+                "description": "How the label wraps. Only the fields given change."
               }
             },
             "anyOf": [
@@ -1363,6 +1382,7 @@
               { "required": ["endpoints"] },
               { "required": ["waypoints"] },
               { "required": ["edgeType"] },
+              { "required": ["textStyle"] },
               { "required": ["metadata"] },
               { "required": ["extensions"] },
               { "required": ["after"] },
