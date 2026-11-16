@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.8.3
+
+Changed: in a Google Cloud diagram, cards that stand together are drawn at one width in a new layout and after an `autoLayout` without `elements` (5.5, 6.5). An edit doesn't draw cards at one width again: a card it leaves alone keeps its width, and a card it adds outside a zone column takes the width its own label needs. Cards of different products more than a few pixels apart keep the width their labels need.
+
+Changed: a `gcp.vpc` band's margin opens a lane for a line from a global item above the Regions into a card past the bands' first row, and none for a line between two items outside the boundary (5.5). No input field or value changed.
+
 ## v9.8.0
 
 Added: `textStyle` on an edge, and `textStyle` on `createEdge` and `updateEdge` (5.3, 10.3, 10.4). It holds `wrap` alone: `auto`, `none`, `word` or `character`. `createEdge` and `updateEdge` refuse `align` and `verticalAlign`, and `setText` ignores them. Absent means `auto`. The reference engine never adds `textStyle` to an edge, and a `wrap` you send is kept as sent. `updateEdge` merges `textStyle` field by field, and `setText` on an edge takes its `wrap`.
