@@ -2,6 +2,16 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.13.0
+
+Changed: an `anchor` with a `side` and no `offset` leaves the place on that side to the reference engine (5.3). Where the two sides face each other and their faces overlap it lines the ends up so the line is straight, it spreads ends that share the side, and it slides a straight line past the title of a frame it enters, as it does for an edge with no anchor. An `offset` still places the end. No input field or value changed.
+
+Changed: in a top-to-bottom Google Cloud diagram, a line that ends on a generic frame round cards, from an item above it, lands on the frame's top 16 px clear of the frame's title where it can drop straight under the item. Where the title leaves no such place, or the item has other lines down, it lands where the router puts it. The lane over the frame's cards for a second line runs 16 px under the title (5.5). No input field or value changed.
+
+Changed: the reference engine keeps a stored stack of `layer` frames stacked when an edit changes it (5.5, 6.4, 6.5, 10.6). A card an edit adds to a layer, or moves into one, stands in that layer's row; a layer that grows, or is added, moves the layers after it along by the growth; a card that grows keeps the edge of its row nearest the start of the stack. `autoLayout` with `elements` places a card of a stack in its layer's row (10.6). A card added to a stored stack was placed by the layout's general rules before. No input field or value changed.
+
+Changed: the reference engine warns about an untyped group (`GCP_GROUP_UNTYPED`, `AWS_GROUP_UNTYPED`, 5.5) only when the frame's title is a group's own name, alone or with one identifier (a letter, or a word with a digit), such as `VPC network` or `Region: us-east1`. A title that only contains such a word, such as `VPC Service Controls perimeter`, no longer gets the warning, and the warning's fix offers `or leave it generic`. In an AWS diagram a bare or identified `Subnet` names both subnet presets. No input field or value changed.
+
 ## v9.12.0
 
 Added: the `layer` container type (5.5). In an `architecture` document, or one without a family, the reference engine stacks the `layer` frames one frame lists, or at the root those no frame lists, as rows in the order listed, each card in its layer's row, the layers one width, with the codes `LAYER_NOT_ARRANGED` and `LAYER_HAS_LAYOUT` for a layer it draws as a generic frame. Documents that don't write `layer` draw as before.
