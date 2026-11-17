@@ -514,7 +514,7 @@
           "wrap": {
             "type": "string",
             "enum": ["auto", "none", "word", "character"],
-            "description": "'auto', the default when textStyle is absent, and 'word' wrap a label wider than 200 px (its text and 4 px of padding each side). Lines break by the Unicode line breaking rules (UAX #14): at spaces, after hyphens and slashes, and between Chinese or Japanese characters. A word wider than the line runs past it. 'character' also breaks such a word between its characters. 'none' keeps each line as written, however wide, and breaks only at \\n. The 200 px can't be changed: a label has no box of its own to widen."
+            "description": "'auto', the default when textStyle is absent, and 'word' wrap a label wider than 200 px (its text and 4 px of padding each side). Lines break by the Unicode line breaking rules (UAX #14): at spaces, after hyphens and slashes, and between Chinese or Japanese characters. A word wider than the line runs past it. 'character' also breaks such a word between its characters. 'none' keeps each line as written, however wide, and breaks only at \\n, wherever the label is placed. A label with no clean place beside its line also wraps narrower, in at most three lines (or the lines you wrote, if more), unless 'none' keeps it as written or it can't break; a sequence message's label is never narrowed. The 200 px can't be changed: a label has no box of its own to widen."
           }
         }
       },

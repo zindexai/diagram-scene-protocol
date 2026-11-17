@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.11.0
+
+Changed: the reference engine wraps an edge label narrower, in at most three lines (or the lines written, if more), where it finds no clean place for it beside its line (5.2). A label that has a clean place keeps its lines. `textStyle.wrap: "none"` keeps a label as written wherever it goes. A label that only crowds another stays within 14 px of its own line; one that covers another label is still moved off it.
+
 ## v9.10.0
 
 Changed: in a Google Cloud diagram, a project is one box round its Regions and the global items it lists itself, and the boxes of sibling projects don't overlap (5.5). A project's items stand over or under its own Regions. A row of them wider than the project's Regions widens the box, and the project after it moves right by the growth. A diagram saved on an earlier version keeps its places, unless an edit needs room. Its next edit also clears sibling projects' boxes saved overlapping: the project listed later, and what lies right of it, move right.

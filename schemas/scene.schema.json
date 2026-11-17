@@ -821,7 +821,7 @@
               },
               "label": {
                 "type": "string",
-                "description": "Edge label text, centered on its line. A label wider than 200 px (its text and 4 px of padding each side) wraps onto lines of at most that width; textStyle.wrap 'none' keeps each line as written. Break a line yourself with \\n: each line you write wraps by itself. Labels matching the state-machine / SCXML / BPMN convention 'EVENT [guard] / action' render with multi-tier typography: event 12px, guard 10px muted, action 10px muted italic. Detection is content-based (balanced [...] OR ' / ' separator), in flowchart, workflow, uiflow and sequence diagrams; in every other diagram, one with no diagramFamily included, a label is plain text. A convention label too wide for one line breaks between its parts first: the event, then the guard and action together if they fit, else each on its own line. Multi-line labels (containing \\n) skip the convention parse."
+                "description": "Edge label text, centered on its line. A label wider than 200 px (its text and 4 px of padding each side) wraps onto lines of at most that width; textStyle.wrap 'none' keeps each line as written. A label with no clean place beside its line wraps narrower than that, as the wrap field says. Break a line yourself with \\n: each line you write wraps by itself. Labels matching the state-machine / SCXML / BPMN convention 'EVENT [guard] / action' render with multi-tier typography: event 12px, guard 10px muted, action 10px muted italic. Detection is content-based (balanced [...] OR ' / ' separator), in flowchart, workflow, uiflow and sequence diagrams; in every other diagram, one with no diagramFamily included, a label is plain text. A convention label too wide for one line breaks between its parts first: the event, then the guard and action together if they fit, else each on its own line. Multi-line labels (containing \\n) skip the convention parse."
               },
               "textStyle": {
                 "$ref": "#/$defs/edgeTextStyle"
@@ -996,7 +996,7 @@
           "wrap": {
             "type": "string",
             "enum": ["auto", "none", "word", "character"],
-            "description": "'auto', the default when textStyle is absent, and 'word' wrap a label wider than 200 px (its text and 4 px of padding each side). Lines break by the Unicode line breaking rules (UAX #14): at spaces, after hyphens and slashes, and between Chinese or Japanese characters. A word wider than the line runs past it. 'character' also breaks such a word between its characters. 'none' keeps each line as written, however wide, and breaks only at \\n. The 200 px can't be changed: a label has no box of its own to widen."
+            "description": "'auto', the default when textStyle is absent, and 'word' wrap a label wider than 200 px (its text and 4 px of padding each side). Lines break by the Unicode line breaking rules (UAX #14): at spaces, after hyphens and slashes, and between Chinese or Japanese characters. A word wider than the line runs past it. 'character' also breaks such a word between its characters. 'none' keeps each line as written, however wide, and breaks only at \\n, wherever the label is placed. A label with no clean place beside its line also wraps narrower, in at most three lines (or the lines you wrote, if more), unless 'none' keeps it as written or it can't break; a sequence message's label is never narrowed. The 200 px can't be changed: a label has no box of its own to widen."
           }
         }
       },

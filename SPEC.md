@@ -244,7 +244,7 @@ An edge connects two elements. Required fields: `id`, `kind`, `from` and `to`.
 
 The reference engine wraps an edge's label that is wider than 200 px, counting 4 px of padding on each side. Its lines are at most that wide and break where a node's label breaks (5.2). A `\n` starts a line in every mode, and in every mode but `none` each line you write wraps by itself.
 
-`auto` and `word` keep a piece wider than the line whole. `character` also breaks it between its characters. `none` keeps each line as written, however wide. A label that fits is drawn as written. The 200 px isn't a field, and an edge's `textStyle` takes no `align` or `verticalAlign`: a label is centered on its line.
+`auto` and `word` keep a piece wider than the line whole. `character` also breaks it between its characters. `none` keeps each line as written, however wide. A label that fits is drawn as written. Where the engine finds no clean place for a label beside its line, it wraps the label narrower, in at most three lines (or the lines written, if more), at the widest width that has one. `none`, a sequence message's label and a label that can't break keep their lines. The 200 px isn't a field, and an edge's `textStyle` takes no `align` or `verticalAlign`: a label is centered on its line.
 
 A label written as `EVENT [guard] / action`, in a flowchart, workflow, UI flow or sequence diagram, draws its three parts in different type on one line. When that is too wide, it breaks between them: the event first, then the guard and action together if they fit, else each on its own line. A part still too wide wraps by itself.
 
