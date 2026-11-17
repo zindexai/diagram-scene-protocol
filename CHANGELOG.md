@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.12.0
+
+Added: the `layer` container type (5.5). In an `architecture` document, or one without a family, the reference engine stacks the `layer` frames one frame lists, or at the root those no frame lists, as rows in the order listed, each card in its layer's row, the layers one width, with the codes `LAYER_NOT_ARRANGED` and `LAYER_HAS_LAYOUT` for a layer it draws as a generic frame. Documents that don't write `layer` draw as before.
+
 ## v9.11.1
 
 Changed: in a top-to-bottom Google Cloud diagram, a generic frame round cards, such as a GKE cluster or a service perimeter, keeps a lane beside or under its cards for a line from one of its cards to a card outside the frame when another card of the frame is in the line's way (5.5). The line runs in the lane clear of the cards and the frame's border. The lane opens in a new layout and after an `autoLayout` without `elements`; a saved diagram keeps its frames and cards as they are. No input field or value changed.
