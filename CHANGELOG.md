@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.11.1
+
+Changed: in a top-to-bottom Google Cloud diagram, a generic frame round cards, such as a GKE cluster or a service perimeter, keeps a lane beside or under its cards for a line from one of its cards to a card outside the frame when another card of the frame is in the line's way (5.5). The line runs in the lane clear of the cards and the frame's border. The lane opens in a new layout and after an `autoLayout` without `elements`; a saved diagram keeps its frames and cards as they are. No input field or value changed.
+
 ## v9.11.0
 
 Changed: the reference engine wraps an edge label narrower, in at most three lines (or the lines written, if more), where it finds no clean place for it beside its line (5.2). A label that has a clean place keeps its lines. `textStyle.wrap: "none"` keeps a label as written wherever it goes. A label that only crowds another stays within 14 px of its own line; one that covers another label is still moved off it.
