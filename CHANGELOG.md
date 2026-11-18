@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.18.0
+
+Changed: in a Google Cloud diagram the reference engine arranges, a line from an item outside the boundary, or from a global item over the Regions, into a tier past another tier of its Region takes a lane (5.5). The lane is a gap between the zone columns, else a lane beside the tiers on their right, and the line lands on the top of what it enters. An item takes lanes only when all its lines enter a tier, card or node past another tier of one Region and none is drawn curved. A line to another item outside the boundary doesn't count. Each item takes one gap, and only a top-to-bottom flow, or a bottom-to-top one for an item a top-to-bottom flow would stand below the boundary, gives a lane. Any other line is drawn as before. An edit that adds such an item with its line opens the lane, and the item stands over it where its row has room. A line an edit adds that the lane doesn't serve takes the item's saved lanes away, and no saved item moves to stand over a lane. No input field or value changed.
+
 ## v9.17.0
 
 Changed: a Google Cloud Region keeps 24 px under the lowest card, row of items or subnet it holds, 21 px at its sides, and 24 px from the subnets under a VPC band (5.5). Regions that stand level share one bottom. A diagram saved on an earlier version is drawn with a Region that stood closer lowered to that, and the rows under the Regions move down with it. No node inside a Region moves, and the next edit saves the rows where they stand. No input field or value changed.

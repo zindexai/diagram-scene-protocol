@@ -326,7 +326,13 @@ In an `architecture` document, or one without a family, the reference engine als
 - each zone is a column through every tier of its Region, in the order the document lists the Region's zones;
 - a subnet's tiers and other members are rows, in the order their edges run;
 - Regions stand side by side in the order their parent lists them, their matching rows level;
-- a `gcp.vpc` is one band across its Regions; its margin before the first Region holds its title and a lane for each line between an item above the band and one below it, and for each line from a global item above the Regions into a card past the bands' first row; a line between two items of one Region, or between two items outside the boundary, has none;
+- a `gcp.vpc` is one band across its Regions; its margin before the first Region holds its title and a lane for each line between an item above the band and one below it, and for each line from a global item or an item outside the boundary, above the Regions, into a card past the bands' first row, and from one below the Regions into a card before the last row, unless the line has a lane through the tiers; a line between two items of one Region, or between two items outside the boundary, has none;
+- a line from an item outside the boundary, or from a global item over the Regions, into a tier past another tier of its Region takes a lane through the Region where the item qualifies:
+  - every line the item has goes into a tier, a card or a node of a subnet's own row past another tier, all into one Region, and none is drawn curved; a line between the item and an item outside the boundary doesn't count, and a global item takes a lane only into a tier;
+  - the lane is a gap between zone columns where the Region has two or more columns with every card in a zone, else a run down the right of the tiers; the item stands over the lane where its row has room, and the line lands on the top of the tier, card or node it enters;
+  - each item takes one gap, in the order the document lists its first line, and beside the tiers the lane serves one item;
+  - only a top-to-bottom flow, or a bottom-to-top one for an item a top-to-bottom flow would stand below the boundary, gives a lane;
+  - a line of an item that has no lane is drawn as without lanes;
 - the other members of the boundary or of a Region stand in rows above or below, by their edges;
 - a dashboard service the boundary or a project lists (a node with the `gcp:looker`, `gcp:looker-studio` or `gcp:looker-studio-pro` icon, or the alias `gcp:data-studio`) stands in the row below the Regions when two things hold:
   - the lines the Regions send it equal its lines into the Regions plus the calls from outside;
@@ -421,7 +427,8 @@ The reference engine places each unplaced node when it lays the document out: ar
 - in a Google Cloud diagram, a card an edit adds to a Region's rows of cards joins a row, and the cards after it in that row move along when its place is too small (5.5);
 - in a Google Cloud diagram, an edit to a diagram saved with the boxes of sibling projects overlapping moves the project listed later, and what lies right of it, right until the boxes clear each other by the gap a new layout keeps (5.5);
 - in a Google Cloud diagram, a line an edit adds can move an item in its row aside;
-- in a Google Cloud diagram, a line an edit adds past a tier to an item the Region lists below its subnets opens the gap between zone columns where they take it, and otherwise the inset beside the tiers and the gap between two tiers; the item moves under the line, what lies past the opening moves by it, and the reference engine draws any other line past a tier without opening room (5.5);
+- in a Google Cloud diagram, a line an edit adds past a tier to an item the Region lists below its subnets opens the gap between zone columns where they take it, and otherwise the inset beside the tiers and the gap between two tiers; the item moves under the line, what lies past the opening moves by it, and the reference engine draws any other line past a tier without opening room, except one from an item outside the boundary, which the next item describes (5.5);
+- in a Google Cloud diagram, an item outside the boundary that an edit adds with its line into a tier past another tier opens the same room and stands over the line where its row has room, and a saved item outside moves only as far as what lies past the opening moves (5.5);
 - an edit changes its frame, as when it moves a task to another lane (6.6).
 
 In a Google Cloud diagram, an edit adds no row of a Region's cards, doesn't reorder them and doesn't arrange them by flow again; a layout of every node, such as `autoLayout` without `elements`, arranges them by flow again.
