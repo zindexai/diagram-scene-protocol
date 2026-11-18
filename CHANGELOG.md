@@ -2,6 +2,20 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.17.0
+
+Changed: a Google Cloud Region keeps 24 px under the lowest card, row of items or subnet it holds, 21 px at its sides, and 24 px from the subnets under a VPC band (5.5). Regions that stand level share one bottom. A diagram saved on an earlier version is drawn with a Region that stood closer lowered to that, and the rows under the Regions move down with it. No node inside a Region moves, and the next edit saves the rows where they stand. No input field or value changed.
+
+Changed: a labeled line that runs straight between matching rows of two neighboring Google Cloud Regions opens the gap between them to the label's width plus its room (5.5). The room is 24 px or more, and the gap stays as it is when the label already fits on a stretch of the line. The gap doesn't open for a line between different rows, past a card, past a Region or into a Region with no subnet. An edit that labels such a line moves the second Region, and what lies right of it, right by what the gap opens. No input field or value changed.
+
+Changed: a line that drops through a project's own row, or the row `gcp.cloud` lists, makes the row stand aside (5.5). The items in its way move 16 px past it, and the box grows when the row then runs past it. A line added to a saved diagram moves no saved card. The router draws it round the row's cards, and `autoLayout` stands the row aside. No input field or value changed.
+
+Changed: a project's title stands at its top center (5.5). It moves to its top left when a line between an item above it and a card under it would run down closer than 16 px to it and the top left is clear of such lines. A project with an `icon`, or no wider than its title needs, keeps its title where it is. Every layout decides it again from the places of the cards. No input field or value changed.
+
+Changed: a dashboard service (a node with the `gcp:looker`, `gcp:looker-studio` or `gcp:looker-studio-pro` icon, or the alias `gcp:data-studio`) that the boundary or a project lists stands below the Regions (5.5). It does so when two things hold: the lines the Regions send it equal its lines into the Regions plus the calls from outside, and every card that feeds it ends its Region's flow. A user whose every line with the boundary reaches a dashboard service there stands below the boundary under it. A user with a line to anything else in the boundary stays above. No input field or value changed.
+
+Changed: in a Google Cloud diagram the reference engine arranges, an edge label keeps a floor (5.2, 5.5). It stays 10 px from every other line and from every card but its edge's ends, at least twice as near its own line as any other, and out of a frame's title row. A label whose place breaks that wraps narrower, in at most three lines, where a narrower place keeps it. Other diagrams place labels as before. No input field or value changed.
+
 ## v9.14.0
 
 Added: the reference engine's warning `EDGE_OFFSET_ON_GROWN_NODE`, for an edge end that pins an `offset` on a side of a node drawn bigger than its `layout` says (5.3, 6.5). An `offset` is a fraction of the side as drawn.
