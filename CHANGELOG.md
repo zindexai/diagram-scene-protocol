@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.14.0
+
+Added: the reference engine's warning `EDGE_OFFSET_ON_GROWN_NODE`, for an edge end that pins an `offset` on a side of a node drawn bigger than its `layout` says (5.3, 6.5). An `offset` is a fraction of the side as drawn.
+
+Changed: the reference engine stores the size a placed node is drawn at (6.5). A node whose label or icon needs more room than its stored `width` or `height` was already drawn larger; a create or an edit now stores that size, so the stored `layout` says what is drawn. A growth of 1 px or less isn't stored. A node whose edges dock on a smaller box than it draws (a workflow event or gateway, a UI flow entry or exit point, a node that draws its icon alone, or a card a `gcp.zone` spans) is the exception. It stores a drawn size only where the reference engine places or moves it, an edit measures it again, or its growth pushes a neighbor or a frame border. A Google Cloud card drawn as a stack, sequence nodes and relatively placed nodes store none. A read, a render, a check and `restoreRevision` store no size. No input field or value changed.
+
+Changed: when an edit changes what a placed node shows, the reference engine measures the node again only on an axis where its stored size was what the old content needed, within 1 px (6.5). A size bigger than the old content needed stays when a label gets shorter, and a longer label still draws the node larger. A workflow event or gateway and a UI flow entry or exit point are measured on both axes, as before. No input field or value changed.
+
 ## v9.13.0
 
 Changed: an `anchor` with a `side` and no `offset` leaves the place on that side to the reference engine (5.3). Where the two sides face each other and their faces overlap it lines the ends up so the line is straight, it spreads ends that share the side, and it slides a straight line past the title of a frame it enters, as it does for an edge with no anchor. An `offset` still places the end. No input field or value changed.
