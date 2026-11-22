@@ -74,7 +74,7 @@ Most objects in the schemas reject properties they don't list. `metadata` and `e
 
 A service that stores documents can assign `scene.id` itself. The reference service does: it gives each new diagram its own ID and ignores the one sent.
 
-`canvas.width` and `canvas.height` are a minimum. The reference engine grows the drawing to fit its content, and on a layout that places every node it writes the size it used into `canvas`. When `canvas` has no size, the reference engine uses 800 by 600.
+`canvas.width` and `canvas.height` are a minimum. The reference engine grows the drawing to fit its content, and on a layout that places every node it writes into `canvas` the x of the canvas's right edge and the y of its bottom edge. The part of the canvas left of or above 0, where a line or label reaches there, isn't stored (13). When `canvas` has no size, the reference engine uses 800 by 600.
 
 The reference engine keeps `units`, `canvas.grid`, `canvas.snap`, `viewport` and `defaults`, but doesn't use them to lay out or draw. It doesn't keep `scene.extensions`: put extension data at the document's top level or on an element.
 
@@ -110,7 +110,7 @@ Workflow diagrams use `pool` and `lane` frames for swimlanes, and sequence diagr
 
 `layoutStrategy` guides where an implementation places the nodes that have no position (6.4). It has `direction` (`TB`, `BT`, `LR` or `RL`: top to bottom, bottom to top, left to right, right to left), `nodeSpacing` (pixels between nodes in the same rank) and `rankSpacing` (pixels between ranks). The schema accepts other keys in `layoutStrategy`, and implementations ignore them.
 
-The reference engine chooses its placement method from `diagramFamily`, not from `layoutStrategy`. Its layered layout, used for architecture, flowchart, workflow, entity-relationship and UI flow diagrams and for diagrams without a family, reads all three fields, and a field left out takes its default: `LR` (`TB` for flowcharts) for `direction`, 30 for `nodeSpacing`, and 80 (50 for flowcharts) for `rankSpacing`. The spacings are what it aims for, not minimums: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best. Org charts (a tree, top to bottom), network diagrams (placed by forces) and sequence diagrams (placed from their messages) don't read `layoutStrategy`. The document's `extensions.layoutHints.primaryDirection` turns an org chart's tree, and wins over `direction` in the layered layout (section 8).
+The reference engine chooses its placement method from `diagramFamily`, not from `layoutStrategy`. Its layered layout, used for architecture, flowchart, workflow, entity-relationship and UI flow diagrams and for diagrams without a family, reads all three fields, and a field left out takes its default: `LR` (`TB` for flowcharts) for `direction`, 30 for `nodeSpacing`, and 80 (50 for flowcharts) for `rankSpacing`. The spacings are what it aims for, not minimums: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, and it opens a gap wider where a label lacks room on its line. Org charts (a tree, top to bottom), network diagrams (placed by forces) and sequence diagrams (placed from their messages) don't read `layoutStrategy`. The document's `extensions.layoutHints.primaryDirection` turns an org chart's tree, and wins over `direction` in the layered layout (section 8).
 
 ### 3.5 Styles and the palette
 
@@ -145,7 +145,7 @@ The reference engine draws text in Inter for `fontFamily` `sans`, the default, a
 
 `styles` maps names (the characters an element ID allows) to style objects. A style name that an element uses MUST be in `styles`.
 
-`palette` sets colors for elements that don't set their own: `background`, `foreground` (the text of nodes and frames), `nodeFill`, `nodeStroke`, `edgeStroke`, `accentPrimary` (the `accentColor` of nodes that set none), `accentSecondary` (no effect: nothing draws a second accent yet), `mutedForeground` (edge label text), `containerFill` and `containerStroke` (frames and groups). In the reference engine an element's style wins over the palette, and the palette wins over the drawing theme. The schema accepts other keys in `palette`, and implementations ignore them.
+`palette` sets colors for elements that don't set their own: `background`, `foreground` (the text of nodes and frames), `nodeFill`, `nodeStroke`, `edgeStroke`, `accentPrimary` (the `accentColor` of nodes that set none), `accentSecondary` (no effect: nothing draws a second accent yet), `mutedForeground` (no effect on an edge's label), `containerFill` and `containerStroke` (frames and groups). In the reference engine an element's style wins over the palette, and the palette wins over the drawing theme. The schema accepts other keys in `palette`, and implementations ignore them.
 
 ### 3.6 Assets
 
@@ -782,10 +782,11 @@ Two documents have the same content when their stored forms (section 11), withou
 | Field | Meaning |
 |---|---|
 | `layout` | Each drawn element's box, by element ID. |
+| `canvas` | The canvas as a box: `x` and `y` are 0, or negative where a line or label reaches left of or above 0, and `width` and `height` run from there. |
 | `edgePaths` | Each edge's path by ID: its `points` (at least two), and where its label goes (`labelPosition`, `labelWidth`, `labelHeight`). `router` is `polyline` or `curved`, and a curved path's `control` is its control point (`M points[0] Q control points[1]`); `cornerRadius` rounds the path's corners, and when edges join one trunk into a shared port, the edge whose last leg is the trunk carries `junctions`, every point where the joined lines branch, each drawn as a dot, and `isFanInFeeder` marks the others, which end on the trunk with no arrowhead. Where a plain decision's branches (any decision diamond but the `workflow.*` types) share a vertex, one of them carries each point where their shared line splits in `junctions` too, and in an architecture, entity-relationship or network diagram or one without a family, so does one of the edges drawn alike that leave one point (or end at one point) at each point where they fork: a crossing carries none. |
 | `diagnostics` | The diagnostics of that layout (9.3). |
 
-The boxes in `computed.layout` are where the elements were drawn. They can differ from the stored sizes (6.5) wherever no size is stored: a growth of 1 px or less, a node sized by `autoSize: "content"`, a node that docks on a smaller box than it draws, a Google Cloud card drawn as a stack (`style.multiple`), a sequence node, a node with a relative `layout`, and a node in a version stored before drawn sizes were stored. The drawing can be shifted from the document's coordinates by one offset shared by every element.
+The boxes in `computed.layout` are where the elements were drawn. They can differ from the stored sizes (6.5) wherever no size is stored: a growth of 1 px or less, a node sized by `autoSize: "content"`, a node that docks on a smaller box than it draws, a Google Cloud card drawn as a stack (`style.multiple`), a sequence node, a node with a relative `layout`, and a node in a version stored before drawn sizes were stored. The reference engine adds no offset: an element is drawn where its coordinates put it, negative ones included. Where a line or label reaches left of or above 0, the canvas starts there (3.2).
 
 The reference engine ignores a document's `computed` without checking it, and works it out again each time it lays the document out. It leaves `computed` out of content comparisons (12.4) and out of the documents it returns. A frame whose `layout` has `autoSize: "children"` (section 11) is read the same way: as if it had none.
 

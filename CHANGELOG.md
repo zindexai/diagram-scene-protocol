@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.23.0
+
+Changed: the reference engine no longer moves the drawing when a line or label reaches left of or above 0 (3.2, 13). Nothing is offset: every element is drawn where its coordinates put it, negative ones included, and the canvas starts where the line or label reaches. Before, it moved everything drawn right and down by that overshoot and grew the canvas by the same amount. A stored document and its `canvas` don't change. No input field or value changed.
+
+Changed: when the reference engine lays out every node of a flowchart, workflow, UI flow, architecture, entity-relationship or no-family diagram, it opens a gap between two ranks wider where a label that stands on its own line would hide the ends of its line or lie against a line that crosses it (3.4). The spacings stay targets, not minimums. Before, the gap kept the spacing the layout chose, and such a label could cover most of a short line. A document that keeps its nodes' positions is laid out as before. No input field or value changed.
+
+Changed: when the reference engine lays out every node of an entity-relationship diagram that flows left to right or right to left, it moves tables until two rows a relationship joins are level where they lie less than 16 px apart and the tables have the room (6.4). A table with a `layout` of its own never moves. Before, the line between such rows made a step of 8 to 10 px. No input field or value changed.
+
 ## v9.22.0
 
 Added: the reference engine's warning `ACCENT_COLOR_NOT_DRAWN`, for a `style.accentColor` on an element that draws nothing with it (3.5). It returns one warning for each kind of element: a node with no accent mark, an `er.entity` or `er.weakEntity` with no `extensions.columns`, an edge, a text, an image, a guide, a group and a Google Cloud zone. Before, such an `accentColor` changed nothing and returned no warning.

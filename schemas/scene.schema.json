@@ -85,7 +85,7 @@
             "description": "Layout direction: top to bottom, bottom to top, left to right, right to left. The default is LR, and TB for flowchart and orgchart."
           },
           "nodeSpacing": { "type": "number", "default": 30, "description": "Pixels the engine aims for between nodes in the same rank. Not a minimum: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, and it widens gaps to fill a larger canvas." },
-          "rankSpacing": { "type": "number", "default": 80, "description": "Pixels the engine aims for between adjacent ranks: 80 by default, 50 in a flowchart. Not a minimum: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, and it widens gaps to fill a larger canvas." }
+          "rankSpacing": { "type": "number", "default": 80, "description": "Pixels the engine aims for between adjacent ranks: 80 by default, 50 in a flowchart. Not a minimum: when it lays out every node it also tries tighter and wider spacings and keeps the layout that scores best, it opens a gap wider where a label lacks room on its line, and it widens gaps to fill a larger canvas." }
         }
       },
       "palette": {
@@ -99,7 +99,7 @@
           "edgeStroke": { "type": "string", "description": "Default edge line color" },
           "accentPrimary": { "type": "string", "description": "Accent color of nodes whose style sets no accentColor: the headers and PK badges of ER tables with columns, org.person and org.role stripes, uiflow.screen and uiflow.modal title bars" },
           "accentSecondary": { "type": "string", "description": "Nothing draws a second accent yet, so this has no effect" },
-          "mutedForeground": { "type": "string", "description": "Edge label text color" },
+          "mutedForeground": { "type": "string", "description": "No effect on an edge's label" },
           "containerFill": { "type": "string", "description": "Default frame/group fill color" },
           "containerStroke": { "type": "string", "description": "Default frame/group border color" }
         }
