@@ -128,7 +128,14 @@ An element's `style` is either the name of an entry in the document's `styles`, 
 | `forceLabel` | Edges only (5.3) |
 | `multiple` | `true` or `false`: several instances of one thing (below) |
 
-`accentColor` colors the header and PK badges of ER tables, the stripe of org chart cards and the title bar of UI flow screens and modals.
+`accentColor` colors:
+
+- the header and PK badges of an `er.entity` or `er.weakEntity` with columns;
+- the stripe of an `org.person` or `org.role`;
+- the title bar of a `uiflow.screen` or `uiflow.modal`;
+- the border and title of a frame, where `stroke` and `textColor` override it and it never tints the fill.
+
+A pool, a fragment, an `aws.*` group, a frame with an `aws:*` icon and no preset, and a `gcp.*` group other than a zone keep their own title color, and their borders take the accent. A Google Cloud zone's strips ignore it. It changes nothing on any other element. The reference engine returns the warning `ACCENT_COLOR_NOT_DRAWN` when it checks or stores a document that sets it on one, or on a Google Cloud zone. To fix it, remove it from a zone, color a node with `fill` and `stroke`, a line with `stroke`, or text with `textColor`.
 
 `multiple: true` says a node stands for several instances of one thing. The reference engine draws it only on a Google Cloud product card, its drawing of a node with a `gcp:` icon. A node that is an `externalSystem`, or has a `workflow.*`, `sequence.*`, `er.*`, `org.*` or `uiflow.*` node type, draws no card.
 
@@ -382,7 +389,15 @@ A guide is a horizontal or vertical line across the canvas. Required fields: `id
 
 ### 5.9 The order of elements
 
-The order of `elements` matters in two places. In a sequence diagram, participants (5.2) appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
+The order of `elements` matters in two places. In a sequence diagram, participants (5.2) appear from left to right, and messages (edges whose `edgeType` starts with `sequence.`, and the edges described below) and notes from top to bottom, in array order. Among elements with the same `zIndex`, the reference engine draws in a fixed order of kinds. Operations that create elements add them at the end of the array unless `after` or `before` places them, and `after` or `before` on an update moves an element (10.3, 10.4).
+
+In a sequence diagram (`diagramFamily` `sequence`) the reference engine also reads an edge between two participants whose `edgeType` is absent, `default` or another family's as a message. Its line says the kind:
+
+- a `sequence.reply` when `style.dash` gives it a pattern, whatever its arrowheads;
+- a `sequence.async` when it is solid, its `endArrow` is `openTriangle` and its `startArrow` is `none` or absent;
+- otherwise a `sequence.message`.
+
+Only `style.dash` and `endpoints` count, not an `edgeType`'s own dash or arrowheads. The reference engine works out the kind each time it draws the diagram and doesn't change the stored edge. An edge with an end that isn't a participant is no message. A create or a destroy is never read this way: set `sequence.create` or `sequence.destroy`.
 
 In the reference engine, a participant whose first row is a `sequence.create` message arriving at it begins at that row, and one that a `sequence.destroy` message arrives at ends at that row, with no foot bar. Only the first such message counts, and one from a lifeline to itself counts as neither. A lifeline that a message or note uses above its create message, or below its destroy message, is drawn the full height on that side, and the reference engine warns (`FAMILY_SEQ_USED_BEFORE_CREATE`, `FAMILY_SEQ_USED_AFTER_DESTROY`).
 
@@ -412,7 +427,11 @@ A relatively placed element follows the element it names. The reference engine n
 
 A document stores where its nodes are. A node is placed when it has an absolute layout that isn't at exactly `x` 0, `y` 0 and whose `width` or `height` is above 0. Any other node with an absolute layout is unplaced, and a node with no `layout` counts as an absolute layout at `x` 0, `y` 0.
 
-The reference engine places each unplaced node when it lays the document out: around the placed nodes, which it doesn't move, or every node when none is placed. When it stores the document, it writes each box it chose into the node's `layout`, with the numbers exactly as computed. From then on the node keeps that position. It moves only when:
+The reference engine places each unplaced node when it lays the document out: around the placed nodes, which it doesn't move, or every node when none is placed.
+
+When it lays out every node, it keeps the drawing clear of each text, image and frame that has its own absolute `layout`, except a frame's own members. Where the drawing would cover one, the engine moves the whole drawing right or down, by the least distance that leaves `nodeSpacing` between the drawing (frames fitted around its nodes included) and that element. A pool, a lane, a fragment and a cloud group the cloud layout arranges are part of the drawing, not obstacles. It doesn't move the drawing in a sequence diagram, in a diagram with a pool or lane that has a `layout` of its own, or when some nodes keep their positions.
+
+When it stores the document, it writes each box it chose into the node's `layout`, with the numbers exactly as computed. From then on the node keeps that position. It moves only when:
 
 - an operation moves it (`updateNode` with a new `layout`, `moveElement`, `resizeElement`, `autoLayout`, `addConstraint` with an `order` constraint, `updateScene` with a new `layoutStrategy` or `diagramFamily`, or `restoreRevision`);
 - an edit changes what it shows, or a node that grows pushes it (6.5);
@@ -502,8 +521,8 @@ The reference engine reads these keys:
 | Document | `autonumber` | Sequence diagrams: numbers every drawn message in row order (5.9), each time the document is drawn. `true` counts from 1 by 1; `{ "start", "increment" }` sets where the count starts and what it goes up by, each an integer from 1 and 1 when absent. A message's own `step` is drawn as given, and the count goes on from it. Notes, hidden messages and messages with a hidden end take no number, and the count skips them. In any other family the reference engine draws nothing for it and warns (`AUTONUMBER_NOT_DRAWN`). |
 | Document | `autoGroup` | Architecture diagrams and diagrams without a family: `"byNodeType"` draws a band behind each set of nodes of the same `nodeType`. The engine skips it when frames already hold those nodes, when every node has the same type, when a type's nodes are scattered, or when a band would overlap a frame or another band. |
 | `er.entity`, `er.weakEntity` | `columns` | The table's columns (5.2). |
-| `sequence.note` | `anchor` | The participant ID the note sits over, or an array of two or more IDs it spans. |
-| `sequence.note` | `side` | `left` or `right`, with a string `anchor`: the note sits beside that lifeline instead of over it, its near edge 25 px from the lifeline in the reference engine. With an array `anchor` the note is drawn over the lifelines, and the reference engine warns (`FAMILY_SEQ_NOTE_SIDE_IGNORED`). |
+| `sequence.note` | `anchor` | The participant ID the note sits over, or an array of two or more IDs it spans. Without one, the note is a remark on the message above it, and the reference engine draws it over that message's lifelines (the first message below it for a note above every message, every lifeline when there is no message) and warns (`FAMILY_SEQ_NOTE_INVALID_ANCHOR`). An anchor that names no participant that exists leaves the note undrawn. |
+| `sequence.note` | `side` | `left` or `right`, with a string `anchor` or none: the note sits beside that lifeline instead of over it, its near edge 25 px from the lifeline in the reference engine. Without an `anchor` it sits beside the leftmost (`left`) or rightmost (`right`) lifeline of the message it would go over (see `anchor`), or of every lifeline when the diagram has no message. With an array `anchor` the note is drawn over the lifelines, and the reference engine warns (`FAMILY_SEQ_NOTE_SIDE_IGNORED`). |
 | `fragment` frame | `operator` | The combined fragment's operator (5.5). |
 | `fragment` frame | `operands` | The operands after the first: an array of `{ "startsAt", "guard" }`, where `startsAt` is the ID of the message or note the operand starts at and `guard` is optional. Each draws a dashed line across the fragment above that row, with `[guard]` under it. The frame's `title` is the first operand's guard. |
 | `sequence.activation` | `startsAt`, `endsAt` | The IDs of the messages a bar runs between: it is drawn on the lifeline `startsAt` arrives at, from that message's arrow to `endsAt`'s, or one row tall without `endsAt`. |

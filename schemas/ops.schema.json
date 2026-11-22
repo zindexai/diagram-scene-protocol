@@ -147,7 +147,7 @@
             "description": "A sequence.activation's last message: the bar ends at that message's arrow. Without it, the bar is as tall as one row at startsAt."
           },
           "anchor": {
-            "description": "A sequence.note's place: the ID of the participant it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. A note without an anchor that names a participant isn't drawn.",
+            "description": "A sequence.note's place: the ID of the participant it sits over, or an array of two or more IDs it spans, from the leftmost to the rightmost. With no anchor, the note is drawn over the lifelines of the message above it (the first message below it for a note above every message, every lifeline when there is no message), or beside one of them when side is set, and FAMILY_SEQ_NOTE_INVALID_ANCHOR warns: set an anchor. A note whose anchor names no participant that exists isn't drawn (FAMILY_SEQ_NOTE_ANCHOR_NOT_FOUND): anchor it to one that does.",
             "oneOf": [
               { "type": "string" },
               { "type": "array", "items": { "type": "string" } }
@@ -156,7 +156,7 @@
           "side": {
             "type": "string",
             "enum": ["left", "right"],
-            "description": "A sequence.note with one anchor: drawn beside that lifeline, on its left or right, instead of over it. Ignored on a note across lifelines (an array anchor), which is always drawn over them (FAMILY_SEQ_NOTE_SIDE_IGNORED)."
+            "description": "Draws a sequence.note beside a lifeline instead of over it. With a string anchor, the lifeline is the anchor's. With no anchor, it is the leftmost (left) or rightmost (right) lifeline the note would go over: those of the message above it, else of the first message below it, else every lifeline in the diagram. On an array anchor, side is ignored and the note is drawn over its lifelines (FAMILY_SEQ_NOTE_SIDE_IGNORED): give one participant ID."
           }
         }
       },
@@ -531,7 +531,7 @@
           "accentColor": {
             "type": "string",
             "minLength": 1,
-            "description": "Accent color: the header and PK badges of an ER table, the stripe of an org chart card, the title bar of a UI flow screen or modal"
+            "description": "Accent color. It draws the header and PK badges of an er.entity or er.weakEntity with columns, the stripe of an org.person or org.role, the title bar of a uiflow.screen or uiflow.modal, and the border and title of a frame. On a frame, stroke and textColor override it, and it never tints the fill. A pool, a fragment, an aws.* group, a frame with an aws:* icon and no preset, and a gcp.* group other than a zone keep their own title color, and their borders take the accent. A Google Cloud zone and every other kind of element draw nothing for it. A check, save or edit returns the warning ACCENT_COLOR_NOT_DRAWN: remove it from a zone, color a node with fill and stroke, a line with stroke, text with textColor"
           },
           "forceLabel": {
             "type": "boolean",
@@ -1520,7 +1520,7 @@
               },
               "icon": {
                 "type": "string",
-                "description": "An icon in the frame's header: a family:id key, or an image as a `data:` URI (a URL stays a link most viewers don't load). An AWS key draws as AWS draws a group icon, a 35 px square flush in the frame's top-left corner with the title beside it (and a frame with an AWS service icon and no stroke takes the service's category color, solid: AWS's custom group); any other icon draws 16 px before the title in the title's color. It replaces an aws.* preset's own icon."
+                "description": "An icon in the frame's header: a family:id key, or an image as a `data:` URI (a URL stays a link most viewers don't load). An AWS key draws as AWS draws a group icon, a 35 px square flush in the frame's top-left corner with the title beside it. A frame with an AWS service icon and no preset is AWS's custom group: its border takes the service's category color, solid, unless style sets a stroke or an accentColor. Any other icon draws 16 px before the title in the title's color. It replaces an aws.* preset's own icon."
               },
               "children": {
                 "$ref": "#/$defs/elementIdList"
