@@ -2,6 +2,12 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v9.24.0
+
+Added: `emphasis` on nodes and edges (5.2, 5.3), and on `createNode`, `createEdge`, `updateNode` and `updateEdge` (10.3, 10.4). `true` marks the element as part of the one path a reader should follow, and `false` is the same as absent; on an update, `null` or `false` removes it. The schemas refuse it on any other element. The reference engine draws an emphasized edge's line, arrowheads and label, and an emphasized node's border, in its theme's emphasis color, in every theme, and marks the node at each end of an emphasized edge. An element's own `stroke` and `strokeWidth` win over it. It changes no position or size, and a colored diff draws none. Its Mermaid view leaves it out with the note `EMPHASIS_NOT_EXPORTED`, and a Mermaid edit keeps it.
+
+Changed: the reference engine's `dark` and `sketch` themes draw a `generic` or `layer` frame as a tier when its `accentColor` names blue, violet, jade or cyan and its style sets no `fill` (3.5). A tier is a panel in that tint, titled in the tint, with no border, and the nodes in it take the tint. Before, the accent drew the frame's border and title in every theme. Any other accent, and every other theme, draw the border and title as before. No input field or value changed.
+
 ## v9.23.0
 
 Changed: the reference engine no longer moves the drawing when a line or label reaches left of or above 0 (3.2, 13). Nothing is offset: every element is drawn where its coordinates put it, negative ones included, and the canvas starts where the line or label reaches. Before, it moved everything drawn right and down by that overshoot and grew the canvas by the same amount. A stored document and its `canvas` don't change. No input field or value changed.
