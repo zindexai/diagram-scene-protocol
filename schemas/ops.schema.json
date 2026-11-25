@@ -476,14 +476,14 @@
           "cardinality": {
             "type": "string",
             "enum": ["one", "many", "zero-or-one", "zero-or-many", "one-or-many"],
-            "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end anchors at each time the diagram is drawn, and isn't stored, so it follows the column."
+            "description": "ER-style cardinality marker for this endpoint. Omitted, it is inferred from the column the end names. An end that names no column takes its table's only primary key when the other end names a foreign key. Any other end draws no marker. Inferred values aren't stored, so they follow the column."
           }
         }
       },
       "edgeEndpoints": {
         "type": "object",
         "additionalProperties": false,
-        "description": "Arrowheads at each end. An arrowhead left out comes from the edge's edgeType, as in a scene: workflow.messageFlow has an open circle at the source and an open triangle at the target, sequence.async and sequence.reply an open triangle at the target, and every other type, default included, a filled triangle at the target and none at the source. In a diagram with an aws.* or gcp.* group frame, or a node with an aws: or gcp: icon, an edge whose edgeType is unset, default, or an er.*, network.* or org.* type draws the open arrow AWS and Google Cloud diagrams draw, openTriangle, at the target instead; workflow.sequenceFlow, sequence.message, sequence.create, sequence.destroy and the uiflow.* types keep the filled triangle there.",
+        "description": "Arrowheads at each end. An arrowhead left out comes from the edge's edgeType, as in a scene: workflow.messageFlow has an open circle at the source and an open triangle at the target, sequence.async and sequence.reply an open triangle at the target, er.relationship and er.identifying none (their ends draw cardinality marks), and every other type, default included, a filled triangle at the target and none at the source. In a diagram with an aws.* or gcp.* group frame, or a node with an aws: or gcp: icon, an edge whose edgeType is unset, default, or a network.* or org.* type draws the open arrow AWS and Google Cloud diagrams draw, openTriangle, at the target instead; workflow.sequenceFlow, sequence.message, sequence.create, sequence.destroy and the uiflow.* types keep the filled triangle there.",
         "properties": {
           "startArrow": {
             "$ref": "#/$defs/arrowhead"

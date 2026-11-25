@@ -2,6 +2,16 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v10.1.0
+
+Changed: the reference engine draws an emphasized edge apart from unmarked edges (5.3). Drawn in the emphasis color and width, it joins them on no trunk or shared port where the engine can part them, so marking an edge can change its route and theirs. Before, an emphasized edge could share a trunk or a port with unmarked edges, and emphasis changed no route. No input field or value changed.
+
+Changed: in a Google Cloud diagram, marking some but not all of a global load balancer's lines into two Regions widens the gap between the Regions (5.3). The nodes past the gap move, as they do for an edit that needs room (6.4). Before, emphasis moved no node. No input field or value changed.
+
+Changed: in every document, AWS and Google Cloud included, `er.relationship` and `er.identifying` have no arrowhead at either end unless `endpoints` sets one (5.3). Before, they had `triangle` at the end, and `openTriangle` in an AWS or Google Cloud document. No input field or value changed.
+
+Changed: an ER end that names no column gets the cardinality of its entity's only primary-key column only when the other end names a foreign-key column (5.3). Otherwise it gets none and draws no marker. Before, such an end got that cardinality whatever the other end named, so a many-to-many drew as one-to-many. No input field or value changed.
+
 ## v9.24.0
 
 Added: `emphasis` on nodes and edges (5.2, 5.3), and on `createNode`, `createEdge`, `updateNode` and `updateEdge` (10.3, 10.4). `true` marks the element as part of the one path a reader should follow, and `false` is the same as absent; on an update, `null` or `false` removes it. The schemas refuse it on any other element. The reference engine draws an emphasized edge's line, arrowheads and label, and an emphasized node's border, in its theme's emphasis color, in every theme, and marks the node at each end of an emphasized edge. An element's own `stroke` and `strokeWidth` win over it. It changes no position or size, and a colored diff draws none. Its Mermaid view leaves it out with the note `EMPHASIS_NOT_EXPORTED`, and a Mermaid edit keeps it.
