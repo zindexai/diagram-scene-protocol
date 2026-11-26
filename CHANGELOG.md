@@ -2,6 +2,14 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v10.4.0
+
+Changed: in an `architecture` document, or one without a family, whose `layoutStrategy.direction` is `LR`, the reference engine lays AWS's groups out as AWS's left-to-right reference diagrams draw them (5.5). A VPC's Availability Zones are rows, one above another, and its subnets are columns shared by every zone, public first. AWS Cloud's and a Region's other members stand in a column before or after what the frame holds, by the direction of their edges. Every zone keeps room between its title and its subnets for the header of a tier or a spanning frame round them. No direction, `TB`, `BT` or `RL` keeps the zones as columns, and so does a document whose positions already stand that way, until it is laid out again. Before, every direction drew the zones as columns. No input field or value changed.
+
+Changed: in an `architecture`, `entityRelationship` or `network` document, or one without a family, an edge that leaves a node where a fan-out's shared trunk leaves, runs along the trunk and first turns where it splits is one of the fork's branches when it matches the trunk's edges at its start (5.3, 13). It leaves by the trunk's point, and the fork keeps one dot. An edge that leaves a table row, has an `anchor` at its start, or is one of several parallel edges between the same two nodes doesn't join. Before, the reference engine could give it a point of its own, a few pixels from the trunk's. No input field or value changed.
+
+Changed: the reference engine breaks a spanning frame's border where it runs through another frame's title or icon, such as a subnet's header in zones drawn as rows (5.5). Before, the border was drawn over them. No input field or value changed.
+
 ## v10.2.3
 
 Changed: the reference engine draws a sequence diagram's message labels as plain text (5.3). A label with ` / ` or `[...]`, such as `Confirmation email / SMS`, is one run in one type. Before, it was read as `EVENT [guard] / action`, and its guard and action were drawn smaller and muted, the action in italic. Flowchart, workflow and UI flow diagrams still read the convention. No input field or value changed.
