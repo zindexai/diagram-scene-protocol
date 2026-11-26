@@ -2,6 +2,10 @@
 
 Each entry is a tag in this repository, named for the Zindex release that first served that version of the spec and schemas. Documents in every version so far carry `"schemaVersion": "0.1"`.
 
+## v10.2.3
+
+Changed: the reference engine draws a sequence diagram's message labels as plain text (5.3). A label with ` / ` or `[...]`, such as `Confirmation email / SMS`, is one run in one type. Before, it was read as `EVENT [guard] / action`, and its guard and action were drawn smaller and muted, the action in italic. Flowchart, workflow and UI flow diagrams still read the convention. No input field or value changed.
+
 ## v10.1.0
 
 Changed: the reference engine draws an emphasized edge apart from unmarked edges (5.3). Drawn in the emphasis color and width, it joins them on no trunk or shared port where the engine can part them, so marking an edge can change its route and theirs. Before, an emphasized edge could share a trunk or a port with unmarked edges, and emphasis changed no route. No input field or value changed.

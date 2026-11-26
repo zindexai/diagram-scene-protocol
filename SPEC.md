@@ -257,7 +257,7 @@ The reference engine wraps an edge's label that is wider than 200 px, counting 4
 
 In a Google Cloud diagram the reference engine arranges, a label also wraps where its place would break the label floor (5.5).
 
-A label written as `EVENT [guard] / action`, in a flowchart, workflow, UI flow or sequence diagram, draws its three parts in different type on one line. When that is too wide, it breaks between them: the event first, then the guard and action together if they fit, else each on its own line. A part still too wide wraps by itself.
+A label written as `EVENT [guard] / action`, in a flowchart, workflow or UI flow diagram, draws its three parts in different type on one line. When that is too wide, it breaks between them: the event first, then the guard and action together if they fit, else each on its own line. A part still too wide wraps by itself. In every other diagram, a sequence diagram included, a label is plain text.
 
 An end has an `elementId` (required) and can have:
 
